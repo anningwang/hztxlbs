@@ -1,0 +1,17 @@
+pip install flask
+pip install flask-login
+pip install flask-openid
+pip install flask-mail
+pip install flask-sqlalchemy
+pip install sqlalchemy-migrate
+pip install flask-whooshalchemy
+pip install flask-wtf
+pip install flask-babel
+pip install guess_language
+pip install flipflop
+pip install coverage
+
+pip install apscheduler == 3.3.1
+
+pip install flask_socketio == 2.9.2
+pip install eventlet == 0.21.0
