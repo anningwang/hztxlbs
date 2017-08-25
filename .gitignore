@@ -8,3 +8,6 @@ flask
 .idea/workspace.xml
 .idea/workspace.xml
 .idea/workspace.xml
+*.log
+*.xml
+*.iml
