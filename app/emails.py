@@ -2,7 +2,7 @@ from flask import render_template
 from flask_mail import Message
 from app import mail
 from decorators import async
-from config import ADMINS
+from config import ADMINS, APP_NAME
 
 
 @async
@@ -20,7 +20,7 @@ def send_email(subject, sender, recipients, text_body, html_body):
 
 
 def follower_notification(followed, follower):
-    send_email("[microblog] %s is now following you!" % follower.nickname,
+    send_email("[%s] %s is now following you!" % (APP_NAME, follower.nickname),
                ADMINS[0],
                [followed.email],
                render_template("follower_email.txt",

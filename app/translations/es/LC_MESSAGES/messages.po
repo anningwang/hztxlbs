@@ -153,8 +153,8 @@ msgid "Regards,"
 msgstr "Cordialmente,"
 
 #: app/templates/follower_email.html:13
-msgid "The <code>microblog</code> admin"
-msgstr "El administrador de <code>microblog</code>"
+msgid "The <code>hztxLbs</code> admin"
+msgstr "El administrador de <code>hztxLbs</code>"
 
 #: app/templates/index.html:5
 #, python-format

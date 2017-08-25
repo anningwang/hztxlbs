@@ -4,6 +4,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 CSRF_ENABLED = True
 SECRET_KEY = 'you-will-never-guess'
+APP_NAME = 'hztxlbs'
 
 OPENID_PROVIDERS = [
     { 'name': 'Google', 'url': 'https://www.google.com/accounts/o8/id' },
@@ -18,6 +19,7 @@ SQLALCHEMY_RECORD_QUERIES = True
 WHOOSH_BASE = os.path.join(basedir, 'search.db')
 
 FILENAME_VERTEX = os.path.join(basedir, "app/static/ajax/vertex.json")
+FILENAME_APP_LOG = basedir + '/tmp/' + APP_NAME + '.log'
 
 # slow database query threshold (in seconds)
 DATABASE_QUERY_TIMEOUT = 0.5
