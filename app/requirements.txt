@@ -15,3 +15,6 @@ pip install apscheduler == 3.3.1
 
 pip install flask_socketio == 2.9.2
 pip install eventlet == 0.21.0
+
+
+pip install futures

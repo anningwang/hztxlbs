@@ -72,6 +72,8 @@ $(document).ready(function(){
     // Connect to the Socket.IO server.
     // The connection URL has the following format:
     //     http[s]://<domain>:<port>[/<namespace>]
+    var connStr = location.protocol + '//' + document.domain + ':' + location.port + namespace;
+    console.log(connStr);
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
 
     // Event handler for new connections.
