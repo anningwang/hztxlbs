@@ -1,39 +1,178 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    <title>Lbs Demo</title>
-    <link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css">
-    <style>
-        #myCanvas{width: 1500px; height: 800px;}
-        #floor3 {width: 1450px; height: 750px;
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta charset="utf-8" />
+<title>和仲位置服务平台</title>
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+
+<!-- bootstrap & fontawesome -->
+<link rel="stylesheet" href="../static/ace/assets/css/bootstrap.css" />
+<link rel="stylesheet" href="../static/ace/components/font-awesome/css/font-awesome.css" />
+
+<!-- page specific plugin styles -->
+
+<!-- text fonts -->
+<link rel="stylesheet" href="../static/ace/assets/css/ace-fonts.css" />
+
+<!-- ace styles -->
+<link rel="stylesheet" href="../static/ace/assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
+<link rel="stylesheet" href="../static/ace/assets/css/ace-skins.css" />
+<link rel="stylesheet" href="../static/ace/assets/css/ace-rtl.css" />
+
+<!-- svg样式 -->
+<link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css">
+
+<!-- inline styles related to this page -->
+
+<!-- ace settings handler -->
+<script src="../static/ace/assets/js/ace-extra.js"></script>
+</head>
+
+<body class="no-skin"  style=" min-width:1905px;">
+<!-- #section:basics/navbar.layout -->
+<div id="navbar" class="navbar navbar-default          ace-save-state" style=" min-width:190px;">
+  <div class="navbar-container ace-save-state" id="navbar-container"> 
+    <!-- #section:basics/sidebar.mobile.toggle -->
+    <button type="button" class="navbar-toggle menu-toggler pull-left" id="menu-toggler" data-target="#sidebar"> <span class="sr-only">Toggle sidebar</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
+    
+    <!-- /section:basics/sidebar.mobile.toggle -->
+    <div class="navbar-header pull-left"> 
+      <!-- #section:basics/navbar.layout.brand --> 
+      <a href="#" class="navbar-brand" style="padding-top:0; padding-bottom:0;"> <img src="../static/img/logo.jpg" /> </a> 
+      
+      <!-- /section:basics/navbar.layout.brand --> 
+      
+      <!-- #section:basics/navbar.toggle --> 
+      
+      <!-- /section:basics/navbar.toggle --> 
+    </div>
+    
+    <!-- #section:basics/navbar.dropdown -->
+    <div class="navbar-buttons navbar-header pull-right" role="navigation">
+      <ul class="nav ace-nav">
+        
+        <!-- #section:basics/navbar.user_menu -->
+        <li class="light-blue dropdown-modal"> <a data-toggle="dropdown" href="#" class="dropdown-toggle"> <img class="nav-user-photo" src="../static/ace/assets/avatars/user.jpg" alt="Jason's Photo" /> <span class="user-info"> <small>欢迎登入,</small> 欧先生 </span> <i class="ace-icon fa fa-caret-down"></i> </a>
+          <ul class="user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
+            <li> <a href="#"> <i class="ace-icon fa fa-cog"></i> Settings </a> </li>
+            <li> <a href="profile.html"> <i class="ace-icon fa fa-user"></i> Profile </a> </li>
+            <li class="divider"></li>
+            <li> <a href="#"> <i class="ace-icon fa fa-power-off"></i> Logout </a> </li>
+          </ul>
+        </li>
+        
+        <!-- /section:basics/navbar.user_menu -->
+      </ul>
+    </div>
+    
+    <!-- /section:basics/navbar.dropdown --> 
+  </div>
+  <!-- /.navbar-container --> 
+</div>
+
+<!-- /section:basics/navbar.layout -->
+<div class="main-container ace-save-state" style="" id="main-container"> 
+  <script type="text/javascript">
+				try{ace.settings.loadState('main-container')}catch(e){}
+			</script> 
+  
+  <!-- #section:basics/sidebar -->
+  <div id="sidebar" class="sidebar                  responsive                    ace-save-state"> 
+    <script type="text/javascript">
+					try{ace.settings.loadState('sidebar')}catch(e){}
+				</script>
+    <div class="sidebar-shortcuts" id="sidebar-shortcuts">
+      <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
+        <button class="btn btn-success"> <i class="ace-icon fa fa-signal"></i> </button>
+        <button class="btn btn-info"> <i class="ace-icon fa fa-pencil"></i> </button>
+        
+        <!-- #section:basics/sidebar.layout.shortcuts -->
+        <button class="btn btn-warning"> <i class="ace-icon fa fa-users"></i> </button>
+        <button class="btn btn-danger"> <i class="ace-icon fa fa-cogs"></i> </button>
+        
+        <!-- /section:basics/sidebar.layout.shortcuts --> 
+      </div>
+      
+      <!--<div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
+						<span class="btn btn-success"></span>
+
+						<span class="btn btn-info"></span>
+
+						<span class="btn btn-warning"></span>
+
+						<span class="btn btn-danger"></span>
+					</div>--> 
+    </div>
+    <!-- /.sidebar-shortcuts -->
+    
+    <ul class="nav nav-list">
+      <li class=""> <a href="http://192.168.1.119/token#"> <i class="menu-icon fa fa-tachometer"></i> <span class="menu-text"> 地图导航 </span> </a> <b class="arrow"></b> </li>
+    </ul>
+    <!-- /.nav-list --> 
+    
+    <!-- #section:basics/sidebar.layout.minimize -->
+    <div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse"> <i id="sidebar-toggle-icon" class="ace-icon fa fa-angle-double-left ace-save-state" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i> </div>
+    
+    <!-- /section:basics/sidebar.layout.minimize --> 
+  </div>
+  
+  <!-- /section:basics/sidebar -->
+  <div class="main-content">
+    <div class="main-content-inner"> 
+      <!-- #section:basics/content.breadcrumbs --> 
+      
+      <!-- /section:basics/content.breadcrumbs -->
+      <div class="page-content">
+        <div class="page-header">
+          <h1>
+          地图导航
+          <h1>
+        </div>
+        
+        <!-- /section:settings.box -->
+        <div class="row">
+          <div class="col-sm-12" > 
+            <!-- PAGE CONTENT BEGINS -->
+            
+            <style>
+        #myCanvas{width: 1690px; height: 860px;}
+        #floor3 {
+			width: 1700px; height: 860px;
             position: absolute;
             overflow: hidden;
-            border: 2px solid #b94a48;}
+            border: 2px solid #b94a48;
+			top:60px; left:0px;
+			}
         #svg_map{
-            width: 1450px;
-            height: 750px;
+            width: 1700px;
+            height: 860px;
             position:absolute;
             overflow:hidden;
         }
         #svg_path{
-            width: 1450px;
-            height: 750px;
+            width: 1700px;
+            height: 860px;
             position:absolute;
         }
     </style>
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script>
-    <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script>
+            <script src="/static/js/jquery.min.js"></script> 
+            <script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script> 
+            <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script> 
+            <script>
 
-<script>
+//localStorage.clear(); // 调试用    清除缓存
+
+
+
     'use strict';
 var hzX = 0, hzY = 0;   // 坐标系原点
 var margin = 0;
 var real_loc_to_pix = 0.0891;
 var map_w = 3477;       /// px
 var map_h = 1769;
-var zoom = 0.3;          /// 地图缩放级别
+var zoom = 0.486;          /// 地图缩放级别
 var hz_is_navigating = false;      /// 是否曾经设置过导航，或正在导航中
 var HZ_DESTINATION_MEETING_ROOM = 27;
 var hz_destination = HZ_DESTINATION_MEETING_ROOM;            /// 导航的目的地，默认 第一个 目的地
@@ -452,64 +591,105 @@ function selectUser(str){
 }
 
 </script>
-
-    <link rel="shortcut icon" href="/static/img/favicon.ico" />
-    <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
-
-</head>
-<body>
-
-<p id="top_panel"><a href="http://www.hezhongsz.com/"><img src="/static/img/hzlogo.png"></a>Floor3平面图
-<a href="/">主页</a>
-
-<div id="txtHint">
-    <select id="userId" onchange="selectUser(this.value)" style="font-family:Verdana, Arial, Helvetica, sans-serif;">
-        <option value="0">请选择用户开启导航</option>
-        <option value="1">1918E00103AA</option>
-        <option value="2">1918E00103A9</option>
-    </select>
-    导航到
-    <select id="loc" class="loc" name="locations" onchange="selectLocation(this.value)" style="font-family:Verdana, Arial, Helvetica, sans-serif;">
-        <option value="27">Room 1 测试区</option>
-        <option value="29">Room 2</option>
-        <option value="30">Room 3</option>
-        <option value="31">Room 4 健身房</option>
-        <option value="32">Room 5</option>
-        <option value="33">Room 6</option>
-        <option value="34">Room 7 演示厅</option>
-        <option value="23">会议室</option>
-        <option value="28">总裁办公室</option>
-        <option value="24">副总办公室1</option>
-        <option value="25">副总办公室2</option>
-        <option value="26">仓库</option>
-    </select>
-    <button class="navigation" id="go">开始导航</button>
-    <button id="stop">结束导航</button>
-    <button id="myPosition" style="visibility:hidden">占位</button>地图：
-    <button id="zoomOut">放大</button>
-    <button id="zoomIn">缩小</button>
-</div>
-</p>
-
-<div id="myCanvas">
-    <div id="floor3">
-        <img src="/static/img/floor3.svg" width="1043.1" height="530.7" style="position:absolute" id="map" >
-        <div id="svg_map">
-            <div id="svg_path"></div>
-            <img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA">
-            <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9">
-            <img src="/static/img/dest.png" style="position:absolute" id="destination" title="终点">
+            <div id="txtHint">
+              <select id="userId" onchange="selectUser(this.value)" style="font-family:Verdana, Arial, Helvetica, sans-serif;">
+                <option value="0">请选择用户开启导航</option>
+                <option value="1">1918E00103AA</option>
+                <option value="2">1918E00103A9</option>
+              </select>
+              导航到
+              <select id="loc" class="loc" name="locations" onchange="selectLocation(this.value)" style="font-family:Verdana, Arial, Helvetica, sans-serif;">
+                <option value="27">Room 1 测试区</option>
+                <option value="29">Room 2</option>
+                <option value="30">Room 3</option>
+                <option value="31">Room 4 健身房</option>
+                <option value="32">Room 5</option>
+                <option value="33">Room 6</option>
+                <option value="34">Room 7 演示厅</option>
+                <option value="23">会议室</option>
+                <option value="28">总裁办公室</option>
+                <option value="24">副总办公室1</option>
+                <option value="25">副总办公室2</option>
+                <option value="26">仓库</option>
+              </select>
+              <button class="navigation btn btn-success btn-sm" id="go">开始导航</button>
+              <button id="stop"  class="btn btn-danger btn-sm">结束导航</button>
+              <button id="myPosition" style="visibility:hidden">占位</button>
+              地图：
+              <button id="zoomOut" class="btn btn-info btn-sm">放大</button>
+              <button id="zoomIn" class="btn btn-info btn-sm">缩小</button>
+            </div>
+            <div id="myCanvas">
+              <div id="floor3"> <img src="/static/img/floor3.svg" width="1706" height="867.9" style="position:absolute" id="map" >
+                <div id="svg_map">
+                  <div id="svg_path"></div>
+                  <img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA"> <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9"> <img src="/static/img/dest.png" style="position:absolute" id="destination" title="终点"> </div>
+              </div>
+            </div>
+            
+            <!--页脚-->
+            
+            <div class="footer">
+              <div class="footer-inner " > 
+                <!-- #section:basics/footer -->
+                <div class="footer-content "  style=" min-width:1713px;" > <span class="bigger-120"> 衡阳市和仲通讯科技有限公司 &copy; 2016-2018 </span> &nbsp; &nbsp; <span class="action-buttons"> <a href="#"> <i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i> </a> <a href="#"> <i class="ace-icon fa fa-facebook-square text-primary bigger-150"></i> </a> <a href="#"> <i class="ace-icon fa fa-rss-square orange bigger-150"></i> </a> </span> </div>
+                
+                <!-- /section:basics/footer --> 
+              </div>
+            </div>
+            
+            <!-- PAGE CONTENT ENDS --> 
+          </div>
+          <!-- /.col --> 
         </div>
+        <!-- /.row --> 
+      </div>
+      <!-- /.page-content --> 
     </div>
+  </div>
+  <!-- /.main-content --> 
+  
+  <!--<a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
+				<i class="ace-icon fa fa-angle-double-up icon-only bigger-110"></i>
+			</a>--> 
 </div>
+<!-- /.main-container --> 
 
-<!--
-<h2>Receive:</h2>
-<div id="log"></div>
--->
+<!-- basic scripts --> 
 
-<!--
-<button class="btnGetLocation" style="background-color:#666666;display:none">11. send userId to flask</button><br>
--->
+<script type="text/javascript">
+			if('ontouchstart' in document.documentElement) document.write("<script src='../static/ace/components/_mod/jquery.mobile.custom/jquery.mobile.custom.js'>"+"<"+"/script>");
+		</script> 
+<script src="../static/ace/components/bootstrap/dist/js/bootstrap.js"></script> 
+
+<!-- page specific plugin scripts --> 
+
+<!-- ace scripts --> 
+<script src="../static/ace/assets/js/src/elements.scroller.js"></script> 
+<script src="../static/ace/assets/js/src/elements.colorpicker.js"></script> 
+<script src="../static/ace/assets/js/src/elements.fileinput.js"></script> 
+<script src="../static/ace/assets/js/src/elements.typeahead.js"></script> 
+<script src="../static/ace/assets/js/src/elements.wysiwyg.js"></script> 
+<script src="../static/ace/assets/js/src/elements.spinner.js"></script> 
+<script src="../static/ace/assets/js/src/elements.treeview.js"></script> 
+<script src="../static/ace/assets/js/src/elements.wizard.js"></script> 
+<script src="../static/ace/assets/js/src/elements.aside.js"></script> 
+<script src="../static/ace/assets/js/src/ace.js"></script> 
+<script src="../static/ace/assets/js/src/ace.basics.js"></script> 
+<script src="../static/ace/assets/js/src/ace.scrolltop.js"></script> 
+<script src="../static/ace/assets/js/src/ace.ajax-content.js"></script> 
+<script src="../static/ace/assets/js/src/ace.touch-drag.js"></script> 
+<script src="../static/ace/assets/js/src/ace.sidebar.js"></script> 
+<script src="../static/ace/assets/js/src/ace.sidebar-scroll-1.js"></script> 
+<script src="../static/ace/assets/js/src/ace.submenu-hover.js"></script> 
+<script src="../static/ace/assets/js/src/ace.widget-box.js"></script> 
+<script src="../static/ace/assets/js/src/ace.settings.js"></script> 
+<script src="../static/ace/assets/js/src/ace.settings-rtl.js"></script> 
+<script src="../static/ace/assets/js/src/ace.settings-skin.js"></script> 
+<script src="../static/ace/assets/js/src/ace.widget-on-reload.js"></script> 
+<script src="../static/ace/assets/js/src/ace.searchbox-autocomplete.js"></script> 
+
+<!-- inline scripts related to this page -->
+
 </body>
 </html>
