@@ -16,7 +16,7 @@
    width="3477"
    height="1769"
    viewBox="0 0 3477 1769"
-   sodipodi:docname="Floor3_bak.svg"
+   sodipodi:docname="floor3_bak.svg"
    inkscape:version="0.92.1 r15371"
    inkscape:export-filename="D:\Softwares\GitHub_file\hztxlbs\app\static\img\Floor3_Inkscape.svg.png"
    inkscape:export-xdpi="96"
@@ -30,7 +30,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -45,7 +45,6 @@
          id="stop8213" />
     </linearGradient>
     <linearGradient
-       inkscape:collect="always"
        id="linearGradient6693"
        osb:paint="gradient">
       <stop
@@ -79,9 +78,9 @@
      inkscape:window-height="988"
      id="namedview3692"
      showgrid="false"
-     inkscape:zoom="0.5"
-     inkscape:cx="1126.2773"
-     inkscape:cy="917.67489"
+     inkscape:zoom="1"
+     inkscape:cx="2293.6303"
+     inkscape:cy="1157.6749"
      inkscape:window-x="1672"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
