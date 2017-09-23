@@ -3,7 +3,7 @@
 from app import app, socketio
 from app.utils.getip import get_ip
 
-# app.run(debug=True)
+
 if __name__ == '__main__':
     ip = get_ip()
     # app.run(host=ip, port=80, debug=True, use_reloader=False, threaded=True)

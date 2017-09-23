@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>接口测试</title>
+</head>
+<script src="/static/js/jquery.min.js"></script>
+
+<script>
+    'use strict';
+
+    /**
+     * 向服务器发送 Ajax 请求，查询相关数据, POST方式
+     * @param url       请求 url
+     * @param txData    请求 参数，具体参数含义，见对应接口说明
+     */
+    function ajaxRequest(url, txData) {
+        $.ajax({
+            url: url,
+            async: true,
+            type: 'POST',
+            //contentType: 'application/json;charset=UTF-8',
+            data: {data: JSON.stringify(txData)}
+        }).done(function(data) {
+            console.log('接口调用成功');
+            console.log('receive:', data);
+            $('#receive').append($('<div/>').text('receive from server: <<<<<<<<<<').html());
+            $('#receive').append('<br>' + JSON.stringify(data));
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            console.log('接口调用失败');
+        });
+    }
+
+
+    function selectApi(str){
+        var tx = $('#send');
+        var rx = $('#receive');
+        tx.empty();
+        rx.empty();
+        if (str === 'get_history_location') {
+            var url = '/lbs/get_history_location';
+            var txData = {
+                "userId": ["1918E00103AA", "1918E00103A9"],     // "userId": ["all"] for all users
+                "datetimeFrom" : "2017-08-17 11:17:35",         // 按照时间段查询
+                "datetimeTo" : "2017-09-23 11:17:35",
+                "compress" : false                             // 是否压缩，压缩的含义是，服务器会根据特定策略返回部分路径坐标。
+            };
+
+            tx.append($('<div/>').text('send to server: >>>>>>>>>>').html());
+            tx.append('<br>' + $('<div/>').text('url:  ' + url).html());
+            tx.append('<br>'+ JSON.stringify(txData));
+
+            console.log('send:', txData);
+            ajaxRequest(url, txData);
+        }
+    }
+
+</script>
+<body>
+
+<select id="userId" onchange="selectApi(this.value)">
+    <option value="choose">选择接口</option>
+    <option value="get_history_location">获取历史轨迹</option>
+
+</select>
+
+<div style="padding: 10px"></div>
+
+<div id="send"></div>
+
+<div style="padding: 10px"></div>
+
+<div id="receive"></div>
+
+</body>
+</html>

@@ -14,6 +14,7 @@ from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS, LANGUAGES, DATABASE_QUERY
 import random
 from dijkstra import min_dist2, get_nearest_vertex, hz_vertex
 from lbs import TEST_UID, CUR_MAP_SCALE, HZ_MAP_GEO_WIDTH, HZ_MAP_GEO_HEIGHT
+import json
 
 
 @lm.user_loader
@@ -315,3 +316,38 @@ def get_path():
 
     ret_loc_with_path = {'x': px, 'y': py, 'path': ret, 'points': points}
     return jsonify(ret_loc_with_path)
+
+
+@app.route('/test')
+def hz_test():
+    return render_template('test.html')
+
+
+@app.route('/lbs/get_history_location', methods=['POST'])
+def get_history_location():
+    if 'data' not in request.form:
+        return jsonify({'errorCode': 100, 'msg': '[data] field required.'})
+
+    obj = json.loads(request.form['data'])
+
+    hzq = HzLocation.query.filter(HzLocation.timestamp >= obj['datetimeFrom'], HzLocation.timestamp <= obj['datetimeTo'])
+    if obj['userId'][0] != 'all':
+        hzq = hzq.filter(HzLocation.user_id.in_(obj['userId']))
+
+    hzq = hzq.order_by(HzLocation.user_id, HzLocation.timestamp).all()
+    uid = -1
+    data = {}
+    points = []
+    for rec in hzq:
+        if uid == rec.user_id:
+            points.append({'x': rec.x, 'y': rec.y, 'datatime': datetime.strftime(rec.timestamp, '%Y-%m-%d %H:%M:%S')})
+        else:
+            if uid != -1:
+                data[uid] = points
+            uid = rec.user_id
+            points = [{'x': rec.x, 'y': rec.y, 'datatime': datetime.strftime(rec.timestamp, '%Y-%m-%d %H:%M:%S')}]
+
+    if uid != -1:
+        data[uid] = points
+
+    return jsonify({'errorCode': 0, 'msg': 'ok', 'data': data})
