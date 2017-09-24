@@ -1,12 +1,11 @@
 # -*- coding:utf-8 -*-
 from apscheduler.schedulers.background import BackgroundScheduler     # Apscheduler ver 3.3.1
-from datetime import datetime
+import datetime
 import urllib2
 import json
-# from dijkstra import min_dist2, get_nearest_vertex, hz_vertex
 from models import HzToken, HzLocation
-from app import db, socketio
-from flask import request, jsonify
+from app import db, socketio, app
+from flask import request
 from flask_socketio import emit, join_room, leave_room, close_room, rooms, disconnect
 import copy
 from threading import Lock
@@ -23,30 +22,53 @@ h.setFormatter(fmt)
 log.addHandler(h)
 
 HZ_LICENSE = "cb5537fd8e684827b7e4f83b742c8f2c"
-JOB_INTERVAL = 60 * 10                # seconds
-TEST_UID = "1918E00103AA"           # 测试用标签UID
-TEST_UID_2 = "1918E00103A9"         # 测试用标签UID
-GEO_SCALE = 0.0891                    # 像素坐标(px) * 10 / 物理坐标(mm) = 89.1%
+JOB_INTERVAL = 60 * 10                  # seconds
+TEST_UID = "1918E00103AA"               # 测试用标签UID
+TEST_UID_2 = "1918E00103A9"             # 测试用标签UID
 CUR_MAP_SCALE = 0.3                     # 当前屏幕地图缩放比例 30%
 HZ_MAP_GEO_WIDTH = 39023.569023569024   # 毫米
 HZ_MAP_GEO_HEIGHT = 19854.09652076319
 # [{"name":"Floor3","mapImage":"Floor3.jpg","mapImageWidth":3477,"mapImageHeight":1769,"geoScale":{"x":89.1,"y":89.1}}]
 HZ_TEST_ADD_POS = False                 # 为真，则向数据库随机插入坐标点
+HZ_TEST_DEBUG = False                   # 为真，不从 LBS 引擎获取数据，从数据库刷新位置
 HZ_UID = [TEST_UID, TEST_UID_2]
 hz_uid_map = {}                         # 保存 uid 对应的最新坐标 { 'userId': [x,y], '1918E00103AA': [100, 200] }
 hz_uid_old_map = {}
 hz_client_id = {}                       # 在线客户表
+""" 
+{'sid': {'navigating': 0,'location': 27, 'userId': '1918E00103AA'}}
+navigating  --  是否开启导航 0, 否; 1, 是
+location    --  导航的目的地 点编号 23,24, ..., 34
+    <option value="23">会议室</option>
+    <option value="24">副总办公室1</option>
+    <option value="25">副总办公室2</option>
+    <option value="26">仓库</option>
+    <option value="27">Room 1 测试区</option>
+    <option value="28">总裁办公室</option>
+    <option value="29">Room 2</option>
+    <option value="30">Room 3</option>
+    <option value="31">Room 4 健身房</option>
+    <option value="32">Room 5</option>
+    <option value="33">Room 6</option>
+    <option value="34">Room 7 演示厅</option>
+userId      --  用户ID
+
+"""
+
 HZ_NAMESPACE = '/HeZhong'
 thread = None
 thread_lock = Lock()
 hz_apscheduler = None
 hz_apscheduler_lock = Lock()
 
-HZ_MSG_INVALID_ACCESS_TOKEN = 1060000           # Invalid AccessToken
+HZ_MSG_INVALID_ACCESS_TOKEN = 1060000   # Invalid AccessToken
 
 
-# 查询 每个ID对应的最新坐标
 def hz_get_new_pos():
+    """
+    查询 每个ID对应的最新坐标
+    :return:
+    """
     hz_location = HzLocation.query.group_by(HzLocation.user_id)
     for loc in hz_location:  # 如果存在，则获取最新的一个坐标
         hz_uid_map[loc.user_id] = [loc.x, loc.y]
@@ -54,7 +76,11 @@ def hz_get_new_pos():
 
 
 def job_get_token():
-    time_now = datetime.utcnow()
+    if HZ_TEST_DEBUG:
+        print '+++---+++ test mode, pass get token.'
+        return
+
+    time_now = datetime.datetime.utcnow()
     hz_token = HzToken.query.all()
     if len(hz_token) > 0 and (time_now - hz_token[0].timestamp).total_seconds() < hz_token[0].expires_in - JOB_INTERVAL:
         return
@@ -80,7 +106,7 @@ def job_get_token():
                                token=obj['data']['token'],
                                refresh_token=obj['data']['refreshToken'],
                                expires_in=obj['data']['expiresIn'],
-                               timestamp=datetime.utcnow())
+                               timestamp=datetime.datetime.utcnow())
             db.session.add(my_token)
             db.session.commit()
         else:           # 更新token
@@ -97,11 +123,16 @@ def job_get_token():
         print "error in function job_get_token(): ", res
         print "url= ", url
         print "req data= ", test_data
-        return
 
 
 def job_get_location():
-    time_now = datetime.utcnow()
+
+    if HZ_TEST_DEBUG:
+        with app.app_context():
+            hz_test_refresh_location()
+        return
+
+    time_now = datetime.datetime.utcnow()
     hz_token = HzToken.query.all()
     # 还没有获取过token，或者token过期
     if len(hz_token) == 0 or (time_now - hz_token[0].timestamp).total_seconds() > hz_token[0].expires_in:
@@ -123,7 +154,7 @@ def job_get_location():
             test_loc = HzLocation(build_id='', floor_no='', user_id=TEST_UID,
                                   x=random.randint(20, int(HZ_MAP_GEO_WIDTH)-1000),
                                   y=random.randint(20, int(HZ_MAP_GEO_HEIGHT)-1000),
-                                  timestamp=datetime.today())
+                                  timestamp=datetime.datetime.today())
             db.session.add(test_loc)
             db.session.commit()
 
@@ -143,7 +174,7 @@ def job_get_location():
                                      user_id=item["userId"],
                                      x=item["xMillimeter"],
                                      y=item["yMillimeter"],
-                                     timestamp=datetime.today())
+                                     timestamp=datetime.datetime.today())
             db.session.add(hz_location)
             db.session.commit()
             hz_uid_map[uid] = [x, y]
@@ -167,15 +198,23 @@ scheduler = BackgroundScheduler()
 with hz_apscheduler_lock:
     if hz_apscheduler is None:
         scheduler.add_job(job_get_token, 'interval', seconds=JOB_INTERVAL, id='my_job_get_token',
-                          next_run_time=datetime.now())
-        scheduler.add_job(job_get_location, 'interval', seconds=2, id='my_job_get_location')
+                          next_run_time=datetime.datetime.now())
+        scheduler.add_job(job_get_location, 'interval', seconds=2, id='my_job_get_location',
+                          next_run_time=datetime.datetime.now() + datetime.timedelta(seconds=2))
         scheduler.start()
+
+
+def hz_test_refresh_location():
+    hz_location = HzLocation.query.group_by(HzLocation.user_id).all()
+    for loc in hz_location:  # 如果存在，则获取最新的一个坐标
+        hz_uid_map[loc.user_id] = [loc.x, loc.y]
+    return hz_uid_map
 
 
 # 实时查询用户的最新位置,  from other LBS engine
 # hz_token -- list, for class HzToken: token,refresh_token, timestamp, expires_in
 def hz_refresh_token_position():
-    time_now = datetime.today()
+    time_now = datetime.datetime.today()
     hz_token = HzToken.query.all()
     if len(hz_token) > 0 and (time_now - hz_token[0].timestamp).total_seconds() < hz_token[0].expires_in - JOB_INTERVAL:
         hz_get_location(hz_token[0].token)
@@ -201,7 +240,7 @@ def hz_refresh_token_position():
                                token=obj['data']['token'],
                                refresh_token=obj['data']['refreshToken'],
                                expires_in=obj['data']['expiresIn'],
-                               timestamp=datetime.utcnow())
+                               timestamp=datetime.datetime.utcnow())
             db.session.add(my_token)
             db.session.commit()
         else:           # 更新token
@@ -215,7 +254,7 @@ def hz_refresh_token_position():
 
         hz_get_location(obj['data']['token'])
     else:
-        print "error in function hz_refresh_token_position(): ", res
+        print "error in function: ", res
         print "url= ", url
         print "req data= ", test_data
         return
@@ -248,7 +287,7 @@ def hz_get_location(token):
                                      user_id=item["userId"],
                                      x=item["xMillimeter"],
                                      y=item["yMillimeter"],
-                                     timestamp=datetime.today())
+                                     timestamp=datetime.datetime.today())
             db.session.add(hz_location)
             db.session.commit()
             hz_uid_map[uid] = [x, y]
@@ -275,8 +314,11 @@ def hz_get_pos():
     return pos_to_client
 
 
-# 获取和上次有变化的用户位置
 def hz_get_changed_pos():
+    """
+    获取和上次有变化的用户位置
+    :return:  位置有变化的用户列表, list [{'userId': '1918E00103AA', 'x': 7000, 'y': 2000}, {...}, ...]
+    """
     global hz_uid_old_map
 
     if len(hz_uid_map) == 0:
@@ -369,6 +411,8 @@ def hz_get_path(location, user_id):
 
 def background_thread():
     """Example of how to send server generated events to clients."""
+    from app.hzlbs.elecrail import hz_lbs_elect_rail
+
     count = 0
     # hz_tk = {}
     while True:
@@ -383,7 +427,10 @@ def background_thread():
         if len(pos_to_client) > 0:
             socketio.emit('hz_position', pos_to_client, namespace=HZ_NAMESPACE)
 
-        # hz_refresh_token_position(hz_tk)
+            with app.app_context():
+                rail_info = hz_lbs_elect_rail(pos_to_client)    # 判断是否进入/退出 电子围栏
+                if len(rail_info) != 0:
+                    socketio.emit('hz_electronic_tail', rail_info, namespace=HZ_NAMESPACE)
 
         for client in hz_client_id:
             if hz_client_id[client]['navigating'] == 1:
@@ -392,7 +439,4 @@ def background_thread():
                     continue
 
                 hz_client_id[client]['path_cmp'] = path
-                socketio.emit('hz_path',
-                              path,
-                              namespace=HZ_NAMESPACE,
-                              room=client)
+                socketio.emit('hz_path', path, namespace=HZ_NAMESPACE, room=client)

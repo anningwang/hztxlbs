@@ -1,7 +1,7 @@
 # coding=utf-8
 import json
 from config import FILENAME_VERTEX
-from lbs import GEO_SCALE, CUR_MAP_SCALE
+from app.hzlbs.hzglobal import *
 
 
 INT_MAX = 9999999

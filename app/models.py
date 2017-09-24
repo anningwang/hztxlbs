@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 from hashlib import md5
 from app import db
 from app import app
@@ -117,5 +118,21 @@ class HzLocation(db.Model):
 
     def __repr__(self):
         return '<HzLocation %r>' % self.user_id
+
+
+class HzElecTail(db.Model):
+    """ 电子围栏表 """
+    id = db.Column(db.Integer, primary_key=True)
+    build_id = db.Column(db.String(40))
+    floor_no = db.Column(db.String(40))
+    user_id = db.Column(db.String(40))
+    x = db.Column(db.Float)
+    y = db.Column(db.Float)
+    timestamp = db.Column(db.DateTime)
+    status = db.Column(db.Integer)      # 进入(1) or 退出(0) 围栏
+    rail_no = db.Column(db.String(40))     # 围栏编号
+
+    def __repr__(self):
+        return '<HzElecTail %r>' % self.user_id
 
 whooshalchemy.whoosh_index(app, Post)

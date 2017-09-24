@@ -6,7 +6,6 @@ from flask_babel import gettext
 from app import app, db, lm, oid, babel
 from forms import LoginForm, EditForm, PostForm, SearchForm
 from models import User, ROLE_USER, ROLE_ADMIN, Post, HzToken, HzLocation
-from datetime import datetime
 from emails import follower_notification
 from guess_language import guessLanguage
 from translate import microsoft_translate
@@ -15,6 +14,7 @@ import random
 from dijkstra import min_dist2, get_nearest_vertex, hz_vertex
 from lbs import TEST_UID, CUR_MAP_SCALE, HZ_MAP_GEO_WIDTH, HZ_MAP_GEO_HEIGHT
 import json
+from hzlbs.elecrail import *
 
 
 @lm.user_loader
@@ -31,7 +31,7 @@ def get_locale():
 def before_request():
     g.user = current_user
     if g.user.is_authenticated:
-        g.user.last_seen = datetime.utcnow()
+        g.user.last_seen = datetime.datetime.utcnow()
         db.session.add(g.user)
         db.session.commit()
         g.search_form = SearchForm()
@@ -42,7 +42,8 @@ def before_request():
 def after_request(response):
     for query in get_debug_queries():
         if query.duration >= DATABASE_QUERY_TIMEOUT:
-            app.logger.warning("SLOW QUERY: %s\nParameters: %s\nDuration: %fs\nContext: %s\n" % (query.statement, query.parameters, query.duration, query.context))
+            app.logger.warning("SLOW QUERY: %s\nParameters: %s\nDuration: %fs\nContext: %s\n" %
+                               (query.statement, query.parameters, query.duration, query.context))
     return response
 
 
@@ -68,7 +69,7 @@ def index(page=1):
         if language == 'UNKNOWN' or len(language) > 5:
             language = ''
         post = Post(body=form.post.data,
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.datetime.utcnow(),
                     author=g.user,
                     language=language)
         db.session.add(post)
@@ -330,7 +331,8 @@ def get_history_location():
 
     obj = json.loads(request.form['data'])
 
-    hzq = HzLocation.query.filter(HzLocation.timestamp >= obj['datetimeFrom'], HzLocation.timestamp <= obj['datetimeTo'])
+    hzq = HzLocation.query.filter(HzLocation.timestamp >= obj['datetimeFrom'],
+                                  HzLocation.timestamp <= obj['datetimeTo'])
     if obj['userId'][0] != 'all':
         hzq = hzq.filter(HzLocation.user_id.in_(obj['userId']))
 
@@ -340,14 +342,103 @@ def get_history_location():
     points = []
     for rec in hzq:
         if uid == rec.user_id:
-            points.append({'x': rec.x, 'y': rec.y, 'datatime': datetime.strftime(rec.timestamp, '%Y-%m-%d %H:%M:%S')})
+            points.append({'x': rec.x, 'y': rec.y,
+                           'datatime': datetime.datetime.strftime(rec.timestamp, '%Y-%m-%d %H:%M:%S')})
         else:
             if uid != -1:
                 data[uid] = points
             uid = rec.user_id
-            points = [{'x': rec.x, 'y': rec.y, 'datatime': datetime.strftime(rec.timestamp, '%Y-%m-%d %H:%M:%S')}]
+            points = [{'x': rec.x, 'y': rec.y,
+                       'datatime': datetime.datetime.strftime(rec.timestamp, '%Y-%m-%d %H:%M:%S')}]
 
     if uid != -1:
         data[uid] = points
 
     return jsonify({'errorCode': 0, 'msg': 'ok', 'data': data})
+
+
+@app.route('/lbs/get_electronic_rail_cfg', methods=['POST'])
+def get_electronic_rail_cfg():
+    """
+    查询电子围栏配置信息
+    :return:
+    """
+    if 'data' not in request.form:
+        return jsonify({'errorCode': 100, 'msg': '[data] field required.'})
+
+    obj = json.loads(request.form['data'])
+    if 'floorNo' not in obj:
+        return jsonify({'errorCode': 101, 'msg': '[floorNo] field required.'})
+
+    return jsonify({'errorCode': 0, 'msg': 'ok', 'data': get_elecrail()})
+
+
+@app.route('/lbs/get_electronic_rail_info', methods=['POST'])
+def get_electronic_rail_info():
+    """
+    查询电子围栏告警（进入、离开围栏）信息
+
+    查询条件、排序规则：
+    "userId": ["1918E00103AA", "1918E00103A9"],  "userId": ["all"] for all users
+    "datetimeFrom": "2017-08-17 11:17:35", 按照时间段查询, 可选，若不填写，时间段不作为过滤条件
+    "datetimeTo": "2017-09-23 11:17:35", 结束日期，可选，不填写时，结束日期为 Now
+    "page": 1,      查询的页码。 当记录很多时，需要分页查询。可选参数，默认为第一页
+    "rows": 100,    当前页记录条数。可选参数。默认100条
+    "sort": [{"field": "datetime", "oper": "desc"},     记录排序规则， 可选参数。
+             {"field": "userId", "oper": "desc"}]       默认按照时间降序排序
+        当前条件只支持 and 。
+        oper取值： desc -- 降序（默认）， asc -- 升序。 可以不填oper，默认降序
+        字段顺序代表查询时的排序顺序。
+        目前支持的排序字段：datetime, userId, room
+    :return:
+    """
+    if 'data' not in request.form:
+        return jsonify({'errorCode': 100, 'msg': '[data] field required.'})
+
+    obj = json.loads(request.form['data'])
+    hzq = HzElecTail.query
+
+    if obj['userId'][0] != 'all':
+        hzq = hzq.filter(HzElecTail.user_id.in_(obj['userId']))
+
+    if 'datetimeFrom' in obj and obj['datetimeFrom'] != '':
+        hzq = hzq.filter(HzElecTail.timestamp >= obj['datetimeFrom'])
+    if 'datetimeTo' in obj and obj['datetimeTo'] != '':
+        hzq = hzq.filter(HzElecTail.timestamp <= obj['datetimeTo'])
+    page = 1 if 'page' not in obj or obj['page'] == '' else int(obj['page'])
+    rows = 100 if 'rows' not in obj or obj['rows'] == '' else int(obj['rows'])
+
+    total = hzq.count()
+
+    if 'sort' in obj:
+        for st in obj['sort']:
+            is_desc = True if 'oper' not in st or st['oper'] == 'desc' else False
+            if st['field'] == 'datetime':
+                if is_desc:
+                    hzq = hzq.order_by(HzElecTail.timestamp.desc())
+                else:
+                    hzq = hzq.order_by(HzElecTail.timestamp)
+            elif st['field'] == 'userId':
+                if is_desc:
+                    hzq = hzq.order_by(HzElecTail.user_id.desc())
+                else:
+                    hzq = hzq.order_by(HzElecTail.user_id)
+            elif st['field'] == 'room':
+                if is_desc:
+                    hzq = hzq.order_by(HzElecTail.rail_no.desc())
+                else:
+                    hzq = hzq.order_by(HzElecTail.rail_no)
+    else:
+        hzq = hzq.order_by(HzElecTail.timestamp.desc())
+
+    if page < 1:
+        page = 1
+    offset = (page - 1) * rows
+    records = hzq.limit(rows).offset(offset).all()
+    rs = []
+    for rec in records:
+        rs.append({'id': rec.id, 'buildingId': rec.build_id, 'floorNo': rec.floor_no,
+                   'x': rec.x, 'y': rec.y, 'status': rec.status,
+                   'room': rec.rail_no,
+                   'datetime': datetime.datetime.strftime(rec.timestamp, '%Y-%m-%d %H:%M:%S')})
+    return jsonify({'errorCode': 0, 'msg': 'ok', 'data': {'total': total, 'rows': rs}})
