@@ -146,7 +146,7 @@
 			width: 1700px; height: 860px;
             position: absolute;
             overflow: hidden;
-            border: 2px solid #b94a48;
+            border: 1px solid #b94a48;
 			top:60px; left:0px;
 			}
         #svg_map{
@@ -244,7 +244,8 @@ $(document).ready(function(){
             hz_user_xy[index] = [item['userId'], json[index]['x'], json[index]['y']];
         });
 
-        for (var i = 0; i< hz_user_xy.length; i++) {
+        console.log('json len:', json.length, ' hz_user_xy len:', hz_user_xy.length);
+        for (var i = 0; i< json.length; i++) {
             hz_people_goto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
                     hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
         }
@@ -624,7 +625,7 @@ function selectUser(str){
               <button id="zoomIn" class="btn btn-info btn-sm">缩小</button>
             </div>
             <div id="myCanvas">
-              <div id="floor3"> <img src="/static/img/floor3.svg" width="1706" height="867.9" style="position:absolute" id="map" >
+              <div id="floor3" style="background:url(/static/img/cross.gif) fixed"> <img src="/static/img/floor3.svg" width="1706" height="867.9" style="position:absolute" id="map" >
                 <div id="svg_map">
                   <div id="svg_path"></div>
                   <img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA"> <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9"> <img src="/static/img/dest.png" style="position:absolute" id="destination" title="终点"> </div>
