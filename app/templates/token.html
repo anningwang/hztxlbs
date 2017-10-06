@@ -25,13 +25,14 @@
 <link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css">
 
 <!-- inline styles related to this page -->
+<!--时间插件-->
+
+<link rel="stylesheet" href="../static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css"/>
 
 <!-- ace settings handler -->
 <script src="../static/ace/assets/js/ace-extra.js"></script>
-
 <link rel="shortcut icon" href="/static/img/favicon.ico" />
 <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
-
 </head>
 
 <body class="no-skin"  style=" min-width:1905px;">
@@ -137,17 +138,17 @@
         
         <!-- /section:settings.box -->
         <div class="row">
-          <div class="col-sm-12" > 
-            <!-- PAGE CONTENT BEGINS -->
-            
-            <style>
+          <div class="col-sm-12" >
+          <!-- PAGE CONTENT BEGINS -->
+          
+          <style>
         #myCanvas{width: 1690px; height: 860px;}
         #floor3 {
 			width: 1700px; height: 860px;
             position: absolute;
             overflow: hidden;
             border: 1px solid #b94a48;
-			top:60px; left:0px;
+			top:256px; left:0px;
 			}
         #svg_map{
             width: 1700px;
@@ -159,12 +160,14 @@
             width: 1700px;
             height: 860px;
             position:absolute;
+			z-index:10;
         }
+ 
     </style>
-            <script src="/static/js/jquery.min.js"></script> 
-            <script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script> 
-            <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script> 
-            <script>
+          <script src="/static/js/jquery.min.js"></script> 
+          <script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script> 
+          <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script> 
+          <script>
 
 //localStorage.clear(); // 调试用    清除缓存
 
@@ -172,20 +175,25 @@
 
     'use strict';
 var hzX = 0, hzY = 0;   // 坐标系原点
-var margin = 0;
-var real_loc_to_pix = 0.0891;
+var margin = 0;        //外边距
+var real_loc_to_pix = 0.0891;      //物理单位转像素单位 比例      比例转换计算公式x为传来的数据   x * real_loc_to_pix * zoom
 var map_w = 3477;       /// px
 var map_h = 1769;
 var zoom = 0.486;          /// 地图缩放级别
 var hz_is_navigating = false;      /// 是否曾经设置过导航，或正在导航中
-var HZ_DESTINATION_MEETING_ROOM = 27;
+var HZ_DESTINATION_MEETING_ROOM = 27;     //办公室编号
 var hz_destination = HZ_DESTINATION_MEETING_ROOM;            /// 导航的目的地，默认 第一个 目的地
-var hz_time_id = 0;
-var hz_user_id = 0;
+var hz_time_id = 0;    //废弃
+var hz_user_id = 0;   //下面的索引   实际函数用0应该是未选择
 var HZ_USER_IDS = ['1918E00103AA', '1918E00103A9'];
-var hz_user_xy = [];
+var hz_user_xy = [];   //用户数据  每项为一个用户
 
 var storage = window.localStorage;
+
+
+
+
+
 if(storage){
     //storage.clear();
     ///alert("浏览支持localStorage");
@@ -238,21 +246,42 @@ $(document).ready(function(){
     });
 
     socket.on('hz_position', function(msg) {
-        console.log(msg);
+	 
+      
+		
+	 
+		
         var json = eval(msg); // 数组
-        $.each(json, function (index, item) {
+		
+		
+		console.log(json);
+		 
+
+		
+        $.each(json, function (index, item) {//index json 索引   item  为本索引内容
             hz_user_xy[index] = [item['userId'], json[index]['x'], json[index]['y']];
+			//把每个人存起来
         });
 
         console.log('json len:', json.length, ' hz_user_xy len:', hz_user_xy.length);
         for (var i = 0; i< json.length; i++) {
+			
+			 
+			
+			//zoom:地图缩放级别  
+			//   hz_people_goto 把人放到对应位置函数 
+			
             hz_people_goto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
                     hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
         }
     });
-
+		//导航路径
     socket.on('hz_path', function (msg) {
+		
         console.log(msg);
+		
+		console.log(msg.path[0].pt_name)
+		
         var pt_path = [];
         pt_path[0] = [msg.x * real_loc_to_pix * zoom, msg.y * real_loc_to_pix * zoom];
         var json = eval(msg.path); // 数组
@@ -265,10 +294,14 @@ $(document).ready(function(){
         $('#destination').show();
 
         var svg = $('#svg_path').svg('get');
+		
+ 
+		
         for ( var i = 0; i< pt_path.length; i++) {        // 转换坐标
             pt_path[i][0] += hzX;
             pt_path[i][1] += hzY;
         }
+		
         svg.clear();
         svg.polyline(pt_path, {fill: 'none', stroke: 'blue', strokeWidth: 4});
     });
@@ -322,7 +355,13 @@ $(document).ready(function(){
 
     /// 停止导航
     $("#stop").click(function () {
-        if(hz_is_navigating){
+       navgationStop();
+    });
+		
+	//停止导航函数
+	
+	function navgationStop(){
+		 if(hz_is_navigating){
             hz_clear_path();
             storage.removeItem('hz_is_navigating');
             hz_is_navigating = false;
@@ -332,8 +371,10 @@ $(document).ready(function(){
             $("#destination").hide();
 
             socket.emit('hz_stop_navigating');
-        }
-    });
+        }	
+	}
+
+	
 
     $("#zoomOut").click(function () {
         zoom = parseFloat(zoom) + 0.05;
@@ -404,6 +445,9 @@ $(document).ready(function(){
     /// 调整用户、标签位置
     ///$('.btnGetLocation').click();
 
+
+	
+	
     $("#loc").val(parseInt(hz_destination));
     $("#userId").val(parseInt(hz_user_id));
     $("#go").attr("disabled", hz_user_id == '0');
@@ -440,9 +484,14 @@ function hz_map_zoom(left, top, height, width, isAnimate) {
         $('#map').stop(true, true);
    }
 }
-
+//(用户)人位置函数
 function hz_people_goto(x, y, people) {
+ 
+	
     people = people || '1918E00103AA';      // 设置默认参数
+	
+ 
+	
     /// 24, 45是定位图标的 针尖 位置。显示图片时，是以图片左上角为参考坐标。故需要对坐标进行偏移。
     $("#"+people).stop(true, true).animate({
         left: (hzX + x - 24),
@@ -451,7 +500,11 @@ function hz_people_goto(x, y, people) {
 }
 
 function hz_people_go_no_animate(x, y, people) {
+ 
+	
     people = people || '1918E00103AA';      // 设置默认参数
+ 	
+	
     /// 24, 45 是定位图标的 针尖 位置。显示图片时，是以图片左上角为参考坐标。故需要对坐标进行偏移。
     $("#"+people).animate({
         left: hzX + x - 24,
@@ -595,68 +648,560 @@ function selectUser(str){
     $("#loc").attr("disabled", hz_user_id == '0');
 }
 
+</script> 
+          <script>
+
+	//iii	
+	 $(function(){
+	 		
+		 
+		
+			/**
+			 * 向服务器发送 Ajax 请求，查询相关数据, POST方式
+			 * @param url       请求 url
+			 * @param txData    请求 参数，具体参数含义，见对应接口说明                  
+			 
+			 数据格式
+			 
+			 url = '/lbs/get_history_location';  访问地址 
+            txData = {
+                "userId": ["1918E00103AA"],     // "userId": ["all"] for all users
+                "datetimeFrom": "2017-09-17 11:17:35",          // 按照时间段查询
+                "datetimeTo": "2017-09-23 11:17:35",
+                "compress": false       // 是否压缩，压缩的含义是，服务器会根据特定策略返回部分路径坐标。 保留参数
+            };
+			 */
+			
+			function ajaxRequest(url, txData) { 
+				//接受到的数据 
+				var ajaxData;
+				$.ajax({
+					url: url,
+					async: false,
+					type: 'POST',
+					data: {data: JSON.stringify(txData)}
+				}).done(function(data) {
+					console.log('接口调用成功');
+					console.log('receive:', data);
+					 
+					ajaxData = data;
+					
+					
+					 
+				}).fail(function(jqXHR, textStatus, errorThrown) {
+					console.log('接口调用失败');
+					ajaxData = false;
+					
+				 
+				});
+				 return ajaxData;
+				 
+			}
+			
+			//历史轨迹查询按钮绑定
+			
+			$('#historical-trajectory-query-button').click(function(){
+				
+				historicalTrajectory();
+			});
+			
+			
+			//历史轨迹查询函数
+
+			function historicalTrajectory(){
+				
+				//查询需要的参数
+				var userName,startTime,endTime;
+				//数据发送地址
+				var url;
+				var data;  //后台传过来的数据
+ 				//获得数据并测试是否合法 
+				userName = $('#historical-trajectory-user-name').val();
+				
+		 
+				
+				if(userName == 0){
+					alert('请选择查询用户');
+					return;
+				}
+				
+			 
+				startTime = $('#historical-trajectory-start-time').val();
+			 
+				if(startTime == ''){
+					alert('请选择起始查询时间');
+					return;
+				}
+			 
+				endTime = $('#historical-trajectory-end-time').val();
+				
+				if(endTime == ''){
+					alert('请选择截止查询时间');
+					return;
+				}				
+			 
+				
+				url = '/lbs/get_history_location';
+				
+				var txData = {
+					"userId": [userName],     // "userId": ["all"] for all users
+					"datetimeFrom": startTime,          // 按照时间段查询
+					"datetimeTo": endTime,
+					"compress": false       // 是否压缩，压缩的含义是，服务器会根据特定策略返回部分路径坐标。 保留参数
+				};	
+				
+				
+				data = ajaxRequest(url, txData);
+				
+				if(data == false){
+					alert('连接错误');
+					return;
+				}
+	
+ 
+			 	
+				//后台传来的数据有问题    对象键  不能数字开头 
+				
+				//临时数据 
+
+	        	var temporaryData = data.data[userName];
+				console.log(temporaryData);
+		
+				
+				console.log('xinew:',temporaryData);
+				//没有数据的情况
+				if(temporaryData == undefined){
+					alert('该时间段没有数据');
+					return;		
+				} 
+ 
+		 
+				//曲线位置存储
+				var points = [];
+				/*曲线样式数据*/
+ 
+
+				var temporaryDataLength = temporaryData.length;
+				
+				
+
+		 	    for(var temporaryI = 0 ; temporaryI<temporaryDataLength;temporaryI++){
+				     var temporaryDataFirst = temporaryData[temporaryI];
+					 
+					 var temporaryArr = [];
+					 var temporaryArrX,temporaryArrY;
+					 
+					 temporaryArrX = unitConversion(temporaryDataFirst.x);
+					 temporaryArrY = unitConversion(temporaryDataFirst.y);
+					 
+					 
+					 temporaryArr.push(temporaryArrX);
+					 temporaryArr.push(temporaryArrY);
+					 
+					 points.push(temporaryArr);
+					 
+					 temporaryArr = null;
+					 temporaryArrX = null;
+					 temporaryArrY = null;
+					  
+				}
+				
+			
+					var svg = $('#svg_path').svg('get');
+					//svg.clear();
+					 
+					svg.clear();
+ 					
+					 //曲线
+					svg.polyline(points,{
+						fill: 'none',
+						stroke: 'blue',
+						strokeWidth: 1
+					});
+				 	svg.text(points[0][0],points[0][1],'起',{fontSize: 16, fontFamily: 'Verdana',fill:'red'})
+					svg.text(points[temporaryDataLength-1][0],points[temporaryDataLength-1][1],'终',{fontSize: 16, fontFamily: 'Verdana',fill:'red'})
+				
+				
+				//退出导航
+				navgationStop();
+			 
+			 	
+			 
+			 	
+				//判断是否出现连接错误
+				
+
+			 	
+					
+			}
+			
+			
+			
+			$('#electronic-fence-query-button').click(function(){
+				
+					electronicFence();
+			});
+			
+			function electronicFence(){
+				var url,txData;
+				
+				var data; //后台传来的数据
+				
+				var temporaryArr; //临时数据
+				
+				var  temporaryArrLength; //临时数据长度
+				
+				var address = $('#electronic-fence-address').val();
+				if(address == 0){
+					alert('请选择查询地址');
+					return;
+				}
+				
+				
+				
+				url = '/lbs/get_electronic_rail_cfg';
+				txData = {
+					"floorNo": address	
+				};
+				
+				data = ajaxRequest(url, txData);
+				
+				
+				temporaryArr = data.data;
+				
+				
+				
+				var svg = $('#svg_path').svg('get');
+					//svg.clear();	 
+				svg.clear();
+				/*console.log('temporaryArr[0].points:',temporaryArr[0].points);
+				console.log('temporaryArr[0]:',temporaryArr[0]);*/
+				
+				temporaryArrLength = temporaryArr.length;
+				for(var temporaryI = 0; temporaryI<temporaryArrLength; temporaryI++){
+					var temporaryArrDatas = temporaryArr[temporaryI].points;
+					var temporaryArrDatasLength = temporaryArrDatas.length;
+					var temporatyPosition =[];
+					
+					for(var PositionI = 0; PositionI< temporaryArrDatasLength; PositionI++){
+							var temporatyPositionFor = [];  //for里面的数组   临时用下 
+							 temporatyPositionFor.push(unitConversion(temporaryArrDatas[PositionI].x));
+							 temporatyPositionFor.push(unitConversion(temporaryArrDatas[PositionI].y));
+							 
+							 
+							 
+							 temporatyPosition.push(temporatyPositionFor);
+							 temporatyPositionFor = null;
+							 
+							 if(PositionI == temporaryArrDatasLength-1){
+								 //让线回到第一个	
+								 temporatyPositionFor = []
+								 temporatyPositionFor.push(unitConversion(temporaryArrDatas[0].x));
+								 temporatyPositionFor.push(unitConversion(temporaryArrDatas[0].y));
+								 temporatyPosition.push(temporatyPositionFor);
+							 }
+							 
+					}
+					
+					console.log('temporatyPosition',temporatyPosition);
+					
+					
+					
+					svg.polyline(temporatyPosition,{
+						fill: 'none',
+						stroke: '#ff0000',
+						strokeWidth: 5
+					});
+				 	//完毕清空数据
+					temporaryArrDatas = null;
+					temporaryArrDatasLength = null;
+					temporatyPosition =null;
+					
+				}
+				
+				
+				
+				
+				
+				
+					
+			}
+	
+			
+			
+
+			
+			
+ 
+		var electronic_fence_namespace = '/HeZhong';
+        var electronic_fence_socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + electronic_fence_namespace);
+
+        electronic_fence_socket.on('hz_electronic_tail', function(msg) {
+            console.log('电子围栏：', msg);
+			var electronic_fence_socket_state;
+			
+			if(msg[0].status == 1){
+				electronic_fence_socket_state = '进入';
+			}else if(msg[0].status == 0){
+				electronic_fence_socket_state = '离开';
+			}
+			alert('用户ID:'+msg[0].userId+electronic_fence_socket_state+'了房间'+msg[0].name);
+        });
+			
+			
+			
+			
+			
+			//单位转换
+			function unitConversion(number){
+				return Math.round(number * real_loc_to_pix * zoom);
+			}
+			
+			
+			
+	
+			
+			
+			//以下为时间日历插件
+			
+				 
+			
+		 	     
+ 	 			 $('.date-timepicker').datetimepicker({
+				 //ormat: 'MM/DD/YYYY h:mm:ss A',//use this option to display seconds
+					  language: 'zh-CN',
+					 format: 'yyyy-mm-dd hh:ii:ss',
+					 autoclose: true,
+					 
+				});
+				
+				
+ 
+		 
+
+			
+			
+	 })
+
+
 </script>
-            <div id="txtHint">
-              <select id="userId" onchange="selectUser(this.value)" style="font-family:Verdana, Arial, Helvetica, sans-serif;">
+          <div id="txtHint">
+            <select id="userId" onchange="selectUser(this.value)" style="font-family:Verdana, Arial, Helvetica, sans-serif;">
+            <option value="0">请选择用户开启导航</option>
+            <option value="1">1918E00103AA</option>
+            <option value="2">1918E00103A9</option>
+          </select>
+          导航到
+          <select id="loc" class="loc" name="locations" onchange="selectLocation(this.value)" style="font-family:Verdana, Arial, Helvetica, sans-serif;">
+            <option value="27">Room 1 测试区</option>
+            <option value="29">Room 2</option>
+            <option value="30">Room 3</option>
+            <option value="31">Room 4 健身房</option>
+            <option value="32">Room 5</option>
+            <option value="33">Room 6</option>
+            <option value="34">Room 7 演示厅</option>
+            <option value="23">会议室</option>
+            <option value="28">总裁办公室</option>
+            <option value="24">副总办公室1</option>
+            <option value="25">副总办公室2</option>
+            <option value="26">仓库</option>
+          </select>
+          <button class="navigation btn btn-success btn-sm" id="go">开始导航</button>
+          <button id="stop"  class="btn btn-danger btn-sm">结束导航</button>
+          <button id="myPosition" style="visibility:hidden">占位</button>
+          地图：
+          <button id="zoomOut" class="btn btn-info btn-sm">放大</button>
+          <button id="zoomIn" class="btn btn-info btn-sm">缩小</button>
+          <br />
+          <div class="hr hr-24"></div>
+          
+          <!--      <div class="row">
+      		<div class="col-xs-2">   
+            	历史轨迹:
+              <select id="history_user_id" >
                 <option value="0">请选择用户开启导航</option>
-                <option value="1">1918E00103AA</option>
-                <option value="2">1918E00103A9</option>
+                <option value="1918E00103AA">1918E00103AA</option>
+                <option value="1918E00103A9">1918E00103A9</option>
               </select>
-              导航到
-              <select id="loc" class="loc" name="locations" onchange="selectLocation(this.value)" style="font-family:Verdana, Arial, Helvetica, sans-serif;">
-                <option value="27">Room 1 测试区</option>
-                <option value="29">Room 2</option>
-                <option value="30">Room 3</option>
-                <option value="31">Room 4 健身房</option>
-                <option value="32">Room 5</option>
-                <option value="33">Room 6</option>
-                <option value="34">Room 7 演示厅</option>
-                <option value="23">会议室</option>
-                <option value="28">总裁办公室</option>
-                <option value="24">副总办公室1</option>
-                <option value="25">副总办公室2</option>
-                <option value="26">仓库</option>
-              </select>
-              <button class="navigation btn btn-success btn-sm" id="go">开始导航</button>
-              <button id="stop"  class="btn btn-danger btn-sm">结束导航</button>
-              <button id="myPosition" style="visibility:hidden">占位</button>
-              地图：
-              <button id="zoomOut" class="btn btn-info btn-sm">放大</button>
-              <button id="zoomIn" class="btn btn-info btn-sm">缩小</button>
-            </div>
-            <div id="myCanvas">
-              <div id="floor3" style="background:url(/static/img/cross.gif) fixed"> <img src="/static/img/floor3.svg" width="1706" height="867.9" style="position:absolute" id="map" >
-                <div id="svg_map">
-                  <div id="svg_path"></div>
-                  <img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA"> <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9"> <img src="/static/img/dest.png" style="position:absolute" id="destination" title="终点"> </div>
-              </div>
             </div>
             
-            <!--页脚-->
             
-            <div class="footer">
-              <div class="footer-inner " > 
-                <!-- #section:basics/footer -->
-                <div class="footer-content "  style=" min-width:1713px;" > <span class="bigger-120"> 衡阳市和仲通讯科技有限公司 &copy; 2016-2018 </span> &nbsp; &nbsp; <span class="action-buttons"> <a href="#"> <i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i> </a> <a href="#"> <i class="ace-icon fa fa-facebook-square text-primary bigger-150"></i> </a> <a href="#"> <i class="ace-icon fa fa-rss-square orange bigger-150"></i> </a> </span> </div>
-                
-                <!-- /section:basics/footer --> 
-              </div>
+            
+            
+
+
+
+            
+            
+            <div class="col-xs-4">   
+            	
+            	 <div class="col-xs-2"><span>查询时间:</span>
+             
+                <div class="input-group">
+                    <input id="date-timepicker1" type="text" class="form-control" style="  width:160px;"  placeholder="查询起始时间" />
+                     <span  style=" float:left; vertical-align:middle;">至</span>
+                     <input id="date-timepicker2" type="text" class="form-control" style=" width:160px;" placeholder="查询结束时间"/>
+                </div>
+				</div>
+             	<div class="col-xs-2">
+            	<button id='hisoryStartButton' class="btn btn-info btn-sm">
+                	查询
+                </button>
+                </div>
             </div>
             
-            <!-- PAGE CONTENT ENDS --> 
-          </div>
-          <!-- /.col --> 
-        </div>
-        <!-- /.row --> 
       </div>
-      <!-- /.page-content --> 
+      
+      <div class="row">
+      
+      	<div class="col-xs-1">
+        	<span class=" pull-right">电子围栏查询</span>
+        </div>
+        <div class="col-xs-1">
+        	<select id="userId">
+                <option value="0">请选择查询楼层</option>
+                <option value="Floor3">Floor3</option>
+              
+              </select>
+        </div>
+        <div class="col-xs-1">
+        	<button id="" class="btn btn-info btn-sm">查询</button>
+        </div>
+      	
+      </div>-->
+          
+              <div class="row">
+              
+              
+              
+                  <div class="col-xs-2">
+   
+                  		<div class="col-xs-4">
+                         <label class="control-label no-padding-right pull-right">历史轨迹:</label>
+           				</div> 
+                        <div class="col-sm-8">
+                          <select id="historical-trajectory-user-name" >
+                            <option value="0">请选择用户开启导航</option>
+                            <option value="1918E00103AA">1918E00103AA</option>
+                            <option value="1918E00103A9">1918E00103A9</option>
+                          </select>
+                    	</div>
+        
+                  </div>
+                   
+              
+              
+                 <div class="col-xs-5">
+                  		<div class="col-xs-2">
+                         <label class="control-label no-padding-right pull-right">查询时间:</label>
+    					</div>	        
+	                    
+                        
+                        <div class="col-xs-7">
+                        
+                            <span class="input-icon">
+                                <input type="text" id="historical-trajectory-start-time" class="date-timepicker"  placeholder="查询起始时间" style="width:178px;"/>                            
+                            </span>
+    
+                            <span class="input-icon input-icon-right">
+                                <input type="text" id="historical-trajectory-end-time" class="date-timepicker" placeholder="查询截止时间" style="width:178px;"/>         
+                            </span>
+
+                	  	</div>
+                        <div class="col-xs-2">
+                            <button class="btn btn-info btn-sm" id="historical-trajectory-query-button">查询</button>
+                        </div>
+                  </div>
+                  
+                  
+              
+              
+              
+              
+              
+              
+              
+              </div>
+              
+                <div class="hr hr-24"></div>
+              <div class="row">
+              
+              
+              
+                  <div class="col-xs-2">
+   
+                  		<div class="col-xs-4">
+                         <label class="control-label no-padding-right pull-right">电子围栏设置查询:</label>
+           				</div> 
+                        <div class="col-sm-8">
+                          <select id="electronic-fence-address" >
+                            <option value="0">请选择地址</option>
+                            <option value="Floor3">和仲通讯</option>
+                             
+                          </select>
+                    	</div>
+        
+                  </div>
+                   
+              
+              
+                 <div class="col-xs-5">
+
+                        <div class="col-xs-2">
+                            <button class="btn btn-info btn-sm" id="electronic-fence-query-button">查询</button>
+                        </div>
+                  </div>
+                  
+                  
+              
+              
+              
+              
+              
+              
+              
+              </div>
+                <div class="hr hr-24"></div>
+                
+              
+              
+              
+              
+      </div>
+          <div id="myCanvas">
+              <div id="floor3" style="background:url(/static/img/cross.gif) fixed"> <img src="/static/img/floor3.svg" width="1706" height="867.9" style="position:absolute" id="map" >
+              <div id="svg_map">
+                <div id="svg_path"></div>
+                 
+                <img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA"> <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9"> <img src="/static/img/dest.png" style="position:absolute" id="destination" title="终点"> </div>
+            </div>
+          </div>
+          
+          <!--页脚-->
+          
+          <div class="footer">
+            <div class="footer-inner " > 
+              <!-- #section:basics/footer -->
+              <div class="footer-content "  style=" min-width:1713px;" > <span class="bigger-120"> 衡阳市和仲通讯科技有限公司 &copy; 2016-2018 </span> &nbsp; &nbsp; <span class="action-buttons"> <a href="#"> <i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i> </a> <a href="#"> <i class="ace-icon fa fa-facebook-square text-primary bigger-150"></i> </a> <a href="#"> <i class="ace-icon fa fa-rss-square orange bigger-150"></i> </a> </span> </div>
+              
+              <!-- /section:basics/footer --> 
+            </div>
+          </div>
+          
+          <!-- PAGE CONTENT ENDS --> 
+        </div>
+        <!-- /.col --> 
+      </div>
+      <!-- /.row --> 
     </div>
+    <!-- /.page-content --> 
   </div>
-  <!-- /.main-content --> 
-  
-  <!--<a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
+</div>
+<!-- /.main-content --> 
+
+<!--<a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
 				<i class="ace-icon fa fa-angle-double-up icon-only bigger-110"></i>
-			</a>--> 
+			</a>-->
 </div>
 <!-- /.main-container --> 
 
@@ -667,7 +1212,9 @@ function selectUser(str){
 		</script> 
 <script src="../static/ace/components/bootstrap/dist/js/bootstrap.js"></script> 
 
-<!-- page specific plugin scripts --> 
+<!--时间控制插件--> 
+
+<script src="../static/ace/components/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.min.js"></script> 
 
 <!-- ace scripts --> 
 <script src="../static/ace/assets/js/src/elements.scroller.js"></script> 

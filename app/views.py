@@ -5,16 +5,17 @@ from flask_sqlalchemy import get_debug_queries
 from flask_babel import gettext
 from app import app, db, lm, oid, babel
 from forms import LoginForm, EditForm, PostForm, SearchForm
-from models import User, ROLE_USER, ROLE_ADMIN, Post, HzToken, HzLocation
+from models import User, ROLE_USER, Post, HzToken, HzLocation, HzElecTail
 from emails import follower_notification
 from guess_language import guessLanguage
 from translate import microsoft_translate
 from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS, LANGUAGES, DATABASE_QUERY_TIMEOUT
 import random
+import datetime
 from dijkstra import min_dist2, get_nearest_vertex, hz_vertex
 from lbs import TEST_UID, CUR_MAP_SCALE, HZ_MAP_GEO_WIDTH, HZ_MAP_GEO_HEIGHT
 import json
-from hzlbs.elecrail import *
+from hzlbs.elecrail import get_elecrail
 
 
 @lm.user_loader
@@ -49,13 +50,13 @@ def after_request(response):
 
 @app.errorhandler(404)
 def internal_error(error):
-    return render_template('404.html'), 404
+    return render_template('404.html', error=error), 404
 
 
 @app.errorhandler(500)
 def internal_error(error):
     db.session.rollback()
-    return render_template('500.html'), 500
+    return render_template('500.html', error=error), 500
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -265,7 +266,7 @@ def gettoken():
         y = loc.y
         break
 
-    return render_template('token.html',            # token.html     svgBasec.html
+    return render_template('token.html',
                            token=token,
                            refreshToken=refresh_token,
                            mac=mac,
@@ -283,7 +284,7 @@ def show_all_users():
 
 @app.route('/get_location', methods=['POST'])
 def get_pos():
-    user_id = request.form['userId']
+    # user_id = request.form['userId']
     ret_loc = []
     hz_location = HzLocation.query.group_by(HzLocation.user_id)
     for loc in hz_location:  # 如果存在，则获取最新的一个坐标
@@ -322,6 +323,31 @@ def get_path():
 @app.route('/test')
 def hz_test():
     return render_template('test.html')
+
+
+@app.route('/hz_history_loc')
+def hz_history_loc():
+    return render_template('hz_history_loc.html')
+
+
+@app.route('/hz_electronic_rail')
+def hz_electronic_rail():
+    return render_template('hz_electronic_rail.html')
+
+
+@app.route('/hz_page1')
+def hz_page1():
+    return render_template('hz_page1.html')
+
+
+@app.route('/hz_page2')
+def hz_page2():
+    return render_template('hz_page2.html')
+
+
+@app.route('/mytest')
+def mytest():
+    return render_template('mytest.html')
 
 
 @app.route('/lbs/get_history_location', methods=['POST'])
