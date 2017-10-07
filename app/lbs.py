@@ -12,6 +12,9 @@ from threading import Lock
 import dijkstra
 import random
 import logging
+from utils.getip import is_windows_os
+from hzlbs.hzglobal import HZ_ACCESS_TOKEN
+
 
 log = logging.getLogger('apscheduler.executors.default')
 log.setLevel(logging.WARNING)
@@ -30,7 +33,7 @@ HZ_MAP_GEO_WIDTH = 39023.569023569024   # 毫米
 HZ_MAP_GEO_HEIGHT = 19854.09652076319
 # [{"name":"Floor3","mapImage":"Floor3.jpg","mapImageWidth":3477,"mapImageHeight":1769,"geoScale":{"x":89.1,"y":89.1}}]
 HZ_TEST_ADD_POS = False                 # 为真，则向数据库随机插入坐标点
-HZ_TEST_DEBUG = True                   # 为真，不从 LBS 引擎获取数据，从数据库刷新位置
+HZ_TEST_DEBUG = False                   # 为真，不从 LBS 引擎获取数据，从数据库刷新位置
 HZ_UID = [TEST_UID, TEST_UID_2]
 hz_uid_map = {}                         # 保存 uid 对应的最新坐标 { 'userId': [x,y], '1918E00103AA': [100, 200] }
 hz_uid_old_map = {}
@@ -77,6 +80,8 @@ def hz_get_new_pos():
 def job_get_token():
     if HZ_TEST_DEBUG:
         print '+++---+++ test mode, pass get token.'
+        return
+    elif is_windows_os():
         return
 
     time_now = datetime.datetime.utcnow()
@@ -126,72 +131,78 @@ def job_get_token():
 
 def job_get_location():
 
-    if HZ_TEST_DEBUG:
-        with app.app_context():
+    with app.app_context():
+        if HZ_TEST_DEBUG:
             hz_test_refresh_location()
-        return
+            return
 
-    time_now = datetime.datetime.utcnow()
-    hz_token = HzToken.query.all()
-    # 还没有获取过token，或者token过期
-    if len(hz_token) == 0 or (time_now - hz_token[0].timestamp).total_seconds() > hz_token[0].expires_in:
-        return
+        time_now = datetime.datetime.utcnow()
+        hz_token = HzToken.query.all()
 
-    url = "https://api.joysuch.com:46000/WebLocate/locateResults"
-    data = {'accessToken': hz_token[0].token,
-            'userIds': HZ_UID,
-            'timePeriod': 3000}
-    headers = {'Content-Type': 'application/json;charset=UTF-8',
-               'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'}
-    req = urllib2.Request(url=url, data=json.dumps(data), headers=headers)
-    res_data = urllib2.urlopen(req)
-    res = res_data.read()
-    obj = json.loads(res)
-    if obj["errorCode"] == 0:
-        # 测试代码。向数据库随机插入坐标点
-        if HZ_TEST_ADD_POS:
-            test_loc = HzLocation(build_id='', floor_no='', user_id=TEST_UID,
-                                  x=random.randint(20, int(HZ_MAP_GEO_WIDTH)-1000),
-                                  y=random.randint(20, int(HZ_MAP_GEO_HEIGHT)-1000),
-                                  timestamp=datetime.datetime.today())
-            db.session.add(test_loc)
-            db.session.commit()
+        if not is_windows_os():
+            # 还没有获取过token，或者token过期
+            if len(hz_token) == 0 or (time_now - hz_token[0].timestamp).total_seconds() > hz_token[0].expires_in:
+                return
+            token = hz_token[0].token
+            url = "https://api.joysuch.com:46000/WebLocate/locateResults"
+        else:
+            token = HZ_ACCESS_TOKEN
+            url = "http://120.78.81.125:8300/api/hz_lbs/WebLocate/locateResults"
 
-        # pos_to_client = []
-        if len(hz_uid_map) == 0:
-            hz_get_new_pos()
-        for item in obj["data"]:
-            uid = item['userId']
-            x = item["xMillimeter"]
-            y = item["yMillimeter"]
-            if uid in hz_uid_map and hz_uid_map[uid][0] == x and hz_uid_map[uid][1] == y:
-                # print "重复数据the same data: x=", x, " y=", y, " uid=", uid
-                continue
+        data = {'accessToken': token,
+                'userIds': HZ_UID,
+                'timePeriod': 3000}
+        headers = {'Content-Type': 'application/json;charset=UTF-8',
+                   'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'}
+        req = urllib2.Request(url=url, data=json.dumps(data), headers=headers)
+        res_data = urllib2.urlopen(req)
+        res = res_data.read()
+        obj = json.loads(res)
+        if obj["errorCode"] == 0:
+            # 测试代码。向数据库随机插入坐标点
+            if HZ_TEST_ADD_POS:
+                test_loc = HzLocation(build_id='', floor_no='', user_id=TEST_UID,
+                                      x=random.randint(20, int(HZ_MAP_GEO_WIDTH)-1000),
+                                      y=random.randint(20, int(HZ_MAP_GEO_HEIGHT)-1000),
+                                      timestamp=datetime.datetime.today())
+                db.session.add(test_loc)
+                db.session.commit()
 
-            hz_location = HzLocation(build_id=item["buildId"],
-                                     floor_no=item["floorNo"],
-                                     user_id=item["userId"],
-                                     x=item["xMillimeter"],
-                                     y=item["yMillimeter"],
-                                     timestamp=datetime.datetime.today())
-            db.session.add(hz_location)
-            db.session.commit()
-            hz_uid_map[uid] = [x, y]
-            # pos_to_client.append({'userId': uid, 'x': x, 'y': y})
-        # if len(hz_client_id) > 0 and len(pos_to_client) > 0:
-            # print 'Notify position to client.', pos_to_client
-            # socketio.emit('hz_position', pos_to_client, namespace=HZ_NAMESPACE)
-    elif obj['errorCode'] == HZ_MSG_INVALID_ACCESS_TOKEN:
-        hz_token[0].expires_in = 0
-        db.session.add(hz_token[0])
-        db.session.commit()
-        print 'token error!'
-    else:
-        print "error in function job_get_location(): ", res
-        print "url= ", url
-        print "req data= ", data
+            # pos_to_client = []
+            if len(hz_uid_map) == 0:
+                hz_get_new_pos()
+            for item in obj["data"]:
+                uid = item['userId']
+                x = item["xMillimeter"]
+                y = item["yMillimeter"]
+                if uid in hz_uid_map and hz_uid_map[uid][0] == x and hz_uid_map[uid][1] == y:
+                    # print "重复数据the same data: x=", x, " y=", y, " uid=", uid
+                    continue
 
-    return
+                hz_location = HzLocation(build_id=item["buildId"],
+                                         floor_no=item["floorNo"],
+                                         user_id=item["userId"],
+                                         x=item["xMillimeter"],
+                                         y=item["yMillimeter"],
+                                         timestamp=datetime.datetime.today())
+                db.session.add(hz_location)
+                db.session.commit()
+                hz_uid_map[uid] = [x, y]
+                # pos_to_client.append({'userId': uid, 'x': x, 'y': y})
+            # if len(hz_client_id) > 0 and len(pos_to_client) > 0:
+                # print 'Notify position to client.', pos_to_client
+                # socketio.emit('hz_position', pos_to_client, namespace=HZ_NAMESPACE)
+        elif obj['errorCode'] == HZ_MSG_INVALID_ACCESS_TOKEN:
+            if not is_windows_os():
+                hz_token[0].expires_in = 0
+                db.session.add(hz_token[0])
+                db.session.commit()
+            print 'token error!'
+        else:
+            print "error in function job_get_location(): ", res
+            print "url= ", url
+            print "req data= ", data
+
 
 scheduler = BackgroundScheduler()
 with hz_apscheduler_lock:
