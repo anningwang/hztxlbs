@@ -4,6 +4,9 @@ from app import db
 from app import app
 import flask_whooshalchemy as whooshalchemy
 import re
+import datetime
+from hzlbs.hzglobal import gen_code
+
 
 ROLE_USER = 0
 ROLE_ADMIN = 1
@@ -134,5 +137,49 @@ class HzElecTail(db.Model):
 
     def __repr__(self):
         return '<HzElecTail %r>' % self.user_id
+
+
+class HzElecTailCfg(db.Model):
+    """ 电子围栏配置表 """
+    id = db.Column(db.Integer, primary_key=True)
+    rail_no = db.Column(db.String(40))  # 围栏编号
+    name = db.Column(db.String(40))     # 电子围栏名称
+    build_id = db.Column(db.String(40))
+    floor_no = db.Column(db.String(40))
+    create_at = db.Column(db.DateTime)
+
+    def __init__(self, param):
+        self.rail_no = self.create_no()
+        self.name = param['name']
+        if 'buildingId' in param:
+            self.build_id = param['buildingId']
+        if 'floorNo' in param:
+            self.floor_no = param['floorNo']
+        self.create_at = datetime.datetime.today()
+
+    def update(self, param):
+        if 'name' in param:
+            self.name = param['name']
+        if 'buildingId' in param:
+            self.build_id = param['buildingId']
+        if 'floorNo' in param:
+            self.floor_no = param['floorNo']
+
+    def create_no(self):
+        search_sno = gen_code('WL')
+        et = HzElecTailCfg.query.filter(HzElecTailCfg.rail_no.like('%' + search_sno + '%'))\
+            .order_by(HzElecTailCfg.id.desc()).first()
+        number = 1 if et is None else int(et.rail_no.rsplit('-', 1)[1]) + 1
+        self.rail_no = search_sno + ('%03d' % number)
+        return self.rail_no
+
+
+class HzEtPoints(db.Model):
+    """ 电子围栏顶点坐标表 """
+    id = db.Column(db.Integer, primary_key=True)
+    et_id = db.Column(db.Integer)   # 电子围栏id
+    x = db.Column(db.Float)
+    y = db.Column(db.Float)
+
 
 whooshalchemy.whoosh_index(app, Post)

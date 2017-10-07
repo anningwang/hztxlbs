@@ -30,7 +30,7 @@ HZ_MAP_GEO_WIDTH = 39023.569023569024   # 毫米
 HZ_MAP_GEO_HEIGHT = 19854.09652076319
 # [{"name":"Floor3","mapImage":"Floor3.jpg","mapImageWidth":3477,"mapImageHeight":1769,"geoScale":{"x":89.1,"y":89.1}}]
 HZ_TEST_ADD_POS = False                 # 为真，则向数据库随机插入坐标点
-HZ_TEST_DEBUG = False                   # 为真，不从 LBS 引擎获取数据，从数据库刷新位置
+HZ_TEST_DEBUG = True                   # 为真，不从 LBS 引擎获取数据，从数据库刷新位置
 HZ_UID = [TEST_UID, TEST_UID_2]
 hz_uid_map = {}                         # 保存 uid 对应的最新坐标 { 'userId': [x,y], '1918E00103AA': [100, 200] }
 hz_uid_old_map = {}
@@ -39,20 +39,19 @@ hz_client_id = {}                       # 在线客户表
 {'sid': {'navigating': 0,'location': 27, 'userId': '1918E00103AA'}}
 navigating  --  是否开启导航 0, 否; 1, 是
 location    --  导航的目的地 点编号 23,24, ..., 34
-    <option value="23">会议室</option>
-    <option value="24">副总办公室1</option>
-    <option value="25">副总办公室2</option>
-    <option value="26">仓库</option>
-    <option value="27">Room 1 测试区</option>
-    <option value="28">总裁办公室</option>
-    <option value="29">Room 2</option>
-    <option value="30">Room 3</option>
-    <option value="31">Room 4 健身房</option>
-    <option value="32">Room 5</option>
-    <option value="33">Room 6</option>
-    <option value="34">Room 7 演示厅</option>
+    23 -- 会议室
+    24 -- 副总办公室1
+    25 -- 副总办公室2
+    26 -- 仓库
+    27 -- Room 1 测试区
+    28 -- 总裁办公室
+    29 -- Room 2
+    30 -- Room 3
+    31 -- Room 4 健身房
+    32 -- Room 5
+    33 -- Room 6
+    34 -- 7 演示厅
 userId      --  用户ID
-
 """
 
 HZ_NAMESPACE = '/HeZhong'

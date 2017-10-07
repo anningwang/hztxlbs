@@ -127,4 +127,29 @@ def hz_lbs_elect_rail(userlist):
                     db.session.add(new_r)
                     db.session.commit()
             i += 1
+
+        for rail in g_hz['et_cfg']:
+            name = rail
+            rec = HzElecTail.query.filter_by(user_id=usr['userId']).filter_by(rail_no=name)\
+                .order_by(HzElecTail.timestamp.desc()).first()
+            if pnpoly(g_hz['et_cfg'][name], usr['x'], usr['y']):    # in room
+                if rec is None or rec.status == 0:  # 用户原来不在 围栏内
+                    enter = 1
+                    new_r = HzElecTail(build_id=HZ_BUILDING_ID, floor_no=HZ_FLOOR_NO, user_id=usr['userId'],
+                                       x=usr['x'], y=usr['y'], timestamp=datetime.datetime.today(),
+                                       status=enter, rail_no=name)
+                    ret.append({'name': name, 'status': enter, 'userId': usr['userId']})
+                    print ret
+                    db.session.add(new_r)
+                    db.session.commit()
+            else:  # not in room
+                if rec is not None and rec.status == 1:     # 用户原来在 围栏内
+                    leave = 0
+                    new_r = HzElecTail(build_id=HZ_BUILDING_ID, floor_no=HZ_FLOOR_NO, user_id=usr['userId'],
+                                       x=usr['x'], y=usr['y'], timestamp=datetime.datetime.today(),
+                                       status=leave, rail_no=name)
+                    ret.append({'name': name, 'status': leave, 'userId': usr['userId']})
+                    print ret
+                    db.session.add(new_r)
+                    db.session.commit()
     return ret

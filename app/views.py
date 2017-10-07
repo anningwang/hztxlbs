@@ -5,7 +5,7 @@ from flask_sqlalchemy import get_debug_queries
 from flask_babel import gettext
 from app import app, db, lm, oid, babel
 from forms import LoginForm, EditForm, PostForm, SearchForm
-from models import User, ROLE_USER, Post, HzToken, HzLocation, HzElecTail
+from models import User, ROLE_USER, Post, HzToken, HzLocation, HzElecTail, HzElecTailCfg, HzEtPoints
 from emails import follower_notification
 from guess_language import guessLanguage
 from translate import microsoft_translate
@@ -16,6 +16,7 @@ from dijkstra import min_dist2, get_nearest_vertex, hz_vertex
 from lbs import TEST_UID, CUR_MAP_SCALE, HZ_MAP_GEO_WIDTH, HZ_MAP_GEO_HEIGHT
 import json
 from hzlbs.elecrail import get_elecrail
+from hzlbs.hzglobal import HZ_BUILDING_ID, g_upd_et_cfg
 
 
 @lm.user_loader
@@ -352,6 +353,30 @@ def mytest():
 
 @app.route('/lbs/get_history_location', methods=['POST'])
 def get_history_location():
+    """
+    1.	查询历史轨迹
+    输入参数：
+        "userId": ["1918E00103AA", "1918E00103A9"],     // "userId": ["all"] for all users
+        "datetimeFrom": "2017-08-17 11:17:35",          // 按照时间段查询
+        "datetimeTo": "2017-09-23 11:17:35",
+        "compress": false       // 是否压缩，压缩的含义是，服务器会根据特定策略返回部分路径坐标。 保留参数
+        "page": 1,      查询的页码。 当记录很多时，需要分页查询。可选参数，默认为第一页
+        "rows": 100     当前页记录条数。可选参数。默认100条
+    :return:
+    {
+        errorCode   错误码
+            0       成功
+        msg         错误信息
+            'ok'    成功
+        data[{      历史轨迹记录。排序方式 userId， datatime。如果查询多个用户，无法控制每个用户
+                        的记录条数，他们的总条数等于 输入参数 rows
+            x       横坐标，实际物理坐标，单位 mm
+            y       纵坐标
+            datatime    时间格式（北京时间）： yyyy-mm-dd HH-MM-SS
+        }]
+        total       符合条件的记录条数
+    }
+    """
     if 'data' not in request.form:
         return jsonify({'errorCode': 100, 'msg': '[data] field required.'})
 
@@ -362,11 +387,22 @@ def get_history_location():
     if obj['userId'][0] != 'all':
         hzq = hzq.filter(HzLocation.user_id.in_(obj['userId']))
 
-    hzq = hzq.order_by(HzLocation.user_id, HzLocation.timestamp).all()
+    page = 1 if 'page' not in obj or obj['page'] == '' else int(obj['page'])
+    rows = 100 if 'rows' not in obj or obj['rows'] == '' else int(obj['rows'])
+
+    total = hzq.count()
+
+    hzq = hzq.order_by(HzLocation.user_id, HzLocation.timestamp)
+
+    if page < 1:
+        page = 1
+    offset = (page - 1) * rows
+    records = hzq.limit(rows).offset(offset).all()
+
     uid = -1
     data = {}
     points = []
-    for rec in hzq:
+    for rec in records:
         if uid == rec.user_id:
             points.append({'x': rec.x, 'y': rec.y,
                            'datatime': datetime.datetime.strftime(rec.timestamp, '%Y-%m-%d %H:%M:%S')})
@@ -380,14 +416,35 @@ def get_history_location():
     if uid != -1:
         data[uid] = points
 
-    return jsonify({'errorCode': 0, 'msg': 'ok', 'data': data})
+    return jsonify({'errorCode': 0, 'msg': 'ok', 'data': data, 'total': total})
 
 
 @app.route('/lbs/get_electronic_rail_cfg', methods=['POST'])
 def get_electronic_rail_cfg():
     """
     查询电子围栏配置信息
+    输入参数(JSON格式)：
+    {
+        data:{      输入参数
+            floorNo:    查询的楼层
+        }
+    }
     :return:
+    {
+        errorCode   错误码
+            ==0     成功
+        msg         错误信息
+            =='ok'  成功
+        data:[{     电子围栏配置
+            name:   围栏名称（所在房间）
+            points:[{   围栏顶点坐标。（坐标应符合连续逆时针或者顺时针的顺序。当前要求：按逆时针顺序）
+                x:  横坐标，物理坐标，单位 毫米 mm
+                y:  纵坐标，物理坐标，单位 mm
+            }]
+            railNo:     电子围栏编号。后台生成的唯一编号。 added date 2017-10-01
+            id:         电子围栏 Id
+        }]
+    }
     """
     if 'data' not in request.form:
         return jsonify({'errorCode': 100, 'msg': '[data] field required.'})
@@ -396,7 +453,16 @@ def get_electronic_rail_cfg():
     if 'floorNo' not in obj:
         return jsonify({'errorCode': 101, 'msg': '[floorNo] field required.'})
 
-    return jsonify({'errorCode': 0, 'msg': 'ok', 'data': get_elecrail()})
+    elect = get_elecrail()
+    records = HzElecTailCfg.query.all()
+    for rec in records:
+        etp = HzEtPoints.query.filter_by(et_id=rec.id).order_by(HzEtPoints.id).all()
+        points = []
+        for p in etp:
+            points.append({'x': p.x, 'y': p.y})
+        elect.append({'id': rec.id, 'name': rec.name, 'railNo': rec.rail_no, 'points': points})
+
+    return jsonify({'errorCode': 0, 'msg': 'ok', 'data': elect})
 
 
 @app.route('/lbs/get_electronic_rail_info', methods=['POST'])
@@ -417,6 +483,25 @@ def get_electronic_rail_info():
         字段顺序代表查询时的排序顺序。
         目前支持的排序字段：datetime, userId, room
     :return:
+    {
+        errorCode   错误码
+            == 0    成功
+        msg         错误信息
+            == 'ok' 成功提示
+        data{       数据内容
+            total   符合条件的记录条数
+            rows[{  记录详情
+                id          记录ID，数据库索引，备用。
+                buildingId  建筑ID
+                floorNo     楼层号
+                x           横坐标，实际物理坐标，单位 mm
+                y           纵坐标
+                room        围栏名称
+                status      告警状态， 1 进入围栏，0 退出围栏
+                datatime    时间格式（北京时间）： yyyy-mm-dd HH-MM-SS
+            }]
+        }
+    }
     """
     if 'data' not in request.form:
         return jsonify({'errorCode': 100, 'msg': '[data] field required.'})
@@ -468,3 +553,184 @@ def get_electronic_rail_info():
                    'room': rec.rail_no,
                    'datetime': datetime.datetime.strftime(rec.timestamp, '%Y-%m-%d %H:%M:%S')})
     return jsonify({'errorCode': 0, 'msg': 'ok', 'data': {'total': total, 'rows': rs}})
+
+
+@app.route('/lbs/electronic_rail_cfg_modify', methods=['POST'])
+def electronic_rail_cfg_modify():
+    """
+    修改/新增电子围栏信息
+    输入参数：
+    {
+        data: [{    信息内容
+            id:     记录ID，新增时 ID可不填或者填 <=0 的数值。 修改时，必须返回记录ID。
+                    若查询返回的围栏配置没有记录ID，则不允许修改。
+            name:   电子围栏名称，不允许重复
+            buildingId:     建筑id，保留
+            floorNo:        楼层号
+            points:[{   围栏顶点坐标。（坐标应符合连续逆时针或者顺时针的顺序。当前要求：按逆时针顺序）
+                        可选参数。 当修改记录时，不涉及顶点修改，可以不传递。其他情况（新增，修改顶点）都需要
+                        传递最终状态的完整顶点信息。
+                x:  横坐标，物理坐标，单位 毫米 mm
+                y:  纵坐标，物理坐标，单位 mm
+            }]
+        }]
+    }
+    :return:
+    {
+        errorCode   错误码
+            == 0    成功
+            == 100  [data] field required.
+            == 101  输入参数错误
+            == 102  围栏[%s]已经存在！ (重复添加)
+            == 103  ID为[%d]的电子围栏不存在！ (修改id不存在的电子围栏)
+            == 104  修改后的围栏名称[%s]和现有的重名！
+            == 105  围栏顶点数须大于等于3！
+        msg         错误信息
+            == 'ok' 成功提示
+    }
+    """
+
+    if 'data' not in request.form:
+        return jsonify({'errorCode': 100, 'msg': '[data] field required.'})
+
+    try:
+        obj = json.loads(request.form['data'])
+        for rec in obj:
+            if 'id' not in rec or rec['id'] <= 0:
+                """ 新增围栏配置，查询是否有重复记录 """
+                et = HzElecTailCfg.query.filter_by(name=rec['name']).first()
+                if et is not None:
+                    return jsonify({'errorCode': 102, 'msg': u'围栏[%s]已经存在！' % rec['name']})
+                if 'buildingId' not in rec:
+                    rec['buildingId'] = HZ_BUILDING_ID
+                et = HzElecTailCfg(rec)
+                db.session.add(et)
+                et = HzElecTailCfg.query.filter_by(rail_no=et.rail_no).first()
+
+                """ 增加围栏顶点配置 """
+                if len(rec['points']) < 3:
+                    return jsonify({'errorCode': 105, 'msg': u'围栏顶点数须大于等于3！'})
+                for vt in rec['points']:
+                    etp = HzEtPoints(et_id=et.id, x=vt['x'], y=vt['y'])
+                    db.session.add(etp)
+            else:
+                """ 更新电子围栏 """
+                et = HzElecTailCfg.query.get(rec['id'])
+                if et is None:
+                    return jsonify({'errorCode': 103, 'msg': u'ID为[%d]的电子围栏不存在！' % rec['id']})
+
+                """ 判断修改后的围栏名称是否和已有的重名 """
+                records = HzElecTailCfg.query.filter_by(name=rec['name']).all()
+                for r in records:
+                    if r.id == rec['id']:
+                        continue
+                    return jsonify({'errorCode': 104, 'msg': u'修改后的围栏名称[%s]和现有的重名！' % rec['name']})
+                et.update(rec)
+                db.session.add(et)
+
+                if 'points' in rec:
+                    HzEtPoints.query.filter_by(et_id=rec['id']).delete()
+                """ 增加围栏顶点配置 """
+                if len(rec['points']) < 3:
+                    return jsonify({'errorCode': 105, 'msg': u'围栏顶点数须大于等于3！'})
+                for vt in rec['points']:
+                    etp = HzEtPoints(et_id=rec['id'], x=vt['x'], y=vt['y'])
+                    db.session.add(etp)
+    except KeyError:
+        return jsonify({'errorCode': 101, 'msg': u'输入参数错误！'})
+
+    db.session.commit()
+    hz_update_et_cfg()
+    return jsonify({'errorCode': 0, 'msg': u'更新成功！'})
+
+
+@app.route('/lbs/hz_data_del', methods=['POST'])
+def lbs_hz_data_del():
+    """
+    通用删除入口
+    输入参数：
+    {
+        who:        要删除的模块。字符串
+            == 'elect_rail_cfg'     电子围栏配置 模块
+        ids: [id1, id2, ...]    电子围栏 id list
+    }
+    :return:
+    {
+        errorCode   错误码
+            == 0    成功
+            == 101  输入参数错误！
+            == 202  未知模块[ %s ]
+        msg         错误信息
+            == [%d]个围栏，[%d]个顶点信息被删除。 (errorCode = 0 时)
+    }
+    """
+    try:
+        ids = request.json['ids']
+        who = request.json['who']
+        if who == 'elect_rail_cfg':
+            return hz_elect_rail_cfg_del(ids)
+        else:
+            return jsonify({'errorCode': 202, 'msg': u'未知模块[ %s ]' % who})
+
+    except KeyError:
+        return jsonify({'errorCode': 101, 'msg': u'输入参数错误！'})
+
+
+def hz_elect_rail_cfg_del(ids):
+    """
+    删除电子围栏配置
+    :param ids:
+    :return:
+    """
+    vt = 0
+    for i in ids:
+        vt += HzEtPoints.query.filter_by(et_id=i).delete()  # 删除顶点坐标
+
+    """ 删除 电子围栏 基本信息 """
+    num = 0
+    num += HzElecTailCfg.query.filter(HzElecTailCfg.id.in_(ids)).delete(synchronize_session=False)
+
+    db.session.commit()
+    hz_update_et_cfg()
+    return jsonify({'errorCode': 0, 'msg': u'[%d]个围栏，[%d]个顶点信息被删除。' % (num, vt)})
+
+
+def hz_update_et_cfg():
+    from hzlbs.hzglobal import g_print_et_cfg
+
+    new_cfg = {}
+    cfgs = HzElecTailCfg.query.all()
+    for cf in cfgs:
+        ets = HzEtPoints.query.filter_by(et_id=cf.id).all()
+        points = []
+        for pt in ets:
+            points.append({'x': pt.x, 'y': pt.y})
+        new_cfg[cf.name] = points
+    g_upd_et_cfg(new_cfg)
+
+    g_print_et_cfg()
+
+
+@app.route('/api/hz_lbs/WebLocate/locateResults', methods=['POST'])
+def api_hz_lbs_locate_results():
+    """
+    查询位置信息，for windows
+    :return:
+    """
+    from hzlbs.hzglobal import HZ_ACCESS_TOKEN
+
+    obj = request.json
+    token = obj['accessToken']
+    uids = obj['userIds']
+
+    if token != HZ_ACCESS_TOKEN:
+        return jsonify({'errorCode': 600, 'errorMsg': u'Invalid access token.'})
+    locs = HzLocation.query.filter(HzLocation.user_id.in_(uids)).group_by(HzLocation.user_id)\
+        .order_by(HzLocation.id.desc()).all()
+    data = []
+    for lo in locs:
+        data.append({'buildId': lo.build_id, 'floorNo': lo.floor_no, 'userId': lo.user_id,
+                     'xMillimeter': lo.x, 'yMillimeter': lo.y,
+                     'time': datetime.datetime.strftime(lo.timestamp, '%Y-%m-%d %H:%M:%S')})
+
+    return jsonify({'errorCode': 0, 'errorMsg': [], 'data': data, 'valid': True})
