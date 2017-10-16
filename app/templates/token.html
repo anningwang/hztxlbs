@@ -758,7 +758,7 @@ function selectUser(str){
 						//获取svg图对象
 						var mapSign = $('#map');
 						//设置缩放速度   比例缩放
-						var zoomSpeed = 0.01;
+						var zoomSpeed = 0.05;
 						
 		 
 						// using the event helper
@@ -778,6 +778,8 @@ function selectUser(str){
 								mapMaxY = mapOffset.top + mapOuterHeight;
 								
 								
+								
+								
 							
 							
 							if(event.pageX > mapMinX && event.pageX < mapMaxX && event.pageY > mapMinY && event.pageY <  mapMaxY){
@@ -786,56 +788,65 @@ function selectUser(str){
 								  /*取消默认事件*/
 								  event.preventDefault()
 								  /*计算速度*/
- 								//记录以前的缩放
-								  var i_zoom = zoom;
+ 						 			
+								  
+								  var mapHeight, mapWidth, mapTopBorder , mapLeftBorder ,mapTop, mapLeft , speedTop ,speedLeft;
+								  /*#map 的基本参数*/
+								  mapHeight = mapSign.height();
+								  mapWidth = mapSign.width();
+								  
+								  mapTopBorder = parseInt(mapSign.css('border-top-width'));
+								  mapLeftBorder = parseInt(mapSign.css('border-left-width'));
+								  
+								  mapTop = parseInt(mapSign.css('top'));
+								  mapLeft = parseInt(mapSign.css('left'));
+								  
+								  
+								  
+								  /*计算缩放速度  单独的top  或  left*/
 								  
 								  if(delta == 1){
-								  	  zoom = parseFloat(zoom) + zoomSpeed;
-									
+								  	  speedTop =  parseInt(zoomSpeed * mapHeight);
+									  console.log ('speedTop',speedTop); 
+									  speedLeft =  parseInt(zoomSpeed * mapWidth);
 								  }else{
-								  	  zoom = parseFloat(zoom) - zoomSpeed;
+								  	  speedTop =  -parseInt(zoomSpeed * mapHeight);
+									  speedLeft = -parseInt(zoomSpeed * mapWidth);
 								  }
-								  /*保存缩放比例*/
-								  storage['hz_zoom'] = zoom;
+								  
+								 
+								/*更改后的高*/
+								var resultHeight = mapHeight + (speedTop * 2); 
+								var resultWidth = mapWidth + (speedLeft * 2);
+								
+								
+								/*鼠标在图内距离*/
+								var currentMouseTop = event.pageY - mapMinY - mapTopBorder;
+								var currentMouseLeft = event.pageX - mapMinX - mapLeftBorder;
+								/*缩放后再图内的距离*/
+								var mouseTop = Math.round(currentMouseTop - (currentMouseTop / mapHeight * resultHeight));
+								var mouseLeft = Math.round(currentMouseLeft - (currentMouseLeft / mapWidth * resultWidth));
+								 
+								 
+		
+ 
  								/*计算svg偏离距离*/
 								/*svg图的left*/
-								var mapPositionLeft = parseInt(mapSign.css('left'));
-								
-								console.log('mapPositionLeft',mapPositionLeft);
-								
-								if(isNaN(mapPositionLeft)) mapPositionLeft = 0;
-								
-								var mapInnerLeft = (event.pageX - mapOffset.left) / mapOuterWidth;
-								
-								
-								
-								console.log('mapInnerLeft',mapInnerLeft);
-								//
-					 
-								var mapPositionTop = parseInt(mapSign.css('top'));
-								
-								if(isNaN(mapPositionTop)) mapPositionTop = 0;
-								
-								var mapInnerTop = (event.pageY - mapOffset.top) / mapOuterHeight;
-						 
-							    var map_h_zoom =  Math.round( zoom * map_h);
-								var map_w_zoom =  Math.round( zoom * map_w);
-								
-								var map_h_izoom =  Math.round( i_zoom * map_h);
-								var map_w_izoom =  Math.round( i_zoom * map_w);
-								
-								
-							 
-									hzX =  Math.round( (mapPositionLeft + map_w_izoom * mapInnerLeft ) - (map_w_zoom * mapInnerLeft) ) ;
-									
-									console.log('hzX',hzX);
-										
-									hzY = Math.round( (mapPositionTop + map_h_izoom *  mapInnerTop) - ( map_h_zoom * mapInnerTop) );
-						 
-					 			 
-					 				
  
-        						  hz_map_zoom(margin, margin, map_h_zoom , map_w_zoom);
+									
+										
+								hzY = mapTop + mouseTop  ;
+					 			hzX =  mapLeft + mouseLeft ;
+									
+					 				
+								/*保存缩放比例*/
+							 	zoom = resultWidth / map_w;
+								storage['hz_zoom'] = zoom;
+									
+									
+									
+ 
+        						  hz_map_zoom(margin, margin, resultHeight , resultWidth);
  		  						  hz_change_item_in_map();
 								  
 								 /*计算图片相对父元素位置*/
@@ -888,7 +899,7 @@ function selectUser(str){
             <div class="hr hr-24"></div>
           	<div class="row">
             	<div id="myCanvas">
-              <div id="floor3" style="background:url(/static/img/cross.gif) fixed"> <img src="/static/img/floor3.svg" width="1706" height="867.9" style="position:absolute" id="map" >
+              <div id="floor3" style="background:url(/static/img/cross.gif) fixed"> <img src="/static/img/floor3.svg"   style="position:absolute" id="map" >
               <div id="svg_map">
                 <div id="svg_path"></div>
                  
