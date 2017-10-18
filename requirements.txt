@@ -1,0 +1,17 @@
+flask
+flask-login
+flask-openid
+flask-mail
+flask-sqlalchemy
+sqlalchemy-migrate
+flask-whooshalchemy
+flask-wtf
+flask-babel
+guess_language
+flipflop
+coverage
+
+apscheduler == 3.3.1
+flask_socketio == 2.9.2
+eventlet == 0.21.0
+futures
