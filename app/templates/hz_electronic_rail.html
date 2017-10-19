@@ -29,13 +29,16 @@
 
 <link rel="stylesheet" href="../static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css"/>
 
+<!--hz地图样式-->
+<link rel="stylesheet" href="../static/css/hzmap.css" />
+
 <!-- ace settings handler -->
 <script src="../static/ace/assets/js/ace-extra.js"></script>
 <link rel="shortcut icon" href="/static/img/favicon.ico" />
 <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
 </head>
 
-<body class="no-skin"  style=" min-width:1905px;">
+<body class="no-skin"  style=" min-width:1900px;">
 <!-- #section:basics/navbar.layout -->
 <div id="navbar" class="navbar navbar-default          ace-save-state" style=" min-width:190px;">
   <div class="navbar-container ace-save-state" id="navbar-container"> 
@@ -88,154 +91,10 @@
     <script type="text/javascript">
 					try{ace.settings.loadState('sidebar')}catch(e){}
 				</script>
-    <div class="sidebar-shortcuts" id="sidebar-shortcuts">
-      <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
-        <button class="btn btn-success"> <i class="ace-icon fa fa-signal"></i> </button>
-        <button class="btn btn-info"> <i class="ace-icon fa fa-pencil"></i> </button>
-        
-        <!-- #section:basics/sidebar.layout.shortcuts -->
-        <button class="btn btn-warning"> <i class="ace-icon fa fa-users"></i> </button>
-        <button class="btn btn-danger"> <i class="ace-icon fa fa-cogs"></i> </button>
-        
-        <!-- /section:basics/sidebar.layout.shortcuts --> 
-      </div>
-      
-      <!--<div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
-						<span class="btn btn-success"></span>
-
-						<span class="btn btn-info"></span>
-
-						<span class="btn btn-warning"></span>
-
-						<span class="btn btn-danger"></span>
-					</div>--> 
-    </div>
-    <!-- /.sidebar-shortcuts -->
-    
-    <ul class="nav nav-list">
-      
-    
-    <li class="">
-						<a href="#" class="dropdown-toggle">
-							<i class="menu-icon  fa fa-home"></i>
-							<span class="menu-text">
-								我的建筑
-							</span>
-
-							<b class="arrow fa fa-angle-down"></b>
-						</a>
-
-						<b class="arrow"></b>
-
-						<ul class="submenu">
-							
-
-							<li class="">
-								<a href="/token">
-									<i class="menu-icon fa fa-caret-right"></i>
-									地图导航
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-							
-                            <li class="">
-								<a href="/hz_page2">
-									<i class="menu-icon fa fa-caret-right"></i>
-									坐标拾取
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-                            
-							<li class="active">
-								<a href="/hz_history_loc">
-									<i class="menu-icon fa fa-caret-right"></i>
-									历史轨迹
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-                            
-                            
-                            
-                        <li class="">
-						<a href="#" class="dropdown-toggle">
-							<i class="menu-icon fa fa-caret-right"></i>
-							<span class="menu-text"> 电子围栏 </span>
-
-							<b class="arrow fa fa-angle-down"></b>
-						</a>
-
-						<b class="arrow"></b>
-
-						<ul class="submenu">
-							<li class="">
-								<a href="/hz_electronic_rail">
-									<i class="menu-icon fa fa-caret-right"></i>
-									实时信息
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-
-							<li class="">
-								<a href="/hz_page1">
-									<i class="menu-icon fa fa-caret-right"></i>
-									历史警报
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-
-							
-
-							
-
-							
-						</ul>
-					</li>
-                            
-
-							
-
-							
-
-							
-						</ul>
-					</li>
-    
-    
-    
-    
-    </ul>
-    <!-- /.nav-list --> 
-    
-    <!-- #section:basics/sidebar.layout.minimize -->
-    <div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse"> <i id="sidebar-toggle-icon" class="ace-icon fa fa-angle-double-left ace-save-state" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i> </div>
-    
-    <!-- /section:basics/sidebar.layout.minimize --> 
-  </div>
-  
-  <!-- /section:basics/sidebar -->
-  <div class="main-content">
-    <div class="main-content-inner"> 
-      <!-- #section:basics/content.breadcrumbs --> 
-      
-      <!-- /section:basics/content.breadcrumbs -->
-      <div class="page-content">
-        <div class="page-header">
-          <h1>
-          地图导航
-          <h1>
-        </div>
-        
-        <!-- /section:settings.box -->
-        <div class="row">
-          <div class="col-sm-12" >
-          <!-- PAGE CONTENT BEGINS -->
-          
-          <style>
+                
+                
+                
+                          <style>
         #myCanvas{width: 1690px; height: 860px; position:relative;}
         #floor3 {
 			width: 1700px; height: 860px;
@@ -1060,82 +919,288 @@ function selectUser(str){
 			})
 			
           </script>
-		  
-	<!--内容-->
-	<div class='row'>
-          <div class="row">
-              
-              
-              
-                  <div class="row">
-              
-              
-              
-                  <div class="col-xs-3">
-   
-                  		<div class="col-xs-6">
-                         <label class="control-label no-padding-right pull-right">电子围栏设置查询:</label>
-           				</div> 
-                        <div class="col-xs-6">
-                          <select id="electronic-fence-address" >
-                            <option value="0">请选择地址</option>
-                            <option value="Floor3">和仲通讯</option>
-                             
-                          </select>
-                    	</div>
+    <div class="sidebar-shortcuts" id="sidebar-shortcuts">
+      <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
+        <button class="btn btn-success"> <i class="ace-icon fa fa-signal"></i> </button>
+        <button class="btn btn-info"> <i class="ace-icon fa fa-pencil"></i> </button>
         
-                  </div>
-                   
-              
-              
-                 <div class="col-xs-2">
-
-                        <div class="col-xs-2">
-                            <button class="btn btn-info btn-sm" id="electronic-fence-query-button">查询</button>
-                        </div>
-                  </div>
-                  
-                  
-              
-              
-              
-              
-              
-              
-              
-              </div>
-              	
-              </div>
-              <div class="hr hr-24"></div>  
-          <div class="row">
-          	<div id="myCanvas">
-              <div id="floor3" style="background:url(/static/img/cross.gif) fixed"> <img src="/static/img/floor3.svg" width="1706" height="867.9" style="position:absolute" id="map" >
-              <div id="svg_map">
-                <div id="svg_path"></div>
-                 
-                <img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA"> <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9"> <img src="/static/img/dest.png" style="position:absolute" id="destination" title="终点"> 
-                </div>
-            </div>
-          </div>
-   		  </div>	
-    </div>
-          <!--页脚-->
-          
-          <div class="footer">
-            <div class="footer-inner " > 
-              <!-- #section:basics/footer -->
-              <div class="footer-content "  style=" min-width:1713px;" > <span class="bigger-120"> 衡阳市和仲通讯科技有限公司 &copy; 2016-2018 </span> &nbsp; &nbsp; <span class="action-buttons"> <a href="#"> <i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i> </a> <a href="#"> <i class="ace-icon fa fa-facebook-square text-primary bigger-150"></i> </a> <a href="#"> <i class="ace-icon fa fa-rss-square orange bigger-150"></i> </a> </span> </div>
-              
-              <!-- /section:basics/footer --> 
-            </div>
-          </div>
-          
-          <!-- PAGE CONTENT ENDS --> 
-        </div>
-        <!-- /.col --> 
+        <!-- #section:basics/sidebar.layout.shortcuts -->
+        <button class="btn btn-warning"> <i class="ace-icon fa fa-users"></i> </button>
+        <button class="btn btn-danger"> <i class="ace-icon fa fa-cogs"></i> </button>
+        
+        <!-- /section:basics/sidebar.layout.shortcuts --> 
       </div>
-      <!-- /.row --> 
+      
+      <!--<div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
+						<span class="btn btn-success"></span>
+
+						<span class="btn btn-info"></span>
+
+						<span class="btn btn-warning"></span>
+
+						<span class="btn btn-danger"></span>
+					</div>--> 
     </div>
+    <!-- /.sidebar-shortcuts -->
+    
+    <ul class="nav nav-list">
+      
+    
+    <li class="">
+						<a href="#" class="dropdown-toggle">
+							<i class="menu-icon  fa fa-home"></i>
+							<span class="menu-text">
+								我的建筑
+							</span>
+
+							<b class="arrow fa fa-angle-down"></b>
+						</a>
+
+						<b class="arrow"></b>
+
+						<ul class="submenu">
+							
+
+							<li class="">
+								<a href="/token">
+									<i class="menu-icon fa fa-caret-right"></i>
+									地图导航
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+							
+                            <li class="">
+								<a href="/hz_page2">
+									<i class="menu-icon fa fa-caret-right"></i>
+									坐标拾取
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+                            
+							<li class="active">
+								<a href="/hz_history_loc">
+									<i class="menu-icon fa fa-caret-right"></i>
+									历史轨迹
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+                            
+                            
+                            
+                        <li class="">
+						<a href="#" class="dropdown-toggle">
+							<i class="menu-icon fa fa-caret-right"></i>
+							<span class="menu-text"> 电子围栏 </span>
+
+							<b class="arrow fa fa-angle-down"></b>
+						</a>
+
+						<b class="arrow"></b>
+
+						<ul class="submenu">
+							<li class="">
+								<a href="/hz_electronic_rail">
+									<i class="menu-icon fa fa-caret-right"></i>
+									实时信息
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+
+							<li class="">
+								<a href="/hz_page1">
+									<i class="menu-icon fa fa-caret-right"></i>
+									历史警报
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+
+							
+
+							
+
+							
+						</ul>
+					</li>
+                            
+
+							
+
+							
+
+							
+						</ul>
+					</li>
+    
+    
+    
+    
+    </ul>
+    <!-- /.nav-list --> 
+    
+    <!-- #section:basics/sidebar.layout.minimize -->
+    <div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse"> <i id="sidebar-toggle-icon" class="ace-icon fa fa-angle-double-left ace-save-state" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i> </div>
+    
+    <!-- /section:basics/sidebar.layout.minimize --> 
+  </div>
+  
+  <!-- /section:basics/sidebar -->
+  <div class="main-content">
+    <div class="main-content-inner"> 
+      <!-- #section:basics/content.breadcrumbs --> 
+      
+      <!-- /section:basics/content.breadcrumbs -->
+      <div class="page-content" style="padding-bottom:0px;">
+      	<div class="row">
+        		 
+            <div  id="myCanvas">
+              <div class="myPanel" style="position:absolute; top:60px; left:80px; z-index:1000;">
+              	<div class="panel panel-success">
+                    <div class="panel-primary" style="padding:10px 20px; border-bottom:1px solid #d6e9c6; ">
+                        <div class="btn-group btn-group-xs">
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">设置围栏</button>
+                            <button type="button" class="btn btn-default">按钮 2</button>
+                   
+                        </div>
+                    </div>
+                    <div class="panel-body" style="padding:10px 20px;">
+                              
+                    </div>
+                    
+                    
+                    
+                    
+                </div>
+              </div>
+              
+              
+              <div id="floor3"  class="map_base_data clearfix"> 
+                <img src="/static/img/floor3.svg"   style="position:absolute;" id="map" class="map_base_data clearfix">
+                <div id="svg_map"  class="map_base_data">
+                  <div id="svg_path" class="map_base_data"></div>
+                  <img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA"> <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9"> <img src="/static/img/dest.png" style="position:absolute" id="destination" title="终点"> </div>
+              </div>
+            </div>
+            
+            
+            
+            
+            <!--模态框开始-->
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" style=" width:1000px;">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                                &times;
+                                            </button>
+                                            <h4 class="modal-title" id="myModalLabel">
+                                                编辑围栏
+                                            </h4>
+                                        </div>
+                                        <div class="modal-body" style="height:600px;" >
+                                          <!--模态框内容区-->
+                                          <div class="row">
+                                          	<div class="alert alert-warning">
+                                                    <a href="#" class="close" data-dismiss="alert">
+                                                        &times;
+                                                    </a>
+                                                    <strong>警告！</strong>您的网络连接有问题。
+                                                </div>
+                                          </div>
+                                          <div class="row">
+                                          	<div class="col-xs-3">
+                                            	<form role="form" class="form-horizontal">
+                                                    
+                                                  
+                                                  <div class="form-group">
+                                                    <label for="firstname" class="col-sm-3 control-label no-padding-right">围栏形状:</label>
+                                                    <div class="col-sm-9">
+                                                      	    <select class="form-control" id=" ">
+																<option value="">多边形</option>
+                                                                									 
+															</select>
+                                                    </div>
+                                                  </div>
+                                                  
+                                                  <div class="form-group">
+                                                    <label for="firstname" class="col-sm-3 control-label no-padding-right">围栏名称:</label>
+                                                    <div class="col-sm-9">
+                                                    <input type="text"  placeholder=""  />
+                                                    </div>
+                                                  </div>
+                                                  <div class="form-group">
+                                                    <label for="firstname" class="col-sm-3 control-label no-padding-right">楼层:</label>
+                                                    <div class="col-sm-9">
+                                                      	    <select class="form-control" id=" ">
+																<option value="">3楼</option>
+                                                                									 
+															</select>
+                                                    </div>
+                                                  </div>
+                                                  <div class="form-group">
+                                                    <label for="firstname" class="col-sm-3 control-label no-padding-right">进入警报方式:</label>
+                                                    <div class="col-sm-9">
+                                                      	    <select class="form-control" id=" ">
+																<option value="">文本</option>
+                                                                									 
+															</select>
+                                                    </div>
+                                                  </div>
+                                                  <div class="form-group">
+                                                    <label for="firstname" class="col-sm-3 control-label no-padding-right">进入警报内容:</label>
+                                                    <div class="col-sm-9">
+                                                      	    <textarea class="form-control" rows="3"></textarea>
+                                                    </div>
+                                                  </div>
+                                                  <div class="form-group">
+                                                    <label for="firstname" class="col-sm-3 control-label no-padding-right">退出警报方式:</label>
+                                                    <div class="col-sm-9">
+                                                      	    <select class="form-control" id=" ">
+																<option value="">文本</option>
+                                                                									 
+															</select>
+                                                    </div>
+                                                  </div>
+                                                  <div class="form-group">
+                                                    <label for="firstname" class="col-sm-3 control-label no-padding-right">退出警报内容:</label>
+                                                    <div class="col-sm-9">
+                                                      	    <textarea class="form-control" rows="3"></textarea>
+                                                    </div>
+                                                  </div>
+                                                  
+                                                  
+                                                </form>
+                                            
+                                            </div>
+                                            <div class="col-xs-9">
+                                            	<!--svg图处理-->
+                                            	<div class="">
+                                                	<div  class=""> 
+                                                        <img src="/static/img/floor3.svg"   style=" width:730px; height:400px;" class="">
+                                                        <div class="">
+                                                        <div id="" class=""></div>
+                                                      </div>
+                                                </div>
+                                            </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                                            </button>
+                                            <button type="button" class="btn btn-primary">
+                                                提交更改
+                                            </button>
+                                        </div>
+                                    </div><!-- /.modal-content -->
+                                </div><!-- /.modal -->
+                            </div>
+        </div>
+      </div>
     <!-- /.page-content --> 
   </div>
 </div>
