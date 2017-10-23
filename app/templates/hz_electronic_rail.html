@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,7 +29,6 @@
 <!--时间插件-->
 
 <link rel="stylesheet" href="../static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css"/>
-
 <!--hz地图样式-->
 <link rel="stylesheet" href="../static/css/hzmap.css" />
 
@@ -38,7 +38,7 @@
 <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
 </head>
 
-<body class="no-skin"  style=" min-width:1900px;">
+<body class="no-skin"  style=" min-width:1905px;">
 <!-- #section:basics/navbar.layout -->
 <div id="navbar" class="navbar navbar-default          ace-save-state" style=" min-width:190px;">
   <div class="navbar-container ace-save-state" id="navbar-container"> 
@@ -91,33 +91,143 @@
     <script type="text/javascript">
 					try{ace.settings.loadState('sidebar')}catch(e){}
 				</script>
-                
-                
-                
-                          <style>
-        #myCanvas{width: 1690px; height: 860px; position:relative;}
-        #floor3 {
-			width: 1700px; height: 860px;
-            position: absolute;
-            overflow: hidden;
-            border: 1px solid #b94a48;
-			top:0px; left:10px;
-			}
-        #svg_map{
-            width: 1700px;
-            height: 860px;
-            position:absolute;
-            overflow:hidden;
-        }
-        #svg_path{
-            width: 1700px;
-            height: 860px;
-            position:absolute;
-			z-index:10;
-        }
- 
-    </style>
-          <script src="/static/js/jquery.min.js"></script> 
+    <div class="sidebar-shortcuts" id="sidebar-shortcuts">
+      <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
+        <button class="btn btn-success"> <i class="ace-icon fa fa-signal"></i> </button>
+        <button class="btn btn-info"> <i class="ace-icon fa fa-pencil"></i> </button>
+        
+        <!-- #section:basics/sidebar.layout.shortcuts -->
+        <button class="btn btn-warning"> <i class="ace-icon fa fa-users"></i> </button>
+        <button class="btn btn-danger"> <i class="ace-icon fa fa-cogs"></i> </button>
+        
+        <!-- /section:basics/sidebar.layout.shortcuts --> 
+      </div>
+      
+      <!--<div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
+						<span class="btn btn-success"></span>
+
+						<span class="btn btn-info"></span>
+
+						<span class="btn btn-warning"></span>
+
+						<span class="btn btn-danger"></span>
+					</div>--> 
+    </div>
+    <!-- /.sidebar-shortcuts -->
+    
+    <ul class="nav nav-list">
+      
+    
+    <li class="">
+						<a href="#" class="dropdown-toggle">
+							<i class="menu-icon  fa fa-home"></i>
+							<span class="menu-text">
+								我的建筑
+							</span>
+
+							<b class="arrow fa fa-angle-down"></b>
+						</a>
+
+						<b class="arrow"></b>
+
+						<ul class="submenu">
+							
+
+							<li class="">
+								<a href="/token">
+									<i class="menu-icon fa fa-caret-right"></i>
+									地图导航
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+							
+                            <li class="">
+								<a href="/hz_page2">
+									<i class="menu-icon fa fa-caret-right"></i>
+									坐标拾取
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+                            
+							<li class="active">
+								<a href="/hz_history_loc">
+									<i class="menu-icon fa fa-caret-right"></i>
+									历史轨迹
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+                            
+                            
+                            
+                        <li class="">
+						<a href="#" class="dropdown-toggle">
+							<i class="menu-icon fa fa-caret-right"></i>
+							<span class="menu-text"> 电子围栏 </span>
+
+							<b class="arrow fa fa-angle-down"></b>
+						</a>
+
+						<b class="arrow"></b>
+
+						<ul class="submenu">
+							<li class="">
+								<a href="/hz_electronic_rail">
+									<i class="menu-icon fa fa-caret-right"></i>
+									实时信息
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+
+							<li class="">
+								<a href="/hz_page1">
+									<i class="menu-icon fa fa-caret-right"></i>
+									历史警报
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+
+							
+
+							
+
+							
+						</ul>
+					</li>
+                            
+
+							
+
+							
+
+							
+						</ul>
+					</li>
+    
+    
+    
+    
+    </ul>
+    <!-- /.nav-list --> 
+    
+    <!-- #section:basics/sidebar.layout.minimize -->
+    <div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse"> <i id="sidebar-toggle-icon" class="ace-icon fa fa-angle-double-left ace-save-state" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i> </div>
+    
+    <!-- /section:basics/sidebar.layout.minimize --> 
+  </div>
+  
+  <!-- /section:basics/sidebar -->
+  <div class="main-content">
+    <div class="main-content-inner"> 
+      <!-- #section:basics/content.breadcrumbs --> 
+      
+      <!-- /section:basics/content.breadcrumbs -->
+      
+                <script src="/static/js/jquery.min.js"></script> 
           <script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script> 
           <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script> 
           <script src="../static/js/jquery.mousewheel.js"></script>
@@ -919,162 +1029,241 @@ function selectUser(str){
 			})
 			
           </script>
-    <div class="sidebar-shortcuts" id="sidebar-shortcuts">
-      <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
-        <button class="btn btn-success"> <i class="ace-icon fa fa-signal"></i> </button>
-        <button class="btn btn-info"> <i class="ace-icon fa fa-pencil"></i> </button>
-        
-        <!-- #section:basics/sidebar.layout.shortcuts -->
-        <button class="btn btn-warning"> <i class="ace-icon fa fa-users"></i> </button>
-        <button class="btn btn-danger"> <i class="ace-icon fa fa-cogs"></i> </button>
-        
-        <!-- /section:basics/sidebar.layout.shortcuts --> 
-      </div>
       
-      <!--<div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
-						<span class="btn btn-success"></span>
-
-						<span class="btn btn-info"></span>
-
-						<span class="btn btn-warning"></span>
-
-						<span class="btn btn-danger"></span>
-					</div>--> 
-    </div>
-    <!-- /.sidebar-shortcuts -->
-    
-    <ul class="nav nav-list">
       
-    
-    <li class="">
-						<a href="#" class="dropdown-toggle">
-							<i class="menu-icon  fa fa-home"></i>
-							<span class="menu-text">
-								我的建筑
-							</span>
-
-							<b class="arrow fa fa-angle-down"></b>
-						</a>
-
-						<b class="arrow"></b>
-
-						<ul class="submenu">
-							
-
-							<li class="">
-								<a href="/token">
-									<i class="menu-icon fa fa-caret-right"></i>
-									地图导航
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-							
-                            <li class="">
-								<a href="/hz_page2">
-									<i class="menu-icon fa fa-caret-right"></i>
-									坐标拾取
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-                            
-							<li class="active">
-								<a href="/hz_history_loc">
-									<i class="menu-icon fa fa-caret-right"></i>
-									历史轨迹
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-                            
-                            
-                            
-                        <li class="">
-						<a href="#" class="dropdown-toggle">
-							<i class="menu-icon fa fa-caret-right"></i>
-							<span class="menu-text"> 电子围栏 </span>
-
-							<b class="arrow fa fa-angle-down"></b>
-						</a>
-
-						<b class="arrow"></b>
-
-						<ul class="submenu">
-							<li class="">
-								<a href="/hz_electronic_rail">
-									<i class="menu-icon fa fa-caret-right"></i>
-									实时信息
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-
-							<li class="">
-								<a href="/hz_page1">
-									<i class="menu-icon fa fa-caret-right"></i>
-									历史警报
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-
-							
-
-							
-
-							
-						</ul>
-					</li>
-                            
-
-							
-
-							
-
-							
-						</ul>
-					</li>
-    
-    
-    
-    
-    </ul>
-    <!-- /.nav-list --> 
-    
-    <!-- #section:basics/sidebar.layout.minimize -->
-    <div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse"> <i id="sidebar-toggle-icon" class="ace-icon fa fa-angle-double-left ace-save-state" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i> </div>
-    
-    <!-- /section:basics/sidebar.layout.minimize --> 
-  </div>
-  
-  <!-- /section:basics/sidebar -->
-  <div class="main-content">
-    <div class="main-content-inner"> 
-      <!-- #section:basics/content.breadcrumbs --> 
-      
-      <!-- /section:basics/content.breadcrumbs -->
       <div class="page-content" style="padding-bottom:0px;">
       	<div class="row">
         		 
             <div  id="myCanvas">
-              <div class="myPanel" style="position:absolute; top:60px; left:80px; z-index:1000;">
-              	<div class="panel panel-success">
-                    <div class="panel-primary" style="padding:10px 20px; border-bottom:1px solid #d6e9c6; ">
-                        <div class="btn-group btn-group-xs">
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">设置围栏</button>
-                            <button type="button" class="btn btn-default">按钮 2</button>
-                        </div>
-                    </div>
-                    <div class="panel-body" style="padding:10px 20px;">
-                              
-                    </div>
-                    
-                    
-                    
-                    
+              
+              	<div class="" id="map_controller_panel" style="position:absolute; top:60px; left:80px; z-index:1000; width:370px;">
+                         
+                                <div class="btn-group btn-group-xs col-xs-12" id="map_panel_button" style="background:#FFF; border:1px solid #CCC;">
+                                    <button type="button" class="btn btn-primary" id="setEnclosure" hz_target = "#EnclosureConcent" >设置围栏</button>
+                                    <button type="button" class="btn btn-primary" id="setEnclosure2" hz_target = "#EnclosureConcent2" >设置围栏2</button>
+                                
+                                </div>
+                                <div class="map_panel_content col-xs-12" style="background:#FFF; border:1px solid #CCC;">
+                                    <div class="col-xs-12"  style="display:none; " id="EnclosureConcent">
+                                        <div class="row" style="padding-right:10px;">
+                                         <form role="form" class="form-horizontal">
+                                                        
+                                                      
+                                                      
+                                                      
+                                                      <div class="form-group">
+                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">围栏名称:</label>
+                                                        <div class="col-sm-9">
+                                                        <input type="text"  placeholder=""  />
+                                                        </div>
+                                                      </div>
+                                                      <div class="form-group">
+                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">楼层:</label>
+                                                        <div class="col-sm-9">
+                                                                <select class="form-control" id=" ">
+                                                                    <option value="">3楼</option>
+                                                                                                         
+                                                                </select>
+                                                        </div>
+                                                      </div>
+                                                      <div class="form-group">
+                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">进入警报方式:</label>
+                                                        <div class="col-sm-9">
+                                                                <select class="form-control" id=" ">
+                                                                    <option value="">文本</option>
+                                                                                                         
+                                                                </select>
+                                                        </div>
+                                                      </div>
+                                                      <div class="form-group">
+                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">进入警报内容:</label>
+                                                        <div class="col-sm-9">
+                                                                <textarea class="form-control" rows="3"></textarea>
+                                                        </div>
+                                                      </div>
+                                                      <div class="form-group">
+                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">退出警报方式:</label>
+                                                        <div class="col-sm-9">
+                                                                <select class="form-control" id=" ">
+                                                                    <option value="">文本</option>
+                                                                                                         
+                                                                </select>
+                                                        </div>
+                                                      </div>
+                                                      <div class="form-group">
+                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">退出警报内容:</label>
+                                                        <div class="col-sm-9">
+                                                                <textarea class="form-control" rows="3"></textarea>
+                                                        </div>
+                                                      </div>
+                                                      
+                                                      <div class="form-group">
+                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">围栏形状:</label>
+                                                        <div class="col-sm-9">
+                                                                
+                                                        </div>
+                                                      </div>
+                                                      
+                                                      
+                                                      <div class="form-group">
+                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">绘制范围:</label>
+                                                        <div class="col-sm-9">
+                                                        	<div class="col-xs-6">
+                                                            	<select class="form-control" id=" ">
+                                                                    <option value="">多边形</option>                                     
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-xs-6">
+                                                            <button id="start_draw" type="button" class="btn btn-primary btn-xs">
+                                                                开始绘制
+                                                            </button>
+                                                            </div>
+                                                         
+                                                        </div>
+                                                      </div>
+                                                      
+                                                     
+    
+                                                    </form>
+                                        </div>
+                                    </div>
+                                    <div  style="display:none;  " id="EnclosureConcent2">
+                                        <div class="row" style="padding-right:10px;">
+                                         asfdasdfasfasfasdfasdf
+                                        </div>
+                                    </div>
+                         		</div>
                 </div>
-              </div>
+                
+                 <script>
+                 	$(function(){
+						
+						$("#start_draw").on('click',function(){
+							var $this = $(this);
+							 
+							if($.trim($this.text()) === '开始绘制'){
+								$this.text('取消绘制');
+								start_draw();
+							}else{
+								$this.text('开始绘制');	
+							}
+						});
+						
+						
+						/*
+							param $this obg   要检查的对象   
+							      data  arr  [0]位X坐标   [1]为Y坐标
+						*/
+						function test_range($this,data){
+							
+								var mapMinX,mapMaxX,mapMinY,mapMaxY;
+								
+								var mapOffset = $this.offset();
+								
+								var mapOuterWidth = $this.outerWidth();
+								var mapOuterHeight = $this.outerHeight();
+								
+								mapMinX = mapOffset.left;
+								mapMaxX = mapOffset.left + mapOuterWidth;
+								mapMinY = mapOffset.top;
+								mapMaxY = mapOffset.top + mapOuterHeight;
+							
+							if(data[0] > mapMinX && data[0] < mapMaxX && data[1] > mapMinY && data[1] <  mapMaxY){
+									return true;
+							}
+							return false;
+							
+						}
+						
+						
+						
+						function start_draw(){
+							var $map = $('#map');
+							var $svg_path = $('#svg_path');
+							var $svg_path_offset = $svg_path.offset();
+							$svg_path.svg();
+							var $svg = $svg_path.svg('get');
+							//画图位置数据
+							var drawLineData =[]; 
+							//相对于svg图数据
+							
+							$svg_path.on('click',function(e){
+								var pageX = e.pageX;
+								var pageY = e.pageY;
+								
+								if(!test_range($map,[pageX,pageY])) return false;
+								
+								
+								var map_path_line = [];
+								map_path_line[0] = e.pageX -  $svg_path_offset.left - parseInt($svg_path.css('border-left-width'));
+								map_path_line[1] = e.pageY -  $svg_path_offset.top - parseInt($svg_path.css('border-top-width'));
+								drawLineData.push(map_path_line);
+								map_path_line = [];
+								
+								drawLine($svg,drawLineData);
+								
+								
+							})
+							
+
+						}
+						
+						function drawLine(svg_obj,LineData){
+							 svg_obj.polyline(LineData,{fill: 'none', stroke: 'blue', strokeWidth: 4});	
+						}
+						
+						
+						
+						
+	 
+						//svg地图 控制面板
+						$("#map_panel_button button").on('click',function(){
+							
+							
+							
+							var $this = $(this);
+							
+							
+							if($this.hasClass('active')){
+								map_button_slide_up($this);
+							}else{
+								map_button_slide_down($this)
+							};
+						 
+ 						});
+						
+						
+						
+						
+						function map_button_slide_down($this){
+							$this.addClass('active');
+						 
+							$this.siblings().removeClass('active');
+							
+							var $target = $($this.attr('hz_target'));
+							
+							$target.siblings().slideUp('100',function(){
+								$target.slideDown();
+							})
+							
+							 
+							
+													
+						
+						}
+						function map_button_slide_up($this){
+							$this.removeClass('active');
+							var $target = $($this.attr('hz_target'));
+							$target.slideUp();						
+						
+						}
+						
+ 
+						
+						
+					});
+                 </script>
+           
               
               
               <div id="floor3"  class="map_base_data clearfix"> 
@@ -1084,120 +1273,8 @@ function selectUser(str){
                   <img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA"> <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9"> <img src="/static/img/dest.png" style="position:absolute" id="destination" title="终点"> </div>
               </div>
             </div>
+      
             
-            
-            
-            
-            <!--模态框开始-->
-            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                                <div class="modal-dialog" style=" width:1000px;">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                                                &times;
-                                            </button>
-                                            <h4 class="modal-title" id="myModalLabel">
-                                                编辑围栏
-                                            </h4>
-                                        </div>
-                                        <div class="modal-body" style="height:600px;" >
-                                          <!--模态框内容区-->
-                                          <div class="row">
-                                          	<div class="alert alert-warning">
-                                                    <a href="#" class="close" data-dismiss="alert">
-                                                        &times;
-                                                    </a>
-                                                    <strong>警告！</strong>您的网络连接有问题。
-                                                </div>
-                                          </div>
-                                          <div class="row">
-                                          	<div class="col-xs-3">
-                                            	<form role="form" class="form-horizontal">
-                                                    
-                                                  
-                                                  <div class="form-group">
-                                                    <label for="firstname" class="col-sm-3 control-label no-padding-right">围栏形状:</label>
-                                                    <div class="col-sm-9">
-                                                      	    <select class="form-control" id=" ">
-																<option value="">多边形</option>
-                                                                									 
-															</select>
-                                                    </div>
-                                                  </div>
-                                                  
-                                                  <div class="form-group">
-                                                    <label for="firstname" class="col-sm-3 control-label no-padding-right">围栏名称:</label>
-                                                    <div class="col-sm-9">
-                                                    <input type="text"  placeholder=""  />
-                                                    </div>
-                                                  </div>
-                                                  <div class="form-group">
-                                                    <label for="firstname" class="col-sm-3 control-label no-padding-right">楼层:</label>
-                                                    <div class="col-sm-9">
-                                                      	    <select class="form-control" id=" ">
-																<option value="">3楼</option>
-                                                                									 
-															</select>
-                                                    </div>
-                                                  </div>
-                                                  <div class="form-group">
-                                                    <label for="firstname" class="col-sm-3 control-label no-padding-right">进入警报方式:</label>
-                                                    <div class="col-sm-9">
-                                                      	    <select class="form-control" id=" ">
-																<option value="">文本</option>
-                                                                									 
-															</select>
-                                                    </div>
-                                                  </div>
-                                                  <div class="form-group">
-                                                    <label for="firstname" class="col-sm-3 control-label no-padding-right">进入警报内容:</label>
-                                                    <div class="col-sm-9">
-                                                      	    <textarea class="form-control" rows="3"></textarea>
-                                                    </div>
-                                                  </div>
-                                                  <div class="form-group">
-                                                    <label for="firstname" class="col-sm-3 control-label no-padding-right">退出警报方式:</label>
-                                                    <div class="col-sm-9">
-                                                      	    <select class="form-control" id=" ">
-																<option value="">文本</option>
-                                                                									 
-															</select>
-                                                    </div>
-                                                  </div>
-                                                  <div class="form-group">
-                                                    <label for="firstname" class="col-sm-3 control-label no-padding-right">退出警报内容:</label>
-                                                    <div class="col-sm-9">
-                                                      	    <textarea class="form-control" rows="3"></textarea>
-                                                    </div>
-                                                  </div>
-                                                  
-                                                  
-                                                </form>
-                                            
-                                            </div>
-                                            <div class="col-xs-9">
-                                            	<!--svg图处理-->
-                                            	<div class="">
-                                                	<div  class=""> 
-                                                        <img src="/static/img/floor3.svg"   style=" width:730px; height:400px;" class="">
-                                                        <div class="">
-                                                        <div id="" class=""></div>
-                                                      </div>
-                                                </div>
-                                            </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭
-                                            </button>
-                                            <button type="button" class="btn btn-primary">
-                                                提交更改
-                                            </button>
-                                        </div>
-                                    </div><!-- /.modal-content -->
-                                </div><!-- /.modal -->
-                            </div>
         </div>
       </div>
     <!-- /.page-content --> 
