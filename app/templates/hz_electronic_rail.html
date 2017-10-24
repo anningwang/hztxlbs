@@ -1047,10 +1047,7 @@ function selectUser(str){
                                     <div class="col-xs-12"  style="display:none; " id="EnclosureConcent">
                                         <div class="row" style="padding-right:10px;">
                                          <form role="form" class="form-horizontal">
-                                                        
-                                                      
-                                                      
-                                                      
+                 
                                                       <div class="form-group">
                                                         <label for="firstname" class="col-sm-3 control-label no-padding-right">围栏名称:</label>
                                                         <div class="col-sm-9">
@@ -1094,13 +1091,6 @@ function selectUser(str){
                                                         <label for="firstname" class="col-sm-3 control-label no-padding-right">退出警报内容:</label>
                                                         <div class="col-sm-9">
                                                                 <textarea class="form-control" rows="3"></textarea>
-                                                        </div>
-                                                      </div>
-                                                      
-                                                      <div class="form-group">
-                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">围栏形状:</label>
-                                                        <div class="col-sm-9">
-                                                                
                                                         </div>
                                                       </div>
                                                       
@@ -1148,6 +1138,9 @@ function selectUser(str){
 								$this.text('开始绘制');	
 							}
 						});
+						
+						
+						
 						
 						
 						/*
@@ -1263,8 +1256,16 @@ function selectUser(str){
 						
 					});
                  </script>
-           
-              
+           		 
+                 <script>
+				 	//围栏对象
+                 	function enclosure(){
+						this.line = function(){
+							
+						}
+					}
+                 </script>	
+              	
               
               <div id="floor3"  class="map_base_data clearfix"> 
                 <img src="/static/img/floor3.svg"   style="position:absolute;" id="map" class="map_base_data clearfix">
