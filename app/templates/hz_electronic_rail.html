@@ -468,20 +468,23 @@
 						
 						$("#start_draw").on('click',function(){
 							var $this = $(this);
-							 
+							var enclosure1 = new enclosure($('#svg_event'));
 							if($.trim($this.text()) === '开始绘制'){
 								$this.text('取消绘制');
-								var enclosure1 = new enclosure($('#svg_map_base'));
+								
 								enclosure1.polyline();
 							}else{
-								$this.text('开始绘制');	
+								$this.text('开始绘制');
+								 
 							}
 						});
 						
-						
+						/*
+						param object obj jquery对象
+						*/
 						function enclosure(obj){
-							//数据资料
-							this.data=[];
+							//坐标资料格式 [[1,2],[3,4]]
+							this.points=[];
 							//操作事件的对象(jquery)
 							this.$obj = obj || null;
 							//画板对象(jquery)
@@ -499,29 +502,68 @@
 							this.polyline = function(){
 								var _this = this;
 								
-								this.$obj.on('click',function(e){
+								$(window).on('keydown',function(e){
+									 e.which;
+								})
+								
+								this.$obj.on('click',line_click);
+								
+								function line_click(e){
 									
-									if (_this.data.length === 0){
-										
-									}
-									
-							 		var mapObjOffset = _this.$mapObj.offset();
+									var mapObjOffset = _this.$mapObj.offset();
 									var map_path_line = [];
 									map_path_line[0] = e.pageX -  mapObjOffset.left - parseInt(_this.$mapObj.css('border-left-width'));
 									map_path_line[1] = e.pageY -  mapObjOffset.top - parseInt(_this.$mapObj.css('border-top-width'));
-								
-									_this.data.push(map_path_line);
+									
+
+									
+									if (_this.points.length === 0){
+										
+										var $line_start = $('#line_start');
+										var line_start_width = $line_start.width()/2;
+										var line_start_height = $line_start.height()/2;
+										 
+										
+										$('#line_start').css({
+											left:map_path_line[0]-line_start_width+'px',
+											top:map_path_line[1]-line_start_height+'px',
+											display:'block'})
+										
+									}
+									
+									_this.points.push(map_path_line);
 									map_path_line = [];
-									_this.svgPolyline();
-								})	
+
+									_this.svgPolyline(this.points);
+								}
+								
+								this.$obj.on('mousemove',function(e){
+									if(_this.points.length > 0){
+										
+										var points = [];
+										var mapObjOffset = _this.$mapObj.offset();
+										points[0] = _this.points[_this.points.length-1];
+										points[1] = [
+											e.pageX -  mapObjOffset.left - parseInt(_this.$mapObj.css('border-left-width')),
+											e.pageY -  mapObjOffset.top - parseInt(_this.$mapObj.css('border-top-width'))
+										];
+										
+										
+										
+										
+										_this.svgPolyline(points);
+									}
+								})
+								
 							}
 							
-							this.svgPolyline = function(){
-								var settings = {fill: 'none', stroke: 'blue', strokeWidth: 4};
-								this.$obj.svg();
-								var $svg = this.$obj.svg('get');
+							//曲线函数
+							this.svgPolyline = function(points,param){
+								var settings = param || {fill: 'none', stroke: 'blue', strokeWidth: 4};
+								this.$boardObj.svg();
+								var $svg = this.$boardObj.svg('get');
 								$svg.clear();
-								$svg.polyline(this.data,settings);
+								$svg.polyline(points,settings);
 								 
 							}
 							
@@ -548,6 +590,13 @@
                       <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9"> 
                       <img src="/static/img/dest.png" style="position:absolute" id="destination" title="终点">-->
                       
+                </div>
+                <div id="svg_event" class="each_map_layer">
+               		<img src="../static/img/drawing.png" id="line_start" title="围栏绘制起点"    style="position:absolute; display:none;"> 
+                </div>
+                
+                <div>
+                	
                 </div>
                 
               </div>
@@ -585,7 +634,7 @@
 				 
 				}
 				#svg_user_sign{
-					z-index:-10
+					z-index:-10;
 					}
 				
 				
