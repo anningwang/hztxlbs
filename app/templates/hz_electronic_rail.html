@@ -250,22 +250,30 @@
                                 </div>
                                 <div class="map_panel_content col-xs-12" style="background:#FFF; border:1px solid #CCC;">
                                     <div class="col-xs-12"  style="display:none; " id="EnclosureConcent">
-                                        <div class="row" style="padding-right:10px;">
-                                         <form role="form" class="form-horizontal">
+                                        <div class="row" style="padding-right:10px; padding-top:20px;">
+                                         <form role="form" class="form-horizontal" id="form-validate">
                                                         
                                                       
+                                                      
+                                          <div class="alert alert-info">
+ 											<strong>Heads up!</strong>
+
+											  设置围栏相关设置
+											<br />
+										</div>
+
                                                       
                                                       
                                                       <div class="form-group">
                                                         <label for="firstname" class="col-sm-3 control-label no-padding-right">围栏名称:</label>
                                                         <div class="col-sm-9">
-                                                        <input type="text"  placeholder=""  />
+                                                        <input type="text"  id="set_enclosure_name" name="set_enclosure_name" placeholder=""  />
                                                         </div>
                                                       </div>
                                                       <div class="form-group">
-                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">楼层:</label>
+                                                        <label for="firstname"  class="col-sm-3 control-label no-padding-right">楼层:</label>
                                                         <div class="col-sm-9">
-                                                                <select class="form-control" id=" ">
+                                                                <select class="form-control" id="set_enclosure_floor">
                                                                     <option value="">3楼</option>
                                                                                                          
                                                                 </select>
@@ -274,22 +282,22 @@
                                                       <div class="form-group">
                                                         <label for="firstname" class="col-sm-3 control-label no-padding-right">进入警报方式:</label>
                                                         <div class="col-sm-9">
-                                                                <select class="form-control" id=" ">
+                                                                <select class="form-control" id="set_enclosure_into_alert" >
                                                                     <option value="">文本</option>
                                                                                                          
                                                                 </select>
                                                         </div>
                                                       </div>
                                                       <div class="form-group">
-                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">进入警报内容:</label>
+                                                        <label for="firstname"  class="col-sm-3 control-label no-padding-right">进入警报内容:</label>
                                                         <div class="col-sm-9">
-                                                                <textarea class="form-control" rows="3"></textarea>
+                                                                <textarea class="form-control" rows="3" id="set_enclosure_into_alert_content"></textarea>
                                                         </div>
                                                       </div>
                                                       <div class="form-group">
-                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">退出警报方式:</label>
+                                                        <label for="firstname"  class="col-sm-3 control-label no-padding-right">退出警报方式:</label>
                                                         <div class="col-sm-9">
-                                                                <select class="form-control" id=" ">
+                                                                <select class="form-control" id="set_enclosure_out_alert">
                                                                     <option value="">文本</option>
                                                                                                          
                                                                 </select>
@@ -298,17 +306,9 @@
                                                       <div class="form-group">
                                                         <label for="firstname" class="col-sm-3 control-label no-padding-right">退出警报内容:</label>
                                                         <div class="col-sm-9">
-                                                                <textarea class="form-control" rows="3"></textarea>
+                                                                <textarea class="form-control" id="set_enclosure_out_alert_content" rows="3"></textarea>
                                                         </div>
                                                       </div>
-                                                      
-                                                      <div class="form-group">
-                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">围栏形状:</label>
-                                                        <div class="col-sm-9">
-                                                                
-                                                        </div>
-                                                      </div>
-                                                      
                                                       
                                                       <div class="form-group">
                                                         <label for="firstname" class="col-sm-3 control-label no-padding-right">绘制范围:</label>
@@ -319,20 +319,30 @@
                                                                 </select>
                                                             </div>
                                                             <div class="col-xs-6">
-                                                            <button id="start_draw" type="button" class="btn btn-primary btn-xs">
-                                                                开始绘制
-                                                            </button>
+                                                            
+                                                                <button type="button" id="start_draw" class="btn btn-xs btn-danger">
+                                                                     
+                    
+                                                                    <span>开始绘制</span>
+                                                                    <i class="ace-icon fa fa-arrow-right icon-on-right"></i>
+                                                                </button>
+
                                                             </div>
                                                          
                                                         </div>
                                                       </div>
                                                       
-                                                     
+                                                      <div class="form-group">
+                                                         
+                                                        <div class="col-xs-6 col-xs-push-6">
+                                                                <input type="button" class="btn btn-success btn-xs" id="set_enclosure_submit" value="提交" />
+                                                        </div>
+                                                      </div>
     
                                                     </form>
                                         </div>
                                     </div>
-                                    <div  style="display:none;  " id="EnclosureConcent2">
+                                    <div  style="display:none;" id="EnclosureConcent2">
                                         <div class="row" style="padding-right:10px;">
                                          asfdasdfasfasfasdfasdf
                                         </div>
@@ -465,17 +475,28 @@
 				 
 				 	$(function(){
 						
+						$('#set_enclosure_submit').on('click',function(){
+							
+						});
 						
+						var enclosure1 = new enclosure($('#svg_event'));
 						$("#start_draw").on('click',function(){
 							var $this = $(this);
-							var enclosure1 = new enclosure($('#svg_event'));
-							if($.trim($this.text()) === '开始绘制'){
-								$this.text('取消绘制');
-								
-								enclosure1.polyline();
-							}else{
-								$this.text('开始绘制');
-								 
+							var $span = $this.find('span');
+							var buttonText = $span.text();
+							if(buttonText === '取消绘制'){
+								$span.text('开始绘制');
+								enclosure1.remove_event();
+							 
+
+							}else if (buttonText === '重新绘制'){
+								$span.text('取消绘制');
+								enclosure1.again_map();
+							 
+							}else {
+								$span.text('取消绘制');
+								enclosure1.polyline(); 
+							 
 							}
 						});
 						
@@ -483,14 +504,44 @@
 						param object obj jquery对象
 						*/
 						function enclosure(obj){
+							this.result = [];
 							//坐标资料格式 [[1,2],[3,4]]
 							this.points=[];
 							//操作事件的对象(jquery)
-							this.$obj = obj || null;
+							this.$event = obj || null;
 							//画板对象(jquery)
-							this.$boardObj = this.$obj;
+							this.$board = $('#svg_path');
 							//地图对象
-							this.$mapObj = this.$boardObj;
+							this.$map =  $('#svg_image');
+ 
+							//鼠标移动坐标
+							this.mousemove_points = [];
+							//直角是否启动判断键值
+							this.right_angle_key = 17; 
+							//demo坐标位置
+							this.dotted_line = []; 
+							
+							 
+							//是否是斜线判断
+							this.is_coordinate_offset = false;
+							//需要的html对象
+							this.htmlObj = {
+								//画线开始图标
+								line_start:'#line_start',
+								line_switch:'#start_draw'
+								
+								
+						
+							};
+							/*线样式*/
+							this.line_style = {
+								//演示线样式
+								demo_line:{fill: 'none', stroke: 'red', strokeWidth: 1 },
+								//实际线样式
+								result_line:{fill: 'none', stroke: 'red', strokeWidth: 4 }
+								
+								
+							}
 							
 							
 							
@@ -498,78 +549,220 @@
 								this[name] = value;
 							}
 							
+							this.again_map = function(){
+								this.remove_event();
+								this.polyline();
+							}
 							
+							//移除事件绑定    
+							/*
+							param boolear is_result 是否生成结果
+							*/
+							this.remove_event = function(is_result,is_board_clear){
+								
+								 is_result = is_result || false;
+								 is_board_clear = (is_board_clear ===false) ? false : true;
+								
+								$window = $(window);
+ 								$window.off('keydown',this.right_angle_package);
+								$window.off('keyup',this.keyup_fn);
+								this.$event.off('click',this.line_click_package);
+								this.$event.off('mousemove',this.mousemove_line_package);
+								
+								$(this.htmlObj.line_start).off('click',this.line_end);
+								
+								//清楚事件线
+								this.svgPolyline([],{},this.$event);
+								 //是否清楚画板线
+								if(is_board_clear) this.svgPolyline([],{},this.$board);
+								
+								
+								$(this.htmlObj.line_start).css({left:0,top:0,display:'none'});
+								
+								
+								if(is_result) this.result = this.points.slice();
+								
+								this.points = [];
+								
+							};
+							//围栏绘制功能入口
 							this.polyline = function(){
 								var _this = this;
+								var _window = $(window);
 								
-								$(window).on('keydown',function(e){
-									 e.which;
-								})
+								/*格式化数据*/
+								this.result =[];
+								this.points = [];
+								this.is_coordinate_offset = false;
 								
-								this.$obj.on('click',line_click);
+								_window.on('keydown',{_this:_this},this.right_angle_package);
 								
-								function line_click(e){
+								_window.on('keyup',{_this:_this},this.keyup_fn)
+								
+								
+								this.$event.on('click',{_this:_this},this.line_click_package);
+
+								
+								this.$event.on('mousemove',{_this:_this},this.mousemove_line_package);
+								
+								$(this.htmlObj.line_start).on('click',{_this:_this},this.line_end);
+								
+
+								
+							}
+							
+							this.line_click_package = function(e){
+
+								e.data._this.line_click(e);
+							}
+	  
+							
+							//划线函数
+							this.line_click = function(e){
 									
-									var mapObjOffset = _this.$mapObj.offset();
+									
+									
+									var mapObjOffset = this.$map.offset();
 									var map_path_line = [];
-									map_path_line[0] = e.pageX -  mapObjOffset.left - parseInt(_this.$mapObj.css('border-left-width'));
-									map_path_line[1] = e.pageY -  mapObjOffset.top - parseInt(_this.$mapObj.css('border-top-width'));
+									map_path_line[0] = e.pageX -  mapObjOffset.left - parseInt(this.$map.css('border-left-width'));
+									map_path_line[1] = e.pageY -  mapObjOffset.top - parseInt(this.$map.css('border-top-width'));
 									
 
 									
-									if (_this.points.length === 0){
+									if (this.points.length === 0){
 										
-										var $line_start = $('#line_start');
-										var line_start_width = $line_start.width()/2;
-										var line_start_height = $line_start.height()/2;
+										
+										
+										var $line_start = $(this.htmlObj.line_start);
+										var line_start_width = $line_start.outerWidth()/2;
+										var line_start_height = $line_start.outerWidth()/2;
 										 
 										
-										$('#line_start').css({
+										$line_start.css({
 											left:map_path_line[0]-line_start_width+'px',
 											top:map_path_line[1]-line_start_height+'px',
 											display:'block'})
 										
 									}
 									
-									_this.points.push(map_path_line);
+									if(this.is_coordinate_offset && this.points.length !== 0){
+										if(this.dotted_line.length = 2){
+											this.points.push(this.dotted_line[1]);
+										}
+									}else{
+										this.points.push(map_path_line);
+									}
+									
+									
 									map_path_line = [];
 
-									_this.svgPolyline(this.points);
+									this.svgPolyline(this.points,this.line_style.result_line,this.$board);
+							}
+							//按键抬起函数
+							this.keyup_fn = function(e){
+									
+									if(e.which === e.data._this.right_angle_key && e.data._this.mousemove_points.length > 1){
+										
+										e.data._this.is_coordinate_offset = false;
+										e.data._this.svgPolyline(e.data._this.mousemove_points,e.data._this.line_style.demo_line);
+									} 
+								
+							}
+							
+							//直线函数包
+								this.right_angle_package = function(e){
+									
+									 
+									
+									if(e.data._this.mousemove_points.length > 1 && e.which === e.data._this.right_angle_key ){
+									 	//是否直线函数判断  鼠标移动也直线函数
+										e.data._this.is_coordinate_offset = true;
+										e.data._this.right_angle(e.data._this.mousemove_points[1]);
+										
+									}
+									 
+								}
+								//直线函数
+								this.right_angle = function(new_points){
+
+									this.dotted_line[0] = this.points[this.points.length-1];
+									
+									if(Math.abs(this.dotted_line[0][0] - new_points[0]) >= Math.abs(this.dotted_line[0][1] - new_points[1])){
+										this.dotted_line[1] = [new_points[0],this.dotted_line[0][1]];
+										
+									}else{
+										
+										this.dotted_line[1] = [this.dotted_line[0][0],new_points[1]];
+									}
+									this.svgPolyline(this.dotted_line,this.line_style.demo_line);
+								}
+							//鼠标移动划线函数包
+							this.mousemove_line_package = function(e){
+							
+								if(e.data._this.points.length > 0){
+									e.data._this.mousemove_line(e);
 								}
 								
-								this.$obj.on('mousemove',function(e){
-									if(_this.points.length > 0){
-										
-										var points = [];
-										var mapObjOffset = _this.$mapObj.offset();
-										points[0] = _this.points[_this.points.length-1];
-										points[1] = [
-											e.pageX -  mapObjOffset.left - parseInt(_this.$mapObj.css('border-left-width')),
-											e.pageY -  mapObjOffset.top - parseInt(_this.$mapObj.css('border-top-width'))
+							}
+							//鼠标移动划线函数
+							this.mousemove_line =function(e){
+										var mapObjOffset = this.$map.offset();
+										this.mousemove_points[0] = this.points[this.points.length-1];
+										this.mousemove_points[1] = [
+											e.pageX -  mapObjOffset.left - parseInt(this.$map.css('border-left-width')),
+											e.pageY -  mapObjOffset.top - parseInt(this.$map.css('border-top-width'))
 										];
+										if(this.is_coordinate_offset){
+											this.right_angle(this.mousemove_points[1]);
+										}else{
+											this.svgPolyline(this.mousemove_points,this.line_style.demo_line);
+										}
+		
 										
 										
 										
 										
-										_this.svgPolyline(points);
-									}
-								})
+										
+							}
+							//围栏结束
+							this.line_end = function(e){
+								/*_this 本函数的对象*/
+								var _this = e.data._this;
+								if(_this.points.length > 1) _this.points.push(_this.points[0]);
+								
+								
+								_this.svgPolyline(_this.points,_this.line_style.result_line,_this.$board);
+								
+								
+								//this 判定该函数的对象 
+								$(this).css({top:0,left:0,display:'none'});
+
+								
+								_this.remove_event(true,false);
+								
+								/*结束绘制*/
+								$(_this.htmlObj.line_switch).find('span').text('重新绘制');
+								 
+								
 								
 							}
 							
 							//曲线函数
-							this.svgPolyline = function(points,param){
-								var settings = param || {fill: 'none', stroke: 'blue', strokeWidth: 4};
-								this.$boardObj.svg();
-								var $svg = this.$boardObj.svg('get');
-								$svg.clear();
-								$svg.polyline(points,settings);
+							this.svgPolyline = function(points,param,obj,is_clear){
+								
+								  
+								
+								var settings = param || this.line_style.result_line;
+								obj = obj || this.$event;
+								is_clear = (is_clear === false) ? false :  true;
+								obj.svg();
+								var $svg = obj.svg('get');
+								if(is_clear) $svg.clear();
+								if(points.length !== 0) $svg.polyline(points,settings);
 								 
 							}
 							
-							this.lineFn = function(){
-								
-							}
+			 
 						}
 					});
                  	
@@ -682,9 +875,24 @@
    
    
    
+   
  
         
 <!-- inline scripts related to this page -->
+
+<!--page scripts -->
+<script src="../static/ace/components/jquery-validation/dist/jquery.validate.js"></script>
+<script>
+	$(function(){
+		$('#form-validate').validate({
+			rules:{
+				set_enclosure_name:{
+					required:true, 
+				}
+			}	
+		});
+	});
+</script>
 
 </body>
 </html>
