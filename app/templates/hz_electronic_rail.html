@@ -14,7 +14,7 @@
 <!-- page specific plugin styles -->
 
 <!-- text fonts -->
- 
+
 <!-- ace styles -->
 <link rel="stylesheet" href="../static/ace/assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
 <link rel="stylesheet" href="../static/ace/assets/css/ace-skins.css" />
@@ -29,7 +29,6 @@
 <link rel="stylesheet" href="../static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css"/>
 
 <!--hz地图样式-->
- 
 
 <!-- ace settings handler -->
 <script src="../static/ace/assets/js/ace-extra.js"></script>
@@ -89,18 +88,11 @@
   <div id="sidebar" class="sidebar                  responsive                    ace-save-state"> 
     <script type="text/javascript">
 					try{ace.settings.loadState('sidebar')}catch(e){}
-				</script>
-                
-                
-                
-                           
-          <script src="/static/js/jquery.min.js"></script> 
-          <script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script> 
-          <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script> 
-          <script src="../static/js/jquery.mousewheel.js"></script>
-            
-           
-		   
+				</script> 
+    <script src="/static/js/jquery.min.js"></script> 
+    <script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script> 
+    <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script> 
+    <script src="../static/js/jquery.mousewheel.js"></script>
     <div class="sidebar-shortcuts" id="sidebar-shortcuts">
       <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
         <button class="btn btn-success"> <i class="ace-icon fa fa-signal"></i> </button>
@@ -126,101 +118,19 @@
     <!-- /.sidebar-shortcuts -->
     
     <ul class="nav nav-list">
-      
-    
-    <li class="">
-						<a href="#" class="dropdown-toggle">
-							<i class="menu-icon  fa fa-home"></i>
-							<span class="menu-text">
-								我的建筑
-							</span>
-
-							<b class="arrow fa fa-angle-down"></b>
-						</a>
-
-						<b class="arrow"></b>
-
-						<ul class="submenu">
-							
-
-							<li class="">
-								<a href="/token">
-									<i class="menu-icon fa fa-caret-right"></i>
-									地图导航
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-							
-                            <li class="">
-								<a href="/hz_page2">
-									<i class="menu-icon fa fa-caret-right"></i>
-									坐标拾取
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-                            
-							<li class="active">
-								<a href="/hz_history_loc">
-									<i class="menu-icon fa fa-caret-right"></i>
-									历史轨迹
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-                            
-                            
-                            
-                        <li class="">
-						<a href="#" class="dropdown-toggle">
-							<i class="menu-icon fa fa-caret-right"></i>
-							<span class="menu-text"> 电子围栏 </span>
-
-							<b class="arrow fa fa-angle-down"></b>
-						</a>
-
-						<b class="arrow"></b>
-
-						<ul class="submenu">
-							<li class="">
-								<a href="/hz_electronic_rail">
-									<i class="menu-icon fa fa-caret-right"></i>
-									实时信息
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-
-							<li class="">
-								<a href="/hz_page1">
-									<i class="menu-icon fa fa-caret-right"></i>
-									历史警报
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-
-							
-
-							
-
-							
-						</ul>
-					</li>
-                            
-
-							
-
-							
-
-							
-						</ul>
-					</li>
-    
-    
-    
-    
+      <li class=""> <a href="#" class="dropdown-toggle"> <i class="menu-icon  fa fa-home"></i> <span class="menu-text"> 我的建筑 </span> <b class="arrow fa fa-angle-down"></b> </a> <b class="arrow"></b>
+        <ul class="submenu">
+          <li class=""> <a href="/token"> <i class="menu-icon fa fa-caret-right"></i> 地图导航 </a> <b class="arrow"></b> </li>
+          <li class=""> <a href="/hz_page2"> <i class="menu-icon fa fa-caret-right"></i> 坐标拾取 </a> <b class="arrow"></b> </li>
+          <li class="active"> <a href="/hz_history_loc"> <i class="menu-icon fa fa-caret-right"></i> 历史轨迹 </a> <b class="arrow"></b> </li>
+          <li class=""> <a href="#" class="dropdown-toggle"> <i class="menu-icon fa fa-caret-right"></i> <span class="menu-text"> 电子围栏 </span> <b class="arrow fa fa-angle-down"></b> </a> <b class="arrow"></b>
+            <ul class="submenu">
+              <li class=""> <a href="/hz_electronic_rail"> <i class="menu-icon fa fa-caret-right"></i> 实时信息 </a> <b class="arrow"></b> </li>
+              <li class=""> <a href="/hz_page1"> <i class="menu-icon fa fa-caret-right"></i> 历史警报 </a> <b class="arrow"></b> </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
     </ul>
     <!-- /.nav-list --> 
     
@@ -237,120 +147,88 @@
       
       <!-- /section:basics/content.breadcrumbs -->
       <div class="page-content" style="padding-bottom:0px;">
-      	<div class="row">
-        		 
-            <div  id="myCanvas">
-              
-              	<div class="" id="map_controller_panel" style="position:absolute; top:60px; left:80px; z-index:1000; width:370px;">
-                         
-                                <div class="btn-group btn-group-xs col-xs-12" id="map_panel_button" style="background:#FFF; border:1px solid #CCC;">
-                                    <button type="button" class="btn btn-primary" id="setEnclosure" hz_target = "#EnclosureConcent" >设置围栏</button>
-                                    <button type="button" class="btn btn-primary" id="setEnclosure2" hz_target = "#EnclosureConcent2" >设置围栏2</button>
-                                
-                                </div>
-                                <div class="map_panel_content col-xs-12" style="background:#FFF; border:1px solid #CCC;">
-                                    <div class="col-xs-12"  style="display:none; " id="EnclosureConcent">
-                                        <div class="row" style="padding-right:10px; padding-top:20px;">
-                                         <form role="form" class="form-horizontal" id="form-validate">
-                                                        
-                                                      
-                                                      
-                                          <div class="alert alert-info">
- 											<strong>Heads up!</strong>
-
-											  设置围栏相关设置
-											<br />
-										</div>
-
-                                                      
-                                                      
-                                                      <div class="form-group">
-                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">围栏名称:</label>
-                                                        <div class="col-sm-9">
-                                                        <input type="text"  id="set_enclosure_name" name="set_enclosure_name" placeholder=""  />
-                                                        </div>
-                                                      </div>
-                                                      <div class="form-group">
-                                                        <label for="firstname"  class="col-sm-3 control-label no-padding-right">楼层:</label>
-                                                        <div class="col-sm-9">
-                                                                <select class="form-control" id="set_enclosure_floor">
-                                                                    <option value="">3楼</option>
-                                                                                                         
-                                                                </select>
-                                                        </div>
-                                                      </div>
-                                                      <div class="form-group">
-                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">进入警报方式:</label>
-                                                        <div class="col-sm-9">
-                                                                <select class="form-control" id="set_enclosure_into_alert" >
-                                                                    <option value="">文本</option>
-                                                                                                         
-                                                                </select>
-                                                        </div>
-                                                      </div>
-                                                      <div class="form-group">
-                                                        <label for="firstname"  class="col-sm-3 control-label no-padding-right">进入警报内容:</label>
-                                                        <div class="col-sm-9">
-                                                                <textarea class="form-control" rows="3" id="set_enclosure_into_alert_content"></textarea>
-                                                        </div>
-                                                      </div>
-                                                      <div class="form-group">
-                                                        <label for="firstname"  class="col-sm-3 control-label no-padding-right">退出警报方式:</label>
-                                                        <div class="col-sm-9">
-                                                                <select class="form-control" id="set_enclosure_out_alert">
-                                                                    <option value="">文本</option>
-                                                                                                         
-                                                                </select>
-                                                        </div>
-                                                      </div>
-                                                      <div class="form-group">
-                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">退出警报内容:</label>
-                                                        <div class="col-sm-9">
-                                                                <textarea class="form-control" id="set_enclosure_out_alert_content" rows="3"></textarea>
-                                                        </div>
-                                                      </div>
-                                                      
-                                                      <div class="form-group">
-                                                        <label for="firstname" class="col-sm-3 control-label no-padding-right">绘制范围:</label>
-                                                        <div class="col-sm-9">
-                                                        	<div class="col-xs-6">
-                                                            	<select class="form-control" id=" ">
-                                                                    <option value="">多边形</option>                                     
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-xs-6">
-                                                            
-                                                                <button type="button" id="start_draw" class="btn btn-xs btn-danger">
-                                                                     
-                    
-                                                                    <span>开始绘制</span>
-                                                                    <i class="ace-icon fa fa-arrow-right icon-on-right"></i>
-                                                                </button>
-
-                                                            </div>
-                                                         
-                                                        </div>
-                                                      </div>
-                                                      
-                                                      <div class="form-group">
-                                                         
-                                                        <div class="col-xs-6 col-xs-push-6">
-                                                                <input type="button" class="btn btn-success btn-xs" id="set_enclosure_submit" value="提交" />
-                                                        </div>
-                                                      </div>
-    
-                                                    </form>
-                                        </div>
-                                    </div>
-                                    <div  style="display:none;" id="EnclosureConcent2">
-                                        <div class="row" style="padding-right:10px;">
-                                         asfdasdfasfasfasdfasdf
-                                        </div>
-                                    </div>
-                         		</div>
+        <div class="row">
+          <div  id="myCanvas">
+            <div class="" id="map_controller_panel" style="position:absolute; top:60px; left:80px; z-index:1000; width:370px;">
+              <div class="btn-group btn-group-xs col-xs-12" id="map_panel_button" style="background:#FFF; border:1px solid #CCC;">
+                <button type="button" class="btn btn-primary" id="setEnclosure" hz_target = "#EnclosureConcent" >设置围栏</button>
+                <button type="button" class="btn btn-primary" id="setEnclosure2" hz_target = "#EnclosureConcent2" >设置围栏2</button>
+              </div>
+              <div class="map_panel_content col-xs-12" style="background:#FFF; border:1px solid #CCC;">
+                <div class="col-xs-12"  style="display:none; " id="EnclosureConcent">
+                  <div class="row" style="padding-right:10px; padding-top:20px;">
+                    <form role="form" class="form-horizontal" id="form-validate">
+                      <div class="alert alert-info"> <strong>Heads up!</strong> 设置围栏相关设置 <br />
+                      </div>
+                      <div class="form-group">
+                        <label for="firstname" class="col-sm-3 control-label no-padding-right">围栏名称:</label>
+                        <div class="col-sm-9">
+                          <input type="text"  id="set_enclosure_name" name="set_enclosure_name" placeholder=""  />
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="firstname"  class="col-sm-3 control-label no-padding-right">楼层:</label>
+                        <div class="col-sm-9">
+                          <select class="form-control" id="set_enclosure_floor">
+                            <option value="">3楼</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="firstname" class="col-sm-3 control-label no-padding-right">进入警报方式:</label>
+                        <div class="col-sm-9">
+                          <select class="form-control" id="set_enclosure_into_alert" >
+                            <option value="">文本</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="firstname"  class="col-sm-3 control-label no-padding-right">进入警报内容:</label>
+                        <div class="col-sm-9">
+                          <textarea class="form-control" rows="3" id="set_enclosure_into_alert_content"></textarea>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="firstname"  class="col-sm-3 control-label no-padding-right">退出警报方式:</label>
+                        <div class="col-sm-9">
+                          <select class="form-control" id="set_enclosure_out_alert">
+                            <option value="">文本</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="firstname" class="col-sm-3 control-label no-padding-right">退出警报内容:</label>
+                        <div class="col-sm-9">
+                          <textarea class="form-control" id="set_enclosure_out_alert_content" rows="3"></textarea>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="firstname" class="col-sm-3 control-label no-padding-right">绘制范围:</label>
+                        <div class="col-sm-9">
+                          <div class="col-xs-6">
+                            <select class="form-control" id=" ">
+                              <option value="">多边形</option>
+                            </select>
+                          </div>
+                          <div class="col-xs-6">
+                            <button type="button" id="start_draw" class="btn btn-xs btn-danger"> <span>开始绘制</span> <i class="ace-icon fa fa-arrow-right icon-on-right"></i> </button>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <div class="col-xs-6 col-xs-push-6">
+                          <input type="button" class="btn btn-success btn-xs" id="set_enclosure_submit" value="提交" />
+                        </div>
+                      </div>
+                    </form>
+                  </div>
                 </div>
-                
-                 <script>
+                <div  style="display:none;" id="EnclosureConcent2">
+                  <div class="row" style="padding-right:10px;"> asfdasdfasfasfasdfasdf </div>
+                </div>
+              </div>
+            </div>
+            <script>
                  	$(function(){
 						
 
@@ -468,9 +346,8 @@
 						
 						
 					});
-                 </script>
-                 
-                 <script>
+                 </script> 
+            <script>
 				 
 				 
 				 	$(function(){
@@ -542,6 +419,12 @@
 								
 								
 							}
+							/*热点大小*/
+							this.hotspot_size = {
+								width:20,
+								height:20
+							}
+						
 							
 							
 							
@@ -644,9 +527,10 @@
 											display:'block'})
 										
 									}
-									
-									if(this.is_coordinate_offset && this.points.length !== 0){
+									//画直角线的情况  且不是第一个数据
+ 									if(this.is_coordinate_offset && this.points.length !== 0){
 										if(this.dotted_line.length = 2){
+											//
 											this.points.push(this.dotted_line[1]);
 										}
 									}else{
@@ -655,6 +539,9 @@
 									
 									
 									map_path_line = [];
+									var points_length = this.points.length;
+									
+									if (points_length > 1) this.create_spot($('#enclosure_spots'),this.points[points_length-1]);
 
 									this.svgPolyline(this.points,this.line_style.result_line,this.$board);
 							}
@@ -746,6 +633,163 @@
 								
 								
 							}
+							/*
+							  创建html热点
+							  param  parent jquery对象 创建HTML节点的父节点
+							  param position 位置数据 left 和 top
+							*/
+							this.create_spot =  function(parent,position){
+								/*本函数属性*/
+								
+								var attribute = {
+									/*创建的父节点id*/
+									spot_parent_id : 'enclosure_spots',
+									/*子节点class*/
+									spot_class : 'enclosure_spot',
+									/*子节点大小*/
+
+									
+								};
+								
+								 
+								 
+						/*		if($('#'+attribute.spot_parent_id).length < 1){
+									 
+									$spot_parent = $('<div></div>');
+									$spot_parent.attr('id',attribute.spot_parent_id);
+									$spot_parent.css({width:'400px',height:'600px',backgroundColor:'#000'});
+									parent.append($spot_parent);
+									
+								}*/ 
+								$spot_parent = $('#'+attribute.spot_parent_id);
+								
+								 
+								//查找父id
+								
+								 
+								
+								var hotspot_top = position[1] - Math.round((this.hotspot_size.height)/2);
+								var hotspot_left = position[0] - Math.round((this.hotspot_size.width)/2);
+								
+								
+								
+								/*创建子节点*/
+								var create_hotspot = $("<div></div>");
+								create_hotspot.addClass(attribute.spot_class);
+								
+								
+								
+								create_hotspot.css(
+									{
+										left:hotspot_left+'px',
+										top:hotspot_top+'px'
+									}
+								);
+								
+						      /*移动需要画的虚线*/
+							   var move_line = [];
+							   //移动事件
+							   var win_mousemove_event = null;
+							   
+							   /*相对于划线index */
+							   var current_spot_index = 0; 
+								
+								//对热点加事件
+								create_hotspot.on('mousedown',{_this:this},function(e){
+									//对象
+									var _this = e.data._this;
+									//事件
+									var $this = $(this);
+
+									// 取消事件冒泡
+									e.stopPropagation()
+							 		//取消划线事件   
+									_this.$event.off('click',_this.line_click_package);
+
+									  /*相对于划线index */
+									current_spot_index = $this.index() + 1;
+
+									 /*实线数量*/
+									 var points_size = _this.points.length;
+  		
+									$(window).on('mousemove',function(event){
+		 
+										win_mousemove_event = event;
+										event.stopPropagation();
+										var mapObjOffset = _this.$map.offset();
+										var map_path_line1 = [];
+										map_path_line1[0] = event.pageX -  mapObjOffset.left - parseInt(_this.$map.css('border-left-width'));
+										map_path_line1[1] = event.pageY -  mapObjOffset.top - parseInt(_this.$map.css('border-top-width'));
+
+										
+										$this.css({
+											left:(map_path_line1[0]-Math.round((_this.hotspot_size.width)/2))+'px',
+											top:(map_path_line1[1]-Math.round((_this.hotspot_size.height)/2))+'px'
+										});
+				 
+										if(points_size > 1){
+											//线位置
+											move_line[0] = _this.points[current_spot_index -1];
+						 
+											move_line[1] = map_path_line1;
+											
+											if((current_spot_index) < (points_size - 1) && points_size > 2 ) move_line[2] =  _this.points[current_spot_index+1];
+							 
+											_this.svgPolyline(move_line,_this.line_style.demo_line,_this.$event);
+										}
+										
+										
+										
+										 
+										
+ 		
+										
+									});
+									
+							 
+	
+
+									
+									
+									
+
+								});
+	
+								
+					
+								
+								
+																	
+										create_hotspot.on('mouseup',{_this:this},function(upEvent){
+										var _this = upEvent.data._this;
+										 _this.svgPolyline([],_this.line_style.demo_line,_this.$event);
+										
+										 
+									     
+										
+										upEvent.stopPropagation();
+									 	
+									    console.log(move_line);
+										_this.points[current_spot_index] = move_line[1];
+										 
+									    $(window).off(win_mousemove_event);
+										
+										_this.svgPolyline(_this.points,_this.line_style.result_line,_this.$board);
+										
+										 move_line = [];
+										 //加上划线事件
+										 _this.$event.on('click',{_this:_this},_this.line_click_package);
+										
+										});
+								
+								 /*加子节点*/
+								$spot_parent.append(create_hotspot);
+								
+								 
+							}
+				 
+					 
+ 
 							
 							//曲线函数
 							this.svgPolyline = function(points,param,obj,is_clear){
@@ -767,35 +811,36 @@
 					});
                  	
                  </script>
-           
-              
-              
-              <div id="svg_map_base"  class="each_map_layer"> 
-              	<!--基础svg图-->
-                <img src="../static/img/floor3.svg"    id="svg_image" class="each_map_layer">
-                <!--绘制路径-->
-                <div id="svg_path" class="each_map_layer"></div>
-                <!--房间等信息标识-->
-                <div id="svg_sign"  class="each_map_layer"></div>
-                <!--用户标识区域-->
-                <div id="svg_user_sign" class="each_map_layer">
-                      <!--<img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA"> 
+            <div id="svg_map_base"  class="each_map_layer"> 
+              <!--基础svg图--> 
+              <img src="../static/img/floor3.svg"    id="svg_image" class="each_map_layer"> 
+              <!--绘制路径-->
+              <div id="svg_path" class="each_map_layer"></div>
+              <!--房间等信息标识-->
+              <div id="svg_sign"  class="each_map_layer"></div>
+              <!--用户标识区域-->
+              <div id="svg_user_sign" class="each_map_layer"> 
+                <!--<img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA"> 
                       <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9"> 
-                      <img src="/static/img/dest.png" style="position:absolute" id="destination" title="终点">-->
-                      
-                </div>
-                <div id="svg_event" class="each_map_layer">
-               		<img src="../static/img/drawing.png" id="line_start" title="围栏绘制起点"    style="position:absolute; display:none;"> 
-                </div>
-                
-                <div>
-                	
-                </div>
+                      <img src="/static/img/dest.png" style="position:absolute" id="destination" title="终点">--> 
                 
               </div>
+              <div id="svg_event" class="each_map_layer"> <img src="../static/img/drawing.png" id="line_start" title="围栏绘制起点"    style="position:absolute; display:none;">
+                <div id="enclosure_spots"></div>
+              </div>
+              <div> </div>
             </div>
-            
-            <style type="text/css" >
+          </div>
+          <style type="text/css" >
+			
+				.enclosure_spot{
+			
+					position:absolute;
+					background:url(../static/img/spot.png) no-repeat;
+					width:20px;
+					height:20px;
+					cursor: pointer;
+				}
             	
 				#myCanvas{  
 					position: relative;
@@ -836,20 +881,16 @@
 				.each_map_layer{ position:absolute; height:890px; width:1700px;}
 				 
             </style>
-            
-            
-      
-            
         </div>
       </div>
-    <!-- /.page-content --> 
+      <!-- /.page-content --> 
+    </div>
   </div>
-</div>
-<!-- /.main-content --> 
-
-<!--<a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
+  <!-- /.main-content --> 
+  
+  <!--<a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
 				<i class="ace-icon fa fa-angle-double-up icon-only bigger-110"></i>
-			</a>-->
+			</a>--> 
 </div>
 <!-- /.main-container --> 
 
@@ -866,22 +907,14 @@
 
 <!-- ace scripts --> 
 
- 
-
-
 <script src="../static/ace/assets/js/src/ace.js"></script> 
 <script src="../static/ace/assets/js/src/ace.basics.js"></script> 
 <script src="../static/ace/assets/js/src/ace.sidebar.js"></script> 
-   
-   
-   
-   
- 
-        
-<!-- inline scripts related to this page -->
 
-<!--page scripts -->
-<script src="../static/ace/components/jquery-validation/dist/jquery.validate.js"></script>
+<!-- inline scripts related to this page --> 
+
+<!--page scripts --> 
+<script src="../static/ace/components/jquery-validation/dist/jquery.validate.js"></script> 
 <script>
  
 	
@@ -984,6 +1017,5 @@
 				});
 
 </script>
-
 </body>
 </html>
