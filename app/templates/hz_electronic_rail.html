@@ -397,6 +397,8 @@
 							this.right_angle_key = 17; 
 							//demo坐标位置
 							this.dotted_line = []; 
+							//热点成立  其他不成立判断
+							
 							
 							 
 							//是否是斜线判断
@@ -541,7 +543,7 @@
 									map_path_line = [];
 									var points_length = this.points.length;
 									
-									if (points_length > 1) this.create_spot($('#enclosure_spots'),this.points[points_length-1]);
+									if (points_length > 1) this.create_spot($('#svg_event'),this.points[points_length-1]);
 
 									this.svgPolyline(this.points,this.line_style.result_line,this.$board);
 							}
@@ -661,12 +663,12 @@
 									parent.append($spot_parent);
 									
 								}*/ 
-								$spot_parent = $('#'+attribute.spot_parent_id);
+							 
 								
 								 
 								//查找父id
 								
-								 
+								console.log('create_spot-top',this.points); 
 								
 								var hotspot_top = position[1] - Math.round((this.hotspot_size.height)/2);
 								var hotspot_left = position[0] - Math.round((this.hotspot_size.width)/2);
@@ -677,7 +679,7 @@
 								var create_hotspot = $("<div></div>");
 								create_hotspot.addClass(attribute.spot_class);
 								
-								
+								create_hotspot.attr('index',this.points.length-1);
 								
 								create_hotspot.css(
 									{
@@ -703,12 +705,12 @@
 
 									// 取消事件冒泡
 									e.stopPropagation()
-							 		//取消划线事件   
-									_this.$event.off('click',_this.line_click_package);
+							 	 
 
 									  /*相对于划线index */
-									current_spot_index = $this.index() + 1;
-
+	  
+									current_spot_index = $this.attr('index');
+		 
 									 /*实线数量*/
 									 var points_size = _this.points.length;
   		
@@ -764,12 +766,12 @@
 										var _this = upEvent.data._this;
 										 _this.svgPolyline([],_this.line_style.demo_line,_this.$event);
 										
-										 
+										 console.log('create_spot-buttom',_this.points);
 									     
 										
 										upEvent.stopPropagation();
 									 	
-									    console.log(move_line);
+									    
 										_this.points[current_spot_index] = move_line[1];
 										 
 									    $(window).off(win_mousemove_event);
@@ -777,18 +779,18 @@
 										_this.svgPolyline(_this.points,_this.line_style.result_line,_this.$board);
 										
 										 move_line = [];
-										 //加上划线事件
-										 _this.$event.on('click',{_this:_this},_this.line_click_package);
+										 
 										
 										});
 								
 								 /*加子节点*/
-								$spot_parent.append(create_hotspot);
+								parent.append(create_hotspot);
 								
 								 
 							}
 				 
-					 
+					 		
+			 
  
 							
 							//曲线函数
@@ -826,7 +828,7 @@
                 
               </div>
               <div id="svg_event" class="each_map_layer"> <img src="../static/img/drawing.png" id="line_start" title="围栏绘制起点"    style="position:absolute; display:none;">
-                <div id="enclosure_spots"></div>
+                 
               </div>
               <div> </div>
             </div>
