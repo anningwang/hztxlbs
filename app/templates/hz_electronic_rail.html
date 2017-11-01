@@ -381,7 +381,7 @@
 						param object obj jquery对象
 						*/
 						function enclosure(obj){
-							this.result = [];
+						 
 							//坐标资料格式 [[1,2],[3,4]]
 							this.points=[];
 							//操作事件的对象(jquery)
@@ -428,7 +428,8 @@
 							}
 							/*移动需要画的虚线*/
 							this.spot_move_line = [];
-						
+							/*备份上一次的地址  出错时用*/
+							this.spot_move_line2 = [];
 							
 							
 							
@@ -445,10 +446,11 @@
 							/*
 							param boolear is_result 是否生成结果
 							*/
-							this.remove_event = function(is_result,is_board_clear){
+							this.remove_event = function(is_board_clear){
 								
-								 is_result = is_result || false;
+								  
 								 is_board_clear = (is_board_clear ===false) ? false : true;
+								
 								
 								$window = $(window);
  								$window.off('keydown',this.right_angle_package);
@@ -461,15 +463,16 @@
 								//清楚事件线
 								this.svgPolyline([],{},this.$event);
 								 //是否清楚画板线
-								if(is_board_clear) this.svgPolyline([],{},this.$board);
+								if(is_board_clear){ 
+									this.svgPolyline([],{},this.$board);
+									$('#svg_map_base > .enclosure_spot').remove();
+								}
 								
 								
 								$(this.htmlObj.line_start).css({left:0,top:0,display:'none'});
 								
 								
-								if(is_result) this.result = this.points.slice();
-								
-								this.points = [];
+							 
 								
 							};
 							//围栏绘制功能入口
@@ -478,7 +481,7 @@
 								var _window = $(window);
 								
 								/*格式化数据*/
-								this.result =[];
+							 
 								this.points = [];
 								this.is_coordinate_offset = false;
 								
@@ -622,20 +625,25 @@
 								var _this = e.data._this;
 								
 								var points_length = _this.points.length;
+								
+								//this 判定该函数的对象 
+								$(this).css({top:0,left:0,display:'none'});
+								
 								if(points_length > 1){
 									 _this.points.push(_this.points[0]);
 								
-									 _this.create_spot($('#svg_map_base'),_this.points[0]);
+									/* _this.create_spot($('#svg_map_base'),_this.points[0]);*/
+									 
+									  
 								}
 								
 								_this.svgPolyline(_this.points,_this.line_style.result_line,_this.$board);
 								
 								
-								//this 判定该函数的对象 
-								$(this).css({top:0,left:0,display:'none'});
+
 
 								
-								_this.remove_event(true,false);
+								_this.remove_event(false);
 								
 								
 								
@@ -719,6 +727,14 @@
 									 /*实线数量*/
 									 var points_size = this.points.length;
 									 
+								 
+									  var $map = this.$map;	
+									  var mapObjOffset = $map.offset();	
+									 						 
+									 this.spot_move_line2[0] = e.pageX -  mapObjOffset.left - parseInt($map.css('border-left-width')) + Math.round((this.hotspot_size.width)/2);
+									 this.spot_move_line2[1] = e.pageY -  mapObjOffset.top - parseInt($map.css('border-top-width')) + Math.round((this.hotspot_size.height)/2);
+									 
+									 
 									 $(window).on('mousemove',{_this:this,$obj:$this,current_spot_index:current_spot_index,points_size:points_size},this.spot_mouse_move_package);
 									 
 									 $(window).on('mouseup',{_this:this,$obj:$this,current_spot_index:current_spot_index,points_size:points_size},this.spot_mouse_up_package);
@@ -739,6 +755,9 @@
 										var current_spot_index = e.data.current_spot_index;
 										var points_size = e.data.points_size;
 										var mapObjOffset = this.$map.offset();
+										
+										
+										
 										var map_path_line1 = [];
 										map_path_line1[0] = e.pageX -  mapObjOffset.left - parseInt(this.$map.css('border-left-width'));
 										map_path_line1[1] = e.pageY -  mapObjOffset.top - parseInt(this.$map.css('border-top-width'));
@@ -754,8 +773,12 @@
 											 
 											this.spot_move_line[0] = this.points[current_spot_index-1];
 											
-						 					
-											this.spot_move_line[1] = map_path_line1;
+						 					if(this.spot_move_line[1]){
+												this.spot_move_line[1] = map_path_line1;
+											}else{
+												this.spot_move_line[1] = this.spot_move_line2;
+											}
+											
 											
 								 
 											
