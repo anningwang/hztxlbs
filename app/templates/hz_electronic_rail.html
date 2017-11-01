@@ -206,7 +206,7 @@
                         <label for="firstname" class="col-sm-3 control-label no-padding-right">绘制范围:</label>
                         <div class="col-sm-9">
                           <div class="col-xs-6">
-                            <select class="form-control" id=" ">
+                            <select class="form-control" id="enclosure_spot_method">
                               <option value="">多边形</option>
                             </select>
                           </div>
@@ -217,7 +217,7 @@
                       </div>
                       <div class="form-group">
                         <div class="col-xs-6 col-xs-push-6">
-                          <input type="button" class="btn btn-success btn-xs" id="set_enclosure_submit" value="提交" />
+                          <input type="submit" class="btn btn-success btn-xs" id="set_enclosure_submit" value="提交" />
                         </div>
                       </div>
                     </form>
@@ -358,6 +358,8 @@
 						
 						var enclosure1 = new enclosure($('#svg_event'));
 						$("#start_draw").on('click',function(){
+							
+							
 							var $this = $(this);
 							var $span = $this.find('span');
 							var buttonText = $span.text();
@@ -956,7 +958,40 @@
 <script>
  
 	
-	
+					(function( factory ) {
+							if ( typeof define === "function" && define.amd ) {
+								define( ["jquery", "../jquery.validate"], factory );
+							} else {
+								factory( jQuery );
+							}
+						}(function( $ ) {
+						
+						/*
+						 * Translated default messages for the jQuery validation plugin.
+						 * Locale: ZH (Chinese, 中文 (Zhōngwén), 汉语, 漢語)
+						 */
+						$.extend($.validator.messages, {
+							required: "这是必填字段",
+							remote: "请修正此字段",
+							email: "请输入有效的电子邮件地址",
+							url: "请输入有效的网址",
+							date: "请输入有效的日期",
+							dateISO: "请输入有效的日期 (YYYY-MM-DD)",
+							number: "请输入有效的数字",
+							digits: "只能输入数字",
+							creditcard: "请输入有效的信用卡号码",
+							equalTo: "你的输入不相同",
+							extension: "请输入有效的后缀",
+							maxlength: $.validator.format("最多可以输入 {0} 个字符"),
+							minlength: $.validator.format("最少要输入 {0} 个字符"),
+							rangelength: $.validator.format("请输入长度在 {0} 到 {1} 之间的字符串"),
+							range: $.validator.format("请输入范围在 {0} 到 {1} 之间的数值"),
+							max: $.validator.format("请输入不大于 {0} 的数值"),
+							min: $.validator.format("请输入不小于 {0} 的数值")
+						});
+						
+						}));
+					
 	
 					$('#form-validate').validate({
 					errorElement: 'div',
@@ -964,65 +999,33 @@
 					focusInvalid: false,
 					ignore: "",
 					rules: {
-						email: {
+						set_enclosure_name: {
 							required: true,
 							email:true
 						},
-						password: {
+						set_enclosure_floor: {
 							required: true,
-							minlength: 5
+						 
 						},
-						password2: {
+						set_enclosure_into_alert: {
 							required: true,
-							minlength: 5,
-							equalTo: "#password"
+						 
 						},
-						name: {
+						set_enclosure_into_alert_content: {
 							required: true
 						},
-						phone: {
+						set_enclosure_out_alert: {
 							required: true,
-							phone: 'required'
+					 
 						},
-						url: {
+						set_enclosure_out_alert_content: {
 							required: true,
-							url: true
-						},
-						comment: {
-							required: true
-						},
-						state: {
-							required: true
-						},
-						platform: {
-							required: true
-						},
-						subscription: {
-							required: true
-						},
-						gender: {
-							required: true,
-						},
-						agree: {
-							required: true,
+							 
 						}
+						 
 					},
 			
-					messages: {
-						email: {
-							required: "Please provide a valid email.",
-							email: "Please provide a valid email."
-						},
-						password: {
-							required: "Please specify a password.",
-							minlength: "Please specify a secure password."
-						},
-						state: "Please choose state",
-						subscription: "Please choose at least one option",
-						gender: "Please choose gender",
-						agree: "Please accept our policy"
-					},
-			
+					 
 			
 					highlight: function (e) {
 						$(e).closest('.form-group').removeClass('has-info').addClass('has-error');
@@ -1033,20 +1036,7 @@
 						$(e).remove();
 					},
 			
-					errorPlacement: function (error, element) {
-						if(element.is('input[type=checkbox]') || element.is('input[type=radio]')) {
-							var controls = element.closest('div[class*="col-"]');
-							if(controls.find(':checkbox,:radio').length > 1) controls.append(error);
-							else error.insertAfter(element.nextAll('.lbl:eq(0)').eq(0));
-						}
-						else if(element.is('.select2')) {
-							error.insertAfter(element.siblings('[class*="select2-container"]:eq(0)'));
-						}
-						else if(element.is('.chosen-select')) {
-							error.insertAfter(element.siblings('[class*="chosen-container"]:eq(0)'));
-						}
-						else error.insertAfter(element.parent());
-					},
+					 
 			
 					submitHandler: function (form) {
 					},
