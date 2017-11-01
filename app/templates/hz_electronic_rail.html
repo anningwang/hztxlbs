@@ -398,7 +398,7 @@
 							//demo坐标位置
 							this.dotted_line = []; 
 							//热点成立  其他不成立判断
-							
+							this.is_spot = false;
 							
 							 
 							//是否是斜线判断
@@ -497,7 +497,8 @@
 							}
 							
 							this.line_click_package = function(e){
-
+								if(e.data._this.is_spot) return;
+								  
 								e.data._this.line_click(e);
 							}
 	  
@@ -543,7 +544,7 @@
 									map_path_line = [];
 									var points_length = this.points.length;
 									
-									if (points_length > 1) this.create_spot($('#svg_event'),this.points[points_length-1]);
+									if (points_length > 1) this.create_spot($('#svg_map_base'),this.points[points_length-1]);
 
 									this.svgPolyline(this.points,this.line_style.result_line,this.$board);
 							}
@@ -644,27 +645,13 @@
 								/*本函数属性*/
 								
 								var attribute = {
-									/*创建的父节点id*/
-									spot_parent_id : 'enclosure_spots',
+			
 									/*子节点class*/
 									spot_class : 'enclosure_spot',
 									/*子节点大小*/
-
-									
+ 
 								};
-								
-								 
-								 
-						/*		if($('#'+attribute.spot_parent_id).length < 1){
-									 
-									$spot_parent = $('<div></div>');
-									$spot_parent.attr('id',attribute.spot_parent_id);
-									$spot_parent.css({width:'400px',height:'600px',backgroundColor:'#000'});
-									parent.append($spot_parent);
-									
-								}*/ 
-							 
-								
+	 
 								 
 								//查找父id
 								
@@ -690,14 +677,31 @@
 								
 						      /*移动需要画的虚线*/
 							   var move_line = [];
-							   //移动事件
-							   var win_mousemove_event = null;
-							   
+					 
 							   /*相对于划线index */
 							   var current_spot_index = 0; 
 								
 								//对热点加事件
-								create_hotspot.on('mousedown',{_this:this},function(e){
+								
+								
+					
+									
+									
+									
+									
+								
+								
+																	
+										
+								
+								 /*加子节点*/
+								parent.append(create_hotspot);
+								
+								 
+							}
+							/*热点鼠标点下事件*/
+							
+							this.mouse_down = function(e){
 									//对象
 									var _this = e.data._this;
 									//事件
@@ -706,6 +710,7 @@
 									// 取消事件冒泡
 									e.stopPropagation()
 							 	 
+								 _this.is_spot = true;
 
 									  /*相对于划线index */
 	  
@@ -713,8 +718,12 @@
 		 
 									 /*实线数量*/
 									 var points_size = _this.points.length;
-  		
-									$(window).on('mousemove',function(event){
+  
+							};
+	
+				 
+					 		/*热点鼠标移动事件*/
+							this.spot_mouse_move = function(event){
 		 
 										win_mousemove_event = event;
 										event.stopPropagation();
@@ -746,23 +755,9 @@
 										
  		
 										
-									});
-									
-							 
-	
-
-									
-									
-									
-
-								});
-	
-								
-					
-								
-								
-																	
-										create_hotspot.on('mouseup',{_this:this},function(upEvent){
+							};
+							/*热点鼠标松开事件*/
+							this.spot_mouse_up = function(upEvent){
 										var _this = upEvent.data._this;
 										 _this.svgPolyline([],_this.line_style.demo_line,_this.$event);
 										
@@ -780,16 +775,9 @@
 										
 										 move_line = [];
 										 
+										 _this.is_spot = false;
 										
-										});
-								
-								 /*加子节点*/
-								parent.append(create_hotspot);
-								
-								 
-							}
-				 
-					 		
+							};
 			 
  
 							
@@ -842,6 +830,7 @@
 					width:20px;
 					height:20px;
 					cursor: pointer;
+					z-index:10;
 				}
             	
 				#myCanvas{  
