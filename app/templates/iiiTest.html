@@ -1,47 +1,58 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+</head>
 <script src="../static/js/jquery-v1.11.0.min.js">
 </script>
 <script>
 $(document).ready(function(){
+	
+	        function stopDefault(e){  
+            //防止浏览器默认行为(W3C)  
+            if(e && e.preventDefault){  
+                e.preventDefault();  
+            }  
+            //IE中组织浏览器行为  
+            else{  
+                window.event.returnValue=false; //实际上在IE8以下，会报错
+                return false; 
+            }  
+        }  
+	
+ $('#div3').mousedown(function(e){
+ 	$this = $(this);
+	$(document).mousemove(function(e1){
+		$this.css({
+			left:e1.pageX + 'px',
+			top: e1.pageY + 'px'
+			
+		})
+		
+	 
+	});
+	e.preventDefault(); 
  
- 	
+ });
+ 
 });
 </script>
 </head>
-
-<body>
- <style>
- 	#parent { width:200px; height:200px;}
- 	.child { width:200px; height:200px; background:#306; position:absolute;}
-	a{ display:block;width:20px; height:20px; background:#666;}
- </style>
- <div id="parent">
- 	<a></a>
-    
-	<div id="div1"></div>
-    <div class="child" id="div2" style="z-index:1"></div>
-    <div class="child" id="div3" style="z-index:2; background:#000;">
-    	<div>
-        	
+<style>
+	div{ width:60px; height:60px; position:absolute;}
+</style>
+<body style="height:2000px;">
+ 123123123
+ 
+    	<div style="background:#00F;" id="div3" >
+         
         </div>
-    </div>
-    
-    <script>
-	$(function(){
-	    $('#div2').on('click',function(){
-			alert('div2');
-		})
-/*		$('#div3').on('click',function(){
-			alert('div3');
-		})*/
-		
-		
-	})
-
-    </script>
+ 
  </div>
+ 
+    
+ 
  
 </body>
 </html>

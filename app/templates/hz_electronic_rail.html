@@ -169,7 +169,7 @@
                       <div class="form-group">
                         <label for="firstname"  class="col-sm-3 control-label no-padding-right">楼层:</label>
                         <div class="col-sm-9">
-                          <select class="form-control" id="set_enclosure_floor">
+                          <select class="form-control" id="set_enclosure_floor" name="set_enclosure_floor">
                             <option value="">3楼</option>
                           </select>
                         </div>
@@ -177,7 +177,7 @@
                       <div class="form-group">
                         <label for="firstname" class="col-sm-3 control-label no-padding-right">进入警报方式:</label>
                         <div class="col-sm-9">
-                          <select class="form-control" id="set_enclosure_into_alert" >
+                          <select class="form-control" id="set_enclosure_into_alert" name="set_enclosure_into_alert" >
                             <option value="">文本</option>
                           </select>
                         </div>
@@ -185,13 +185,13 @@
                       <div class="form-group">
                         <label for="firstname"  class="col-sm-3 control-label no-padding-right">进入警报内容:</label>
                         <div class="col-sm-9">
-                          <textarea class="form-control" rows="3" id="set_enclosure_into_alert_content"></textarea>
+                          <textarea class="form-control" rows="3" id="set_enclosure_into_alert_content" name="set_enclosure_into_alert_content"></textarea>
                         </div>
                       </div>
                       <div class="form-group">
                         <label for="firstname"  class="col-sm-3 control-label no-padding-right">退出警报方式:</label>
                         <div class="col-sm-9">
-                          <select class="form-control" id="set_enclosure_out_alert">
+                          <select class="form-control" id="set_enclosure_out_alert" name="set_enclosure_out_alert">
                             <option value="">文本</option>
                           </select>
                         </div>
@@ -199,7 +199,7 @@
                       <div class="form-group">
                         <label for="firstname" class="col-sm-3 control-label no-padding-right">退出警报内容:</label>
                         <div class="col-sm-9">
-                          <textarea class="form-control" id="set_enclosure_out_alert_content" rows="3"></textarea>
+                          <textarea class="form-control" id="set_enclosure_out_alert_content" name="set_enclosure_out_alert_content" rows="3"></textarea>
                         </div>
                       </div>
                       <div class="form-group">
@@ -207,7 +207,8 @@
                         <div class="col-sm-9">
                           <div class="col-xs-6">
                             <select class="form-control" id="enclosure_spot_method">
-                              <option value="">多边形</option>
+                              <option value="square">方形绘图</option>
+                              <option value="polyline">折线绘图</option>
                             </select>
                           </div>
                           <div class="col-xs-6">
@@ -359,24 +360,46 @@
 						var enclosure1 = new enclosure($('#svg_event'));
 						$("#start_draw").on('click',function(){
 							
-							
-							var $this = $(this);
-							var $span = $this.find('span');
-							var buttonText = $span.text();
-							if(buttonText === '取消绘制'){
-								$span.text('开始绘制');
-								enclosure1.remove_event();
-							 
-
-							}else if (buttonText === '重新绘制'){
-								$span.text('取消绘制');
-								enclosure1.again_map();
-							 
-							}else {
-								$span.text('取消绘制');
-								enclosure1.polyline(); 
-							 
+								var $this = $(this);
+								var $span = $this.find('span');
+								var buttonText = $span.text();
+							if($('#enclosure_spot_method').val() === 'polyline'){
+								
+								if(buttonText === '取消绘制'){
+									$span.text('开始绘制');
+									enclosure1.remove_event();
+								 
+	
+								}else if (buttonText === '重新绘制'){
+									$span.text('取消绘制');
+									enclosure1.again_map();
+								 
+								}else {
+									$span.text('取消绘制');
+									enclosure1.polyline(); 
+								 
+								}
 							}
+							//方形绘图
+							 if($('#enclosure_spot_method').val() === 'square'){
+ 								if(buttonText === '取消绘制'){
+									$span.text('开始绘制');
+									enclosure1.square();
+								 
+	
+								}else if (buttonText === '重新绘制'){
+									$span.text('取消绘制');
+									//enclosure1.square();
+								 
+								}else {
+									$span.text('取消绘制');
+									enclosure1.square(); 
+									alert('square')
+								 
+								}
+							}
+							
+							
 						});
 						
 						/*
@@ -655,6 +678,198 @@
 								
 								
 							}
+							
+							this.square = function(){
+								this.$event.on('mousedown',{_this:this},this.square_mouse_down_package);
+							}
+							this.square_mouse_down_package = function(e){
+								var _this = e.data._this;
+								_this.square_mouse_down(e);
+							}
+							this.square_mouse_down = function(e){
+								//第一个点
+								var spot0 = [];
+								
+   							    var $map = this.$map;	
+							    var mapObjOffset = $map.offset();	
+								this.points = [];
+								spot0[0] = e.pageX -  mapObjOffset.left - parseInt($map.css('border-left-width'));
+								spot0[1] = e.pageY -  mapObjOffset.top - parseInt($map.css('border-top-width'));
+								this.points[0] = spot0;
+								$window = $(window);
+								$window.on('mousemove',{_this:this},this.square_mouse_move_package);
+								$window.on('mouseup',{_this:this},this.square_mouse_up_package);	
+								
+								console.log('square_mouse_down',this.points); 
+							}
+							
+							this.square_mouse_move_package = function(e){
+								var _this = e.data._this;
+								_this.square_mouse_move(e);
+							}
+							this.square_mouse_move = function(e){
+								var spot1 = [],spot2 = [],spot3 = [];
+								var $map = this.$map;	
+							    var mapObjOffset = $map.offset();
+								/*移动原点*/
+								 
+								
+								spot2[0] = e.pageX -  mapObjOffset.left - parseInt($map.css('border-left-width'));
+								spot2[1] = e.pageY -  mapObjOffset.top - parseInt($map.css('border-top-width'));	
+								
+								spot1[0] = spot2[0];
+								spot1[1] = this.points[0][1];
+		
+							 
+							
+								spot3[0] = this.points[0][0];
+								spot3[1] = spot2[1];
+								
+								this.points[1] = spot1;
+								this.points[2] = spot2;
+								this.points[3] = spot3;
+								this.points[4] = this.points[0];
+								console.log('square_mouse_move',this.points);
+								this.svgPolyline(this.points,this.line_style.demo_line,this.$event);
+								
+							}
+							
+							this.square_mouse_up_package = function(e){
+								var _this = e.data._this;
+								_this.square_mouse_up(e);
+							}
+							
+							this.square_mouse_up = function(e){
+								this.svgPolyline([],{},this.$event);
+								this.svgPolyline(this.points,this.line_style.result_line,this.$board);
+								$window = $(window);
+								$window.off('mousemove',this.square_mouse_move_package);
+								$window.off('mouseup',this.square_mouse_up_package);
+							}
+							
+							
+							
+							this.create_hotspot = function(parent,position,index){
+								//创建对象的类
+								var hotspot_class = 'enclosure_spot';
+								
+								var hotspot_top = position[1] - Math.round((this.hotspot_size.height)/2);
+								var hotspot_left = position[0] - Math.round((this.hotspot_size.width)/2);
+								
+								
+								var $create_hotspot = $("<div></div>");
+								$create_hotspot.addClass(hotspot_class);
+								
+								$create_hotspot.attr('index',index);
+								
+								$create_hotspot.css(
+									{
+										left:hotspot_left+'px',
+										top:hotspot_top+'px'
+									}
+								);
+ 								
+								$create_hotspot.on('mousedown',{_this:this},this.hotspot_mouse_down_package);
+									
+								parent.append($create_hotspot);
+							}
+							
+							this.hotspot_mouse_down_package = function(e){
+								var _this = e.data._this;
+								_this.hotspot_mouse_down(e.this);
+							}
+							this.hotspot_mouse_down = function(e,obj){
+								 
+									//事件
+									var $this = $(obj);
+  
+									current_spot_index = parseInt($this.attr('index'));
+		
+									 /*实线数量*/
+									 var points_size = this.points.length;
+									 
+								 
+									  var $map = this.$map;	
+									  var mapObjOffset = $map.offset();	
+									 //暂时存目前位置				 
+									 this.spot_move_line2[0] = e.pageX -  mapObjOffset.left - parseInt($map.css('border-left-width')) + Math.round((this.hotspot_size.width)/2);
+									 this.spot_move_line2[1] = e.pageY -  mapObjOffset.top - parseInt($map.css('border-top-width')) + Math.round((this.hotspot_size.height)/2);
+									 
+									 
+									 $(window).on('mousemove',{
+										 _this:this,
+									 	$obj:$this,
+										current_spot_index:current_spot_index,
+										points_size:points_size
+									},
+										this.hotspot_mouse_move_package
+									);
+									 
+									 $(window).on('mouseup',{_this:this,$obj:$this,current_spot_index:current_spot_index,points_size:points_size},this.spot_mouse_up_package);
+  
+								
+								
+							}
+							
+							this.hotspot_mouse_move_package = function(e){
+								var _this = e.data._this;
+								
+								_this.hotspot_mouse_down(e);
+								
+		   					}
+							this.hotspot_mouse_move = function(e){
+								
+						
+								//$obj 当前点下的元素
+								var $obj = e.data.$obj;
+								var current_spot_index = e.data.current_spot_index;
+								var points_size = e.data.points_size;
+								var mapObjOffset = this.$map.offset();
+								
+								
+								
+								var map_path_line1 = [];
+								map_path_line1[0] = e.pageX -  mapObjOffset.left - parseInt(this.$map.css('border-left-width'));
+								map_path_line1[1] = e.pageY -  mapObjOffset.top - parseInt(this.$map.css('border-top-width'));
+
+								
+								$obj.css({
+									left:(map_path_line1[0]-Math.round((this.hotspot_size.width)/2))+'px',
+									top:(map_path_line1[1]-Math.round((this.hotspot_size.height)/2))+'px'
+								});
+								
+								 
+									//线位置
+									 
+									this.spot_move_line[0] = this.points[current_spot_index-1];
+									
+									if(this.spot_move_line[1]){
+										this.spot_move_line[1] = map_path_line1;
+									}else{
+										this.spot_move_line[1] = this.spot_move_line2;
+									}
+									
+									
+						 
+									
+									 
+									if(current_spot_index < (points_size - 1) && points_size > 2 ) this.spot_move_line[2] =  this.points[current_spot_index+1];
+									
+					 
+									
+									this.svgPolyline(this.spot_move_line,this.line_style.demo_line,this.$event);
+								 
+										
+							}
+							this.hotspot_mouse_up_package = function(e){
+								var _this = e.data._this;
+								_this.hotspot_mouse_down(e,this);
+		   					}
+							this.hotspot_mouse_up = function(e){
+								
+							}
+		 
+							
 							/*
 							  创建html热点
 							  param  parent jquery对象 创建HTML节点的父节点
@@ -708,6 +923,7 @@
 							this.spot_mouse_down_package = function(e){
 								var _this = e.data._this;
 								_this.spot_mouse_down(e,this);
+								return false;
 							}
 							
 							/*热点鼠标点下事件*/
@@ -1001,7 +1217,7 @@
 					rules: {
 						set_enclosure_name: {
 							required: true,
-							email:true
+							 
 						},
 						set_enclosure_floor: {
 							required: true,
