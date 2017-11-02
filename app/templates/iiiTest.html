@@ -8,31 +8,14 @@
 </script>
 <script>
 $(document).ready(function(){
-	
-	        function stopDefault(e){  
-            //防止浏览器默认行为(W3C)  
-            if(e && e.preventDefault){  
-                e.preventDefault();  
-            }  
-            //IE中组织浏览器行为  
-            else{  
-                window.event.returnValue=false; //实际上在IE8以下，会报错
-                return false; 
-            }  
-        }  
+	var b = ['c','f']; 
+	var a = [0,1,2,3]
+ 	a[0] = b;
+	b = ['g','s']; 
 	
  $('#div3').mousedown(function(e){
- 	$this = $(this);
-	$(document).mousemove(function(e1){
-		$this.css({
-			left:e1.pageX + 'px',
-			top: e1.pageY + 'px'
-			
-		})
-		
-	 
-	});
-	e.preventDefault(); 
+ 
+	 alert($(this).attr('aaa') !== 1)
  
  });
  
@@ -40,12 +23,12 @@ $(document).ready(function(){
 </script>
 </head>
 <style>
-	div{ width:60px; height:60px; position:absolute;}
+	div{ width:60px; top:100PX; height:6660px; position:absolute;}
 </style>
 <body style="height:2000px;">
  123123123
  
-    	<div style="background:#00F;" id="div3" >
+    	<div style="background:#00F;" id="div3" aada = 1>
          
         </div>
  
