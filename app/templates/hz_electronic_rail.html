@@ -370,10 +370,6 @@
 									enclosure1.remove_event();
 								 
 	
-								}else if (buttonText === '重新绘制'){
-									$span.text('取消绘制');
-									enclosure1.again_map();
-								 
 								}else {
 									$span.text('取消绘制');
 									enclosure1.polyline(); 
@@ -384,23 +380,20 @@
 							 if($('#enclosure_spot_method').val() === 'square'){
  								if(buttonText === '取消绘制'){
 									$span.text('开始绘制');
-									enclosure1.square();
-								 
-	
-								}else if (buttonText === '重新绘制'){
-									$span.text('取消绘制');
-									//enclosure1.square();
-								 
+									enclosure1.remove_square(); 
 								}else {
 									$span.text('取消绘制');
-									enclosure1.square(); 
-									alert('square')
+									enclosure1.square();
+									 
 								 
 								}
 							}
 							
 							
 						});
+						
+						
+	 
 						
 						/*
 						param object obj jquery对象
@@ -455,8 +448,19 @@
 							this.spot_move_line = [];
 							/*热点 线坐标*/
 							this.hotspot_new_position = [];
-							//是否是尾点
-							this.is_end_spot = false;
+							 /*扫尾*/
+							 //里面只存函数扫尾函数
+							this.map_up_cache = [];
+							//本函数有问题需解决  暂时用笨办法
+							this.map_up_implement = function(){
+								var map_up_cache_length = this.map_up_cache.length;
+								for(var i = 0 ; i < map_up_cache_length; i++){
+									console.log(this.map_up_cache[i]);
+									this.map_up_cache[i]();
+									
+								}
+								this.map_up_cache = [];
+							}
 							
 							
 							
@@ -464,13 +468,11 @@
 								this[name] = value;
 							}
 							
-							this.again_map = function(){
-								this.remove_event();
-								this.polyline();
-							}
+			 
 							
-							this.clear_board = {
-								
+							this.remove_polyline = function(){
+								this.remove_hotspot();
+								this.remove_event();
 							}
 							
 							//移除事件绑定    
@@ -479,7 +481,7 @@
 							*/
 							this.remove_event = function(is_board_clear){
 								
-								  
+								  //默认清除画板
 								 is_board_clear = (is_board_clear ===false) ? false : true;
 								
 								
@@ -515,6 +517,8 @@
 							 
 								this.points = [];
 								this.is_coordinate_offset = false;
+						
+								
 								
 								_window.on('keydown',{_this:_this},this.right_angle_package);
 								
@@ -583,6 +587,8 @@
 									if (points_length > 1) this.create_hotspot($('#svg_map_base'),this.points[points_length-1],points_length-1);
 
 									this.svgPolyline(this.points,this.line_style.result_line,this.$board);
+									
+									console.log('square_mouse_up',this.points);
 							}
 							//按键抬起函数
 							this.keyup_fn = function(e){
@@ -662,7 +668,7 @@
 								
 								if(points_length > 1){
 									 _this.points.push(_this.points[0]);
-								
+									//画热点
 									 _this.create_hotspot($('#svg_map_base'),_this.points[points_length],_this.points.length-1,true);
 									 
 									  
@@ -677,20 +683,21 @@
 								_this.remove_event(false);
 								
 								
-								
-								/*结束绘制*/
-								$(_this.htmlObj.line_switch).find('span').text('重新绘制');
+	 
 								 
 								
 								
 							}
-							
+							//方框
 							this.square = function(){
+						 
+								
 								this.$event.on('mousedown',{_this:this},this.square_mouse_down_package);
 							}
 							this.square_mouse_down_package = function(e){
 								var _this = e.data._this;
 								_this.square_mouse_down(e);
+								return false;
 							}
 							this.square_mouse_down = function(e){
 								//第一个点
@@ -699,6 +706,8 @@
    							    var $map = this.$map;	
 							    var mapObjOffset = $map.offset();	
 								this.points = [];
+								
+								
 								spot0[0] = e.pageX -  mapObjOffset.left - parseInt($map.css('border-left-width'));
 								spot0[1] = e.pageY -  mapObjOffset.top - parseInt($map.css('border-top-width'));
 								this.points[0] = spot0;
@@ -706,7 +715,7 @@
 								$window.on('mousemove',{_this:this},this.square_mouse_move_package);
 								$window.on('mouseup',{_this:this},this.square_mouse_up_package);	
 								
-								console.log('square_mouse_down',this.points); 
+								
 							}
 							
 							this.square_mouse_move_package = function(e){
@@ -735,7 +744,7 @@
 								this.points[2] = spot2;
 								this.points[3] = spot3;
 								this.points[4] = this.points[0];
-								console.log('square_mouse_move',this.points);
+								
 								this.svgPolyline(this.points,this.line_style.demo_line,this.$event);
 								
 							}
@@ -747,20 +756,24 @@
 							
 							this.square_mouse_up = function(e){
 								this.svgPolyline([],{},this.$event);
+								this.remove_hotspot();
 								this.svgPolyline(this.points,this.line_style.result_line,this.$board);
 								$window = $(window);
 								$window.off('mousemove',this.square_mouse_move_package);
 								$window.off('mouseup',this.square_mouse_up_package);
 								var points_length = this.points.length;
-								
-								for(var i = 1 ; i < points_length; i++){
-									if(i < (points_length - 1)){
-										this.create_hotspot($('#svg_map_base'),this.points[i],i);
-									}else{
-										this.create_hotspot($('#svg_map_base'),this.points[i],i,true);
+								if(points_length < 2){
+									this.points = [];
+								}else{
+									for(var i = 1 ; i < points_length; i++){
+										if(i < (points_length - 1)){
+											this.create_hotspot($('#svg_map_base'),this.points[i],i);
+										}else{
+											this.create_hotspot($('#svg_map_base'),this.points[i],i,true);
+										}
 									}
 								}
-								
+								console.log('square_mouse_up',this.points);
 							}
 							
 							
@@ -844,8 +857,8 @@
 								
 								
 								var map_path_line1 = [];
-								map_path_line1[0] = e.pageX + $(document).scrollLeft() -  mapObjOffset.left - parseInt(this.$map.css('border-left-width'));
-								map_path_line1[1] = e.pageY + $(document).scrollTop() -  mapObjOffset.top - parseInt(this.$map.css('border-top-width'));
+								map_path_line1[0] = e.pageX  -  mapObjOffset.left - parseInt(this.$map.css('border-left-width'));
+								map_path_line1[1] = e.pageY  -  mapObjOffset.top - parseInt(this.$map.css('border-top-width'));
 
 								
 								$obj.css({
@@ -929,183 +942,19 @@
 							}
 							
 							this.remove_hotspot = function(){
+								
+							 
+								
 								$('#svg_map_base > .enclosure_spot').remove();
+								
 							}
 		 
-							
-							/*
-							  创建html热点
-							  param  parent jquery对象 创建HTML节点的父节点
-							  param position 位置数据 left 和 top
-							*/
-							this.create_spot =  function(parent,position){
-								/*本函数属性*/
-								
-								var attribute = {
-			
-									/*子节点class*/
-									spot_class : 'enclosure_spot',
-									/*子节点大小*/
- 
-								};
-	 
+							this.remove_square = function(){
+								this.$event.off('mousedown',this.square_mouse_down_package);
 								 
-								//查找父id
+								this.remove_hotspot();
 								
-								console.log('create_spot-top',this.points); 
-								
-								var hotspot_top = position[1] - Math.round((this.hotspot_size.height)/2);
-								var hotspot_left = position[0] - Math.round((this.hotspot_size.width)/2);
-								
-								
-								
-								/*创建子节点*/
-								var create_hotspot = $("<div></div>");
-								create_hotspot.addClass(attribute.spot_class);
-								
-								create_hotspot.attr('index',this.points.length-1);
-								
-								create_hotspot.css(
-									{
-										left:hotspot_left+'px',
-										top:hotspot_top+'px'
-									}
-								);
-		 
-								
-								//对热点加事件
-								
-								create_hotspot.on('mousedown',{_this:this,points_size:this.points.length},this.spot_mouse_down_package);
-					 
-								 /*加子节点*/
-								parent.append(create_hotspot);
-								
-								 
 							}
-							/*热点鼠标点下事件包装*/
-							this.spot_mouse_down_package = function(e){
-								var _this = e.data._this;
-								_this.spot_mouse_down(e,this);
-								return false;
-							}
-							
-							/*热点鼠标点下事件*/
-							/*obj 事件对象*/							
-							this.spot_mouse_down = function(e,obj){
-									 
-								 
-									//事件
-									var $this = $(obj);
-
-									/*// 取消事件冒泡
-									e.stopPropagation()*/
-							 	 
-			 
-									  /*相对于划线index */
-	  
-									current_spot_index = parseInt($this.attr('index'));
-		
-									 /*实线数量*/
-									 var points_size = this.points.length;
-									 
-								 
-									  var $map = this.$map;	
-									  var mapObjOffset = $map.offset();	
-									 						 
-									 this.spot_move_line2[0] = e.pageX -  mapObjOffset.left - parseInt($map.css('border-left-width')) + Math.round((this.hotspot_size.width)/2);
-									 this.spot_move_line2[1] = e.pageY -  mapObjOffset.top - parseInt($map.css('border-top-width')) + Math.round((this.hotspot_size.height)/2);
-									 
-									 
-									 $(window).on('mousemove',{_this:this,$obj:$this,current_spot_index:current_spot_index,points_size:points_size},this.spot_mouse_move_package);
-									 
-									 $(window).on('mouseup',{_this:this,$obj:$this,current_spot_index:current_spot_index,points_size:points_size},this.spot_mouse_up_package);
-  
-							};
-							
-							/*热点鼠标移动包装函数*/
-							this.spot_mouse_move_package = function(e){
-								var _this = e.data._this;
-								_this.spot_mouse_move(e);
-							}
-				 
-					 		/*热点鼠标移动事件*/
-							this.spot_mouse_move = function(e){
-		 
-									 	//$obj 当前点下的元素
-								 		var $obj = e.data.$obj;
-										var current_spot_index = e.data.current_spot_index;
-										var points_size = e.data.points_size;
-										var mapObjOffset = this.$map.offset();
-										
-										
-										
-										var map_path_line1 = [];
-										map_path_line1[0] = e.pageX -  mapObjOffset.left - parseInt(this.$map.css('border-left-width'));
-										map_path_line1[1] = e.pageY -  mapObjOffset.top - parseInt(this.$map.css('border-top-width'));
-
-										
-										$obj.css({
-											left:(map_path_line1[0]-Math.round((this.hotspot_size.width)/2))+'px',
-											top:(map_path_line1[1]-Math.round((this.hotspot_size.height)/2))+'px'
-										});
-				 						
-										 
-											//线位置
-											 
-											this.spot_move_line[0] = this.points[current_spot_index-1];
-											
-						 					if(this.spot_move_line[1]){
-												this.spot_move_line[1] = map_path_line1;
-											}else{
-												this.spot_move_line[1] = this.spot_move_line2;
-											}
-											
-											
-								 
-											
-											 
-											if(current_spot_index < (points_size - 1) && points_size > 2 ) this.spot_move_line[2] =  this.points[current_spot_index+1];
-							 				
-							 
-											
-											this.svgPolyline(this.spot_move_line,this.line_style.demo_line,this.$event);
-										 
-										
-										
-										
-										 
-										
- 		
-										
-							};
-							/*松开事件包*/
-							this.spot_mouse_up_package = function(e){
-								var _this = e.data._this;
-								_this.spot_mouse_up(e);							
-							}
-							/*热点鼠标松开事件*/
-							this.spot_mouse_up = function(e){
-								
-								
-								 		var $obj = e.data.$obj;
-										var current_spot_index = e.data.current_spot_index;
-										var points_size = e.data.points_size;
-										
-										this.svgPolyline([],{},this.$event);
-							 
-										this.points[current_spot_index] = this.spot_move_line[1];
-										 console.log('this.spot_move_line[1]',this.spot_move_line[1]);
-									    $(window).off('mousemove',this.spot_mouse_move_package);
-										
-										this.svgPolyline(this.points,this.line_style.result_line,this.$board);
-										
-										console.log('spot_mouse_up',this.points);
-										
-										 this.spot_move_line = [];
-										 $(window).off('mouseup',this.spot_mouse_up_package);
-										 
-										
-							};
 			 
  
 							

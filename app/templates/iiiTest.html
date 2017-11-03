@@ -8,27 +8,51 @@
 </script>
 <script>
 $(document).ready(function(){
-	var b = ['c','f']; 
-	var a = [0,1,2,3]
- 	a[0] = b;
-	b = ['g','s']; 
-	
- $('#div3').mousedown(function(e){
  
-	 alert($(this).attr('aaa') !== 1)
+    var a = [];
+	
+	
+	
+	
+ $('#div2').mousedown(function(e){
+ 
+	 a.push(ff);
  
  });
+ 
+ function ff(){
+	test();	
+	test2();	
+ }
+ 
+ $('#div3').mousedown(function(){
+	 var a_length = a.length;
+	 for(var i = 0; i<a_length ; i++){
+		a[i]();	
+	 }	
+	 a = [];
+ });
+ 
+ function test(){
+	alert('test');	
+ }
+  function test2(){
+	alert('test2');	
+ }
  
 });
 </script>
 </head>
 <style>
-	div{ width:60px; top:100PX; height:6660px; position:absolute;}
+	div{ width:60px;  height:6660px; float:left;}
 </style>
 <body style="height:2000px;">
  123123123
  
-    	<div style="background:#00F;" id="div3" aada = 1>
+    	<div style="background:#00F;" id="div2" aada = 1>
+         
+        </div>
+        <div style="background:#000;" id="div3" aada = 1>
          
         </div>
  
