@@ -212,7 +212,7 @@
                             </select>
                           </div>
                           <div class="col-xs-6">
-                            <button type="button" id="start_draw" class="btn btn-xs btn-danger"> <span>开始绘制</span> <i class="ace-icon fa fa-arrow-right icon-on-right"></i> </button>
+                            <button type="button" id="start_draw" class="btn btn-xs btn-danger"> <span id="start_draw_span">开始绘制</span> <i class="ace-icon fa fa-arrow-right icon-on-right"></i> </button>
                           </div>
                         </div>
                       </div>
@@ -232,16 +232,9 @@
                       <div class="alert alert-info">查询围栏<br />
                       </div>
                       
-                      
-                      
-                    
-                      
-                      
-                      
-                      
                       <div class="form-group">
-                        <label for="firstname" class="col-sm-3 control-label no-padding-right">电子围栏设置查询:</label>
-                        <div class="col-sm-9">
+                        <label for="firstname" class="col-sm-6 control-label no-padding-right">电子围栏设置查询:</label>
+                        <div class="col-sm-6">
                           <select id="electronic-fence-address" >
                             <option value="0">请选择地址</option>
                             <option value="Floor3">和仲通讯</option>
@@ -255,7 +248,7 @@
                       
                       <div class="form-group">
                         <div class="col-xs-6 col-xs-push-6">
-                          <button type="submit" class="btn btn-success btn-xs" id="electronic-fence-query-button" />查询</button>
+                          <button type="button" class="btn btn-success btn-xs" id="electronic-fence-query-button" />查询</button>
                         </div>
                       </div>
                     </form>
@@ -1457,6 +1450,212 @@
                  	
                  </script>
                  
+            <script>
+
+	//iii	
+	 $(function(){
+	 		
+		 
+		
+			/**
+			 * 向服务器发送 Ajax 请求，查询相关数据, POST方式
+			 * @param url       请求 url
+			 * @param txData    请求 参数，具体参数含义，见对应接口说明                  
+			 
+			 数据格式
+			 
+			 url = '/lbs/get_history_location';  访问地址 
+            txData = {
+                "userId": ["1918E00103AA"],     // "userId": ["all"] for all users
+                "datetimeFrom": "2017-09-17 11:17:35",          // 按照时间段查询
+                "datetimeTo": "2017-09-23 11:17:35",
+                "compress": false       // 是否压缩，压缩的含义是，服务器会根据特定策略返回部分路径坐标。 保留参数
+            };
+			 */
+			
+			function ajaxRequest(url, txData) { 
+				//接受到的数据 
+				var ajaxData;
+				$.ajax({
+					url: url,
+					async: false,
+					type: 'POST',
+					data: {data: JSON.stringify(txData)}
+				}).done(function(data) {
+					console.log('接口调用成功');
+					console.log('receive:', data);
+					 
+					ajaxData = data;
+					
+					
+					 
+				}).fail(function(jqXHR, textStatus, errorThrown) {
+					console.log('接口调用失败');
+					ajaxData = false;
+					
+				 
+				});
+				 return ajaxData;
+				 
+			}
+			
+			
+			
+			
+			
+			$('#electronic-fence-query-button').click(function(){
+				
+					var buttonText = $('#start_draw_span').text();	
+					
+					if(buttonText === '清空绘制'){
+						$('#start_draw').click();
+					}
+					
+					electronicFence();
+			});
+			
+			function electronicFence(){
+				var url,txData;
+				
+				var data; //后台传来的数据
+				
+				var temporaryArr; //临时数据
+				
+				var  temporaryArrLength; //临时数据长度
+				
+				var address = $('#electronic-fence-address').val();
+				if(address == 0){
+					alert('请选择查询地址');
+					return;
+				}
+				
+				
+				
+				url = '/lbs/get_electronic_rail_cfg';
+				txData = {
+					"floorNo": address	
+				};
+				
+				data = ajaxRequest(url, txData);
+				
+				
+				temporaryArr = data.data;
+				
+				
+				
+				var svg = $('#svg_path').svg('get');
+					//svg.clear();	 
+				svg.clear();
+				/*console.log('temporaryArr[0].points:',temporaryArr[0].points);
+				console.log('temporaryArr[0]:',temporaryArr[0]);*/
+				
+				temporaryArrLength = temporaryArr.length;
+				for(var temporaryI = 0; temporaryI<temporaryArrLength; temporaryI++){
+					var temporaryArrDatas = temporaryArr[temporaryI].points;
+					var temporaryArrDatasLength = temporaryArrDatas.length;
+					var temporatyPosition =[];
+					
+					for(var PositionI = 0; PositionI< temporaryArrDatasLength; PositionI++){
+							var temporatyPositionFor = [];  //for里面的数组   临时用下 
+							 temporatyPositionFor.push(unitConversion(temporaryArrDatas[PositionI].x));
+							 temporatyPositionFor.push(unitConversion(temporaryArrDatas[PositionI].y));
+							 
+							 
+							 
+							 temporatyPosition.push(temporatyPositionFor);
+							 temporatyPositionFor = null;
+							 
+							 if(PositionI == temporaryArrDatasLength-1){
+								 //让线回到第一个	
+								 temporatyPositionFor = []
+								 temporatyPositionFor.push(unitConversion(temporaryArrDatas[0].x));
+								 temporatyPositionFor.push(unitConversion(temporaryArrDatas[0].y));
+								 temporatyPosition.push(temporatyPositionFor);
+							 }
+							 
+					}
+					
+ 
+					 
+					
+					svg.polyline(temporatyPosition,{
+						fill: 'none',
+						stroke: '#ff0000',
+						strokeWidth: 5
+					});
+				 	//完毕清空数据
+					temporaryArrDatas = null;
+					temporaryArrDatasLength = null;
+					temporatyPosition =null;
+					
+				}
+				
+				
+				
+				
+				
+				
+					
+			}
+	
+			
+			
+
+			
+			
+ 
+		var electronic_fence_namespace = '/HeZhong';
+        var electronic_fence_socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + electronic_fence_namespace);
+
+        electronic_fence_socket.on('hz_electronic_tail', function(msg) {
+            console.log('电子围栏：', msg);
+			var electronic_fence_socket_state;
+			
+			if(msg[0].status == 1){
+				electronic_fence_socket_state = '进入';
+			}else if(msg[0].status == 0){
+				electronic_fence_socket_state = '离开';
+			}
+			alert('用户ID:'+msg[0].userId+electronic_fence_socket_state+'了房间'+msg[0].name);
+        });
+			
+			
+			
+			
+			
+			//单位转换
+			function unitConversion(number){
+				return Math.round(number * real_loc_to_pix * zoom);
+			}
+			
+			
+			
+	
+			
+			
+			//以下为时间日历插件
+			
+				 
+			
+		 	     
+ 	 			 $('.date-timepicker').datetimepicker({
+				 //ormat: 'MM/DD/YYYY h:mm:ss A',//use this option to display seconds
+					  language: 'zh-CN',
+					 format: 'yyyy-mm-dd hh:ii:ss',
+					 autoclose: true,
+					 
+				});
+				
+				
+ 
+		 
+
+			
+			
+	 })
+
+
+</script>
 
             <div id="svg_map_base"  class="each_map_layer"> 
               <!--基础svg图--> 
