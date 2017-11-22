@@ -152,7 +152,7 @@
             <div class="" id="map_controller_panel" style="position:absolute; top:60px; left:80px; z-index:1000; width:370px;">
               <div class="btn-group btn-group-xs col-xs-12" id="map_panel_button" style="background:#FFF; border:1px solid #CCC;">
                 <button type="button" class="btn btn-primary" id="setEnclosure" hz_target = "#EnclosureConcent" >设置围栏</button>
-                <button type="button" class="btn btn-primary" id="setEnclosure2" hz_target = "#EnclosureConcent2" >设置围栏2</button>
+                <button type="button" class="btn btn-primary" id="setEnclosure2" hz_target = "#EnclosureConcent2" >查询围栏</button>
               </div>
               <div class="map_panel_content col-xs-12" style="background:#FFF; border:1px solid #CCC;">
                 <div class="col-xs-12"  style="display:none; " id="EnclosureConcent">
@@ -224,11 +224,41 @@
                     </form>
                   </div>
                 </div>
-                <div  style="display:none;" id="EnclosureConcent2">
+                <div class="col-xs-12" style="display:none;" id="EnclosureConcent2">
                   <div class="row" style="padding-right:10px; height:200px;"> 
                  
                  		
-                         <div class="alert alert-info"> 新功能预留 <br /></div>
+                         <form role="form" class="form-horizontal" id="form-validate">
+                      <div class="alert alert-info">查询围栏<br />
+                      </div>
+                      
+                      
+                      
+                    
+                      
+                      
+                      
+                      
+                      <div class="form-group">
+                        <label for="firstname" class="col-sm-3 control-label no-padding-right">电子围栏设置查询:</label>
+                        <div class="col-sm-9">
+                          <select id="electronic-fence-address" >
+                            <option value="0">请选择地址</option>
+                            <option value="Floor3">和仲通讯</option>
+                             
+                          </select>
+                        </div>
+                      </div>
+                      
+                      
+                      
+                      
+                      <div class="form-group">
+                        <div class="col-xs-6 col-xs-push-6">
+                          <button type="submit" class="btn btn-success btn-xs" id="electronic-fence-query-button" />查询</button>
+                        </div>
+                      </div>
+                    </form>
                       
                       
                       
@@ -238,8 +268,287 @@
             </div>
             
             
+           	<script>
+			
+				
+				'use strict';
+				var hzX = 0, hzY = 0;   // 坐标系原点
+				var margin = 0;        //外边距
+				var real_loc_to_pix = 0.0891;      //物理单位转像素单位 比例      比例转换计算公式x为传来的数据   x * real_loc_to_pix * zoom
+				var map_w = 3477;       /// px
+				var map_h = 1769;
+				var zoom = 0.4889;          /// 地图缩放级别
+				var hz_is_navigating = false;      /// 是否曾经设置过导航，或正在导航中
+				var HZ_DESTINATION_MEETING_ROOM = 27;     //办公室编号
+				var hz_destination = HZ_DESTINATION_MEETING_ROOM;            /// 导航的目的地，默认 第一个 目的地
+				var hz_time_id = 0;    //废弃
+				var hz_user_id = 0;   //下面的索引   实际函数用0应该是未选择
+				var HZ_USER_IDS = ['1918E00103AA', '1918E00103A9'];
+				var hz_user_xy = [];   //用户数据  每项为一个用户
+				
+				var storage = window.localStorage;
+				
+				
+				
+				
+				
+				if(storage){
+					//storage.clear();
+					///alert("浏览支持localStorage");
+					var _userId = storage['hz_user_id'];
+					if(typeof _userId !== 'undefined') {
+						hz_user_id = _userId;
+					}
+					var hz_zoom = storage['hz_zoom'];
+					///alert(hz_zoom);
+					if(typeof hz_zoom !== 'undefined') {    /// 存在值
+						zoom = hz_zoom;
+					}
+				
+					var _dest = parseInt(storage['hz_destination']);
+					isNaN(_dest) ? hz_destination = HZ_DESTINATION_MEETING_ROOM : hz_destination = _dest;
+				
+					///alert(storage['hz_is_navigating'] + "  " + Boolean(storage['hz_is_navigating']));
+					hz_is_navigating = Boolean(storage['hz_is_navigating']);
+				}else{
+					///alert("浏览暂不支持localStorage");
+				}
+				
+				
+            	$(function(){
+				
+				
+				
+									//以下变量可用可不用
+					
+					var $svg_map_base = $('#svg_map_base');
+					var $svg_event = $('#svg_event');
+					var $svg_board = $('#svg_path');
+					var $svg_map =  $('#svg_image');
+					
+					var $document = $(document);
+
+				
+				
+				
+				
+				
+					
+					//地图缩放
+					
+					//地图缩放函数
+					
+		 
+					
+					
+							  
+          	//iii
+			//鼠标滚轮缩放svg图
+		
+				 
+				 //localStorage.clear();
+				
+				 
+				$svg_event.ready(
+					function(){
+						
+						
+						
+						//获取svg图对象
+						var mapSign = $svg_map_base;
+						//设置缩放速度   比例缩放
+						var zoomSpeed = 0.05;
+						
+		 
+						// using the event helper
+						$svg_event.on('mousewheel',addMousewheelEvent);
+ 						function addMousewheelEvent(event, delta, deltaX, deltaY) {
+						
+						 		//svg图的最小 最大  X和Y
+								var mapMinX,mapMaxX,mapMinY,mapMaxY;
+								
+								var mapOffset = mapSign.offset();
+								
+								var mapOuterWidth = mapSign.outerWidth();
+								var mapOuterHeight = mapSign.outerHeight();
+								
+								mapMinX = mapOffset.left;
+								mapMaxX = mapOffset.left + mapOuterWidth;
+								mapMinY = mapOffset.top;
+								mapMaxY = mapOffset.top + mapOuterHeight;
+								
+								
+								
+								
+							
+							
+							if(event.pageX > mapMinX && event.pageX < mapMaxX && event.pageY > mapMinY && event.pageY <  mapMaxY){
+
+								
+								  /*取消默认事件*/
+								  event.preventDefault()
+								  /*计算速度*/
+ 						 			
+								  
+								  var mapHeight, mapWidth, mapTopBorder , mapLeftBorder ,mapTop, mapLeft , speedTop ,speedLeft;
+								  /*#map 的基本参数*/
+								  mapHeight = mapSign.height();
+								  mapWidth = mapSign.width();
+								  
+								  mapTopBorder = parseInt(mapSign.css('border-top-width'));
+								  mapLeftBorder = parseInt(mapSign.css('border-left-width'));
+								  
+								  mapTop = parseInt(mapSign.css('top'));
+								  mapLeft = parseInt(mapSign.css('left'));
+								  
+								  
+								  
+								  /*计算缩放速度  单独的top  或  left*/
+								  
+								  if(delta == 1){
+								  	  speedTop =  parseInt(zoomSpeed * mapHeight);
+									  console.log ('speedTop',speedTop); 
+									  speedLeft =  parseInt(zoomSpeed * mapWidth);
+								  }else{
+								  	  speedTop =  -parseInt(zoomSpeed * mapHeight);
+									  speedLeft = -parseInt(zoomSpeed * mapWidth);
+								  }
+								  
+								 
+								/*更改后的高*/
+								var resultHeight = mapHeight + (speedTop * 2); 
+								var resultWidth = mapWidth + (speedLeft * 2);
+								
+								
+								/*鼠标在图内距离*/
+								var currentMouseTop = event.pageY - mapMinY - mapTopBorder;
+								var currentMouseLeft = event.pageX - mapMinX - mapLeftBorder;
+								/*缩放后再图内的距离*/
+								var mouseTop = Math.round(currentMouseTop - (currentMouseTop / mapHeight * resultHeight));
+								var mouseLeft = Math.round(currentMouseLeft - (currentMouseLeft / mapWidth * resultWidth));
+								 
+								 
+		
+ 
+ 								/*计算svg偏离距离*/
+								/*svg图的left*/
+ 
+									
+										
+								hzY = mapTop + mouseTop  ;
+					 			hzX =  mapLeft + mouseLeft ;
+									
+					 				
+								/*保存缩放比例*/
+							 	zoom = resultWidth / map_w;
+								storage['hz_zoom'] = zoom;
+									
+									
+									
+									console.log('margin',margin,'resultHeight',resultHeight,'resultWidth',resultWidth);
+									
+ 									zoomFn(resultHeight,resultWidth);
+									
+									$svg_map_base.css({
+										left:hzX+'px',
+										top:hzY + 'px'
+									})
+									
+        						  //hz_map_zoom(margin, margin, resultHeight , resultWidth);
+ 		  						  //hz_change_item_in_map();
+								  
+								 /*计算图片相对父元素位置*/
+ 								  
+							}
+  							 
+						}
+					}
+				);	
+		
+			
+			
+			//缩放函数
+			zoomFn(map_h*zoom,map_w*zoom);
+			function  zoomFn(height,width){
+				var $each_map_layer = $('.each_map_layer');
+				$each_map_layer.animate({height:height+'px',width:width+'px'},'fast','swing');
+				$each_map_layer.stop(false,true);
+			}
+         
+					
+					
+					
+					
+					
+					
+					//地图移动变量
+					
+					var mapMoveMousedownX,mapMoveMousedownY;
+					var currentX,currentY;
+					
+					
+					function addMapMoveEvent(){
+						$svg_event.on('mousedown',mapMoveMousedownFn);
+					}
+					//事件函数
+					function mapMoveMousedownFn(e){
+						 mapMoveMousedownX = e.pageX;
+						 mapMoveMousedownY = e.pageY;
+						
+					    
+						
+						$document.on('mousemove',mapMoveMousemoveFn);
+						
+						$document.on('mouseup',mapMoveMouseupFn);
+						
+						return false;
+						
+					}
+					function mapMoveMousemoveFn(e){
+						var svg_map_base_offset = $svg_map_base.offset();
+						
+						currentX = e.pageX - mapMoveMousedownX + parseInt(hzX);
+						currentY = e.pageY - mapMoveMousedownY + parseInt(hzY);
+						
+					 
+						
+						$svg_map_base.css({
+							left:currentX+'px',
+							top:currentY+'px'
+						});
+						
+					}
+					function mapMoveMouseupFn(){
+						hzX = currentX;
+						hzY = currentY;
+						$document.off('mousemove',mapMoveMousemoveFn);
+						$document.off('mouseup',mapMoveMouseupFn);
+						
+					}
+					
+					function removeMapMoveEvent(){
+						$svg_event.off('mousedown',mapMoveMousedownFn);
+					}
+					
+					
+					addMapMoveEvent();
+					
+				})
+            </script>
+            
             
             <script>
+			
+			
+						/*像素转换物理单位*/
+			function mmConversion(number){
+				return Math.round(number / real_loc_to_pix / zoom);
+			}
+
+			
+			
+			
+			
                  	$(function(){
 						
 
@@ -364,7 +673,7 @@
 				 	$(function(){
 			 
 						
-						var enclosure1 = new enclosure($('#svg_event'));
+						var enclosure1 = new enclosure();
 						$("#start_draw").on('click',function(){
 							
 								var $this = $(this);
@@ -379,6 +688,8 @@
 									$method_select.removeAttr('disabled');
 									
 									enclosure1.remove_event();
+									
+
 		 
 								 
 								}else {
@@ -386,6 +697,10 @@
 									
 									$method_select.attr('disabled','disabled');
 									enclosure1.polyline(); 
+									
+									 
+									
+								 	
 								 
 								}
 							}
@@ -414,12 +729,12 @@
 						/*
 						param object obj jquery对象
 						*/
-						function enclosure(obj){
+						function enclosure(){
 						 
 							//坐标资料格式 [[1,2],[3,4]]
 							this.points=[];
 							//操作事件的对象(jquery)
-							this.$event = obj || null;
+							this.$event = $('#enclosureEvent');
 							//画板对象(jquery)
 							this.$board = $('#svg_path');
 							this.$board.svg();
@@ -494,6 +809,7 @@
 							this.again_map = function(){
 								this.remove_event();
 								this.polyline();
+								
 							}
 			 
 							
@@ -511,7 +827,7 @@
 								  //默认清除画板
 								 is_board_clear = (is_board_clear ===false) ? false : true;
 								
-								
+								$('#enclosureEvent').css('display','none');
 								$window = $(window);
  								$window.off('keydown',this.right_angle_package);
 								$window.off('keyup',this.keyup_fn);
@@ -544,8 +860,8 @@
 							 
 								this.points = [];
 								this.is_coordinate_offset = false;
-						
-								
+								//打开事件绑定div
+								$('#enclosureEvent').css('display','block');
 								
 								_window.on('keydown',{_this:_this},this.right_angle_package);
 								
@@ -719,8 +1035,10 @@
 							}
 							//方框
 							this.square = function(){
-						 
-								
+						 		
+								//打开事件绑定div
+								$('#enclosureEvent').css('display','block');
+
 								this.$event.on('mousedown',{_this:this},this.square_mouse_down_package);
 							}
 							this.square_mouse_down_package = function(e){
@@ -979,6 +1297,7 @@
 							}
 		 
 							this.remove_square = function(){
+								$('#enclosureEvent').css('display','none');
 								this.$event.off('mousedown',this.square_mouse_down_package);
 								this.$board_svg.clear();
 								this.remove_hotspot();
@@ -1092,7 +1411,7 @@
 					},
 			
 					success: function (e) {
-						 console.log('e:',e);
+						 
 						$(e).closest('.form-group').removeClass('has-error');//.addClass('has-info');
 						$(e).remove();
 						
@@ -1104,11 +1423,25 @@
 						
 						if(enclosure1.points[0] == undefined || enclosure1.points[0] != enclosure1.points[enclosure1.points.length - 1]) {
 							alert('您没有画图');
+							return;
 						}
 						
 						 var $form = $(form).serializeArray();
-						 $form.push({name:'fence_coordinates',value:enclosure1.points});
+						 var rusultPoints = [];
 						 
+						 var points_length = enclosure1.points.length - 1;
+						 for(var i = 0; i<points_length ; i++){
+						 	var temporaryArr = [];
+							temporaryArr[0] = mmConversion(enclosure1.points[i][0]);
+							temporaryArr[1] = mmConversion(enclosure1.points[i][1]);
+							rusultPoints.push(temporaryArr);
+							temporaryArr = [];
+						 }
+						 $form.push({name:'fence_coordinates',value:rusultPoints});
+
+						  
+						 $('#start_draw').click();
+
 						 console.log('$form',$form);
 							 
 						
@@ -1123,6 +1456,8 @@
 					});
                  	
                  </script>
+                 
+
             <div id="svg_map_base"  class="each_map_layer"> 
               <!--基础svg图--> 
               <img src="../static/img/floor3.svg"    id="svg_image" class="each_map_layer"> 
@@ -1137,10 +1472,15 @@
                       <img src="/static/img/dest.png" style="position:absolute" id="destination" title="终点">--> 
                 
               </div>
-              <div id="svg_event" class="each_map_layer"> <img src="../static/img/drawing.png" id="line_start" title="围栏绘制起点"    style="position:absolute; display:none;">
+              
+               <div id="enclosureEvent" class="each_map_layer" style="display:none;" > <img src="../static/img/drawing.png" id="line_start" title="围栏绘制起点"    style="position:absolute; display:none;"></div>
+
+              
+              <div id="svg_event" class="each_map_layer"> 
                  
               </div>
-              <div> </div>
+              
+              
             </div>
           </div>
           <style type="text/css" >
@@ -1167,6 +1507,8 @@
 				/*所有事件在floor3父类上面   下面的子元素层级应该全部小于父元素层级*/
 				#svg_map_base {
 				 
+				 	position:absolute;
+ 
  					z-index:2;
 					
 				}
@@ -1187,7 +1529,13 @@
 				#svg_user_sign{
 					z-index:-10;
 					}
-				
+					
+				#svg_event{
+					z-index:1;
+				}
+				#enclosureEvent{
+					z-index:2;
+				}
 				
 				/*图基本设置*/
 				.map_base_data{height:890px;width: 1700px;}
