@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="../static/ace/components/font-awesome/css/font-awesome.css" />
 
 <!-- page specific plugin styles -->
+<link rel="stylesheet" href="../static/components/jquery.gritter/css/jquery.gritter.css" />
 
 <!-- text fonts -->
 
@@ -19,6 +20,7 @@
 <link rel="stylesheet" href="../static/ace/assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
 <link rel="stylesheet" href="../static/ace/assets/css/ace-skins.css" />
 <link rel="stylesheet" href="../static/ace/assets/css/ace-rtl.css" />
+
 
 <!-- svg样式 -->
 <link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css">
@@ -259,6 +261,8 @@
                 </div>
               </div>
             </div>
+            
+            <div id="gritter-notice-wrapper" style="position:absolute; right:0px; z-index:1001;"></div>
             
             
            	<script>
@@ -1617,7 +1621,33 @@
 				electronic_fence_socket_state = '离开';
 			}
 			alert('用户ID:'+msg[0].userId+electronic_fence_socket_state+'了房间'+msg[0].name);
+			
+			gritter_alert('电子围栏警报','用户ID:'+msg[0].userId+electronic_fence_socket_state+'了房间'+msg[0].name);
+			
+							
+			console.log('$.gritter',$.gritter);
+					 
+				
+			
+			
+			
+			
         });
+			
+
+			
+				function gritter_alert(title,text){
+					$.gritter.add({
+						title: title,
+						text: text,
+
+						class_name: 'gritter-warning' 
+					});
+			
+					return false;
+
+				};
+
 			
 			
 			
@@ -1764,13 +1794,33 @@
 <!--时间控制插件--> 
 
 <script src="../static/ace/components/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.min.js"></script> 
+<script src="../static/components/jquery.gritter/js/jquery.gritter.js"></script>
 
 <!-- ace scripts --> 
 
+<script src="../static/ace/assets/js/src/elements.scroller.js"></script> 
+<script src="../static/ace/assets/js/src/elements.colorpicker.js"></script> 
+<script src="../static/ace/assets/js/src/elements.fileinput.js"></script> 
+<script src="../static/ace/assets/js/src/elements.typeahead.js"></script> 
+<script src="../static/ace/assets/js/src/elements.wysiwyg.js"></script> 
+<script src="../static/ace/assets/js/src/elements.spinner.js"></script> 
+<script src="../static/ace/assets/js/src/elements.treeview.js"></script> 
+<script src="../static/ace/assets/js/src/elements.wizard.js"></script> 
+<script src="../static/ace/assets/js/src/elements.aside.js"></script> 
 <script src="../static/ace/assets/js/src/ace.js"></script> 
 <script src="../static/ace/assets/js/src/ace.basics.js"></script> 
+<script src="../static/ace/assets/js/src/ace.scrolltop.js"></script> 
+<script src="../static/ace/assets/js/src/ace.ajax-content.js"></script> 
+<script src="../static/ace/assets/js/src/ace.touch-drag.js"></script> 
 <script src="../static/ace/assets/js/src/ace.sidebar.js"></script> 
-
+<script src="../static/ace/assets/js/src/ace.sidebar-scroll-1.js"></script> 
+<script src="../static/ace/assets/js/src/ace.submenu-hover.js"></script> 
+<script src="../static/ace/assets/js/src/ace.widget-box.js"></script> 
+<script src="../static/ace/assets/js/src/ace.settings.js"></script> 
+<script src="../static/ace/assets/js/src/ace.settings-rtl.js"></script> 
+<script src="../static/ace/assets/js/src/ace.settings-skin.js"></script> 
+<script src="../static/ace/assets/js/src/ace.widget-on-reload.js"></script> 
+<script src="../static/ace/assets/js/src/ace.searchbox-autocomplete.js"></script> 
 <!-- inline scripts related to this page --> 
 
 <!--page scripts --> 
