@@ -312,6 +312,106 @@
 				}
 				
 				
+				
+				
+				function transformDemo(svg) {
+						var x_meeting_room = 2067;
+						var y_meeting_room = 3563;
+					
+						svg.describe('Example Skew - Show effects of skewX and skewY');
+						var str3 = 'translate(' +  parseInt(x_meeting_room*real_loc_to_pix*zoom) + ',' + parseInt(y_meeting_room*real_loc_to_pix*zoom) + ')';
+						var g1 = svg.group({transform: str3});
+						svg.text(g1, 0, 0, '会议室',{fontSize: 20, fontFamily: 'Verdana', fill: 'blue'});
+					
+						var vice_general_office_x = 2067;
+						var vice_general_office_Y = 8981;
+						var str3 = 'translate(' +  parseInt(vice_general_office_x*real_loc_to_pix*zoom) + ',' + parseInt(vice_general_office_Y*real_loc_to_pix*zoom) + ')';
+						var g1 = svg.group({transform: str3});
+						svg.text(g1, 0, 0, '副总办公室',{fontSize: 20, fontFamily: 'Verdana', fill: 'blue'});
+					
+						var president_office_x = 2067;
+						var president_office_y = 15609;
+						var str3 = 'translate(' +  parseInt(president_office_x*real_loc_to_pix*zoom) + ',' + parseInt(president_office_y*real_loc_to_pix*zoom) + ')';
+						var g1 = svg.group({transform: str3});
+						svg.text(g1, 0, 0, '总裁室',{fontSize: 20, fontFamily: 'Verdana', fill: 'blue'});
+					 
+						var warehouse1_x = 7947;
+						var warehouse1_y = 15609;
+						var str3 = 'translate(' +  parseInt(warehouse1_x*real_loc_to_pix*zoom) + ',' + parseInt(warehouse1_y*real_loc_to_pix*zoom) + ')';
+						var g1 = svg.group({transform: str3});
+						svg.text(g1, 0, 0, '仓库1',{fontSize: 20, fontFamily: 'Verdana', fill: 'blue'});
+					
+						var warehouse2_x = 12046;
+						var warehouse2_y = 15609;
+						var str3 = 'translate(' +  parseInt(warehouse2_x*real_loc_to_pix*zoom) + ',' + parseInt(warehouse2_y*real_loc_to_pix*zoom) + ')';
+						var g1 = svg.group({transform: str3});
+						svg.text(g1, 0, 0, '仓库2',{fontSize: 20, fontFamily: 'Verdana', fill: 'blue'})
+					 
+						var log_conference_room_x = 31148;
+						var log_conference_room_y = 14433;
+						var str3 = 'translate(' +  parseInt(log_conference_room_x*real_loc_to_pix*zoom) + ',' + parseInt(log_conference_room_y*real_loc_to_pix*zoom) + ')';
+						var g1 = svg.group({transform: str3});
+						svg.text(g1, 0, 0, '大会议室',{fontSize: 20, fontFamily: 'Verdana', fill: 'blue'})
+						
+						var wisdom_medical_treatment_x = 34569;
+						var wisdom_medical_treatment_y = 9587;
+						var str3 = 'translate(' +  parseInt(wisdom_medical_treatment_x*real_loc_to_pix*zoom) + ',' + parseInt(wisdom_medical_treatment_y*real_loc_to_pix*zoom) + ')';
+						var g1 = svg.group({transform: str3});
+						svg.text(g1, 0, 0, '智慧医疗',{fontSize: 16, fontFamily: 'Verdana', fill: 'blue'})
+					
+						var wisdom_park_x = 34309;
+						var wisdom_park_y = 6486;
+						var str3 = 'translate(' +  parseInt(wisdom_park_x*real_loc_to_pix*zoom) + ',' + parseInt(wisdom_park_y*real_loc_to_pix*zoom) + ')';
+						var g1 = svg.group({transform: str3});
+						svg.text(g1, 0, 0, '智慧园区',{fontSize: 16, fontFamily: 'Verdana', fill: 'blue'})
+						
+						var gym_x = 33678;
+						var gym_y = 3101;
+						var str3 = 'translate(' +  parseInt(gym_x*real_loc_to_pix*zoom) + ',' + parseInt(gym_y*real_loc_to_pix*zoom) + ')';
+						var g1 = svg.group({transform: str3});
+						svg.text(g1, 0, 0, '健身房',{fontSize: 16, fontFamily: 'Verdana', fill: 'blue'})
+						
+						
+						var intelligent_security_x = 31000;
+						var intelligent_security_y = 3101;
+						var str3 = 'translate(' +  parseInt(intelligent_security_x*real_loc_to_pix*zoom) + ',' + parseInt(intelligent_security_y*real_loc_to_pix*zoom) + ')';
+						var g1 = svg.group({transform: str3});
+						svg.text(g1, 0, 0, '智慧安防',{fontSize: 16, fontFamily: 'Verdana', fill: 'blue'})
+						
+						var intelligent_fire_protection_x = 28403;
+						var intelligent_fire_protection_y = 3101;
+						var str3 = 'translate(' +  parseInt(intelligent_fire_protection_x*real_loc_to_pix*zoom) + ',' + parseInt(intelligent_fire_protection_y*real_loc_to_pix*zoom) + ')';
+						var g1 = svg.group({transform: str3});
+						svg.text(g1, 0, 0, '智慧消防',{fontSize: 16, fontFamily: 'Verdana', fill: 'blue'})
+						
+						var beidou_xihe_x = 25588;
+						var beidou_xihe_y = 3101;
+						var str3 = 'translate(' +  parseInt(beidou_xihe_x*real_loc_to_pix*zoom) + ',' + parseInt(beidou_xihe_y*real_loc_to_pix*zoom) + ')';
+						var g1 = svg.group({transform: str3});
+						svg.text(g1, 0, 0, '北斗羲和',{fontSize: 16, fontFamily: 'Verdana', fill: 'blue'})
+						
+						
+						var computer_room_x = 19244;
+						var computer_room_y = 4775;
+						var str3 = 'translate(' +  parseInt(computer_room_x*real_loc_to_pix*zoom) + ',' + parseInt(computer_room_y*real_loc_to_pix*zoom) + ')';
+						var g1 = svg.group({transform: str3});
+						svg.text(g1, 0, 0, '机房',{fontSize: 20, fontFamily: 'Verdana', fill: 'blue'})	
+						
+						var reception_x = 19244;
+						var reception_y = 7456;
+						var str3 = 'translate(' +  parseInt(reception_x*real_loc_to_pix*zoom) + ',' + parseInt(reception_y*real_loc_to_pix*zoom) + ')';
+						var g1 = svg.group({transform: str3});
+						svg.text(g1, 0, 0, '前台',{fontSize: 20, fontFamily: 'Verdana', fill: 'blue'})	
+					
+					
+					}
+				
+				
+				
+				
+				
+				
+				
             	$(function(){
 				
 				
@@ -328,7 +428,11 @@
 				
 				
 				
-				
+					//地图标识
+					var $svg_sign = $('#svg_sign');
+					$svg_sign.svg();
+					var svg_sign_svg = $svg_sign.svg('get');
+					transformDemo(svg_sign_svg);
 				
 					
 					//地图缩放
@@ -470,6 +574,10 @@
 				var $each_map_layer = $('.each_map_layer');
 				$each_map_layer.animate({height:height+'px',width:width+'px'},'fast','swing');
 				$each_map_layer.stop(false,true);
+				//地图标识;
+				svg_sign_svg.clear();
+				transformDemo(svg_sign_svg);
+				
 			}
          
 					
