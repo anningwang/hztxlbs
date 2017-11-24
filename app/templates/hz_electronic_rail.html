@@ -840,6 +840,9 @@
 							this.points=[];
 							//操作事件的对象(jquery)
 							this.$event = $('#enclosureEvent');
+							//临时线函数
+							this.$svg_temporary_line = $('#enclosureEvent');
+							
 							//画板对象(jquery)
 							this.$board = $('#svg_path');
 							this.$board.svg();
@@ -927,12 +930,13 @@
 							/*
 							param boolear is_result 是否生成结果
 							*/
-							this.remove_event = function(is_board_clear){
+							this.remove_event = function(is_board_clear,is_enclosureEvent_dispaly){
 								
 								  //默认清除画板
 								 is_board_clear = (is_board_clear ===false) ? false : true;
+								 is_board_clear = (is_enclosureEvent_dispaly ===false) ? false : true;
 								
-								$('#enclosureEvent').css('display','none');
+								if(is_board_clear) $('#enclosureEvent').css('display','none');
 								$window = $(window);
  								$window.off('keydown',this.right_angle_package);
 								$window.off('keyup',this.keyup_fn);
@@ -942,7 +946,7 @@
 								$(this.htmlObj.line_start).off('click',this.line_end);
 								
 								//清楚事件线
-								this.svgPolyline([],{},this.$event);
+								this.svgPolyline([],{},this.$svg_temporary_line);
 								 //是否清楚画板线
 								if(is_board_clear){ 
 									this.svgPolyline([],{},this.$board);
@@ -988,6 +992,7 @@
 								 
 								  
 								e.data._this.line_click(e);
+								
 							}
 	  
 							
@@ -1128,7 +1133,7 @@
 
 
 								
-								_this.remove_event(false);
+								_this.remove_event(false,false);
 								
 								
 	 
@@ -1197,7 +1202,7 @@
 								this.points[3] = spot3;
 								this.points[4] = this.points[0];
 								
-								this.svgPolyline(this.points,this.line_style.demo_line,this.$event);
+								this.svgPolyline(this.points,this.line_style.demo_line,this.$svg_temporary_line);
 								
 							}
 							
@@ -1207,7 +1212,7 @@
 							}
 							
 							this.square_mouse_up = function(e){
-								this.svgPolyline([],{},this.$event);
+								this.svgPolyline([],{},this.$svg_temporary_line);
 								this.remove_hotspot();
 								this.svgPolyline(this.points,this.line_style.result_line,this.$board);
 								$window = $(window);
@@ -1328,7 +1333,7 @@
 											this.spot_move_line[1] = map_path_line1;
 											this.hotspot_new_position = map_path_line1;
 											if(current_spot_index < (points_size - 1) && points_size > 2 ) this.spot_move_line[2] =  this.points[current_spot_index+1];
-											this.svgPolyline(this.spot_move_line,this.line_style.demo_line,this.$event);
+											this.svgPolyline(this.spot_move_line,this.line_style.demo_line,this.$svg_temporary_line);
 										}else{
 											this.hotspot_new_position = map_path_line1;
 										}
@@ -1341,7 +1346,7 @@
 											this.spot_move_line[1] = map_path_line1;
 											this.hotspot_new_position = map_path_line1;
 											if(points_size > 2 ) this.spot_move_line[2] =  this.points[current_spot_index-1];
-											this.svgPolyline(this.spot_move_line,this.line_style.demo_line,this.$event);
+											this.svgPolyline(this.spot_move_line,this.line_style.demo_line,this.$svg_temporary_line);
 										}else{
 											this.hotspot_new_position = map_path_line1;
 										}
@@ -1367,7 +1372,7 @@
 								var current_spot_index = e.data.current_spot_index;
 								var points_size = e.data.points_size;
 								
-								this.svgPolyline([],{},this.$event);
+								this.svgPolyline([],{},this.$svg_temporary_line);
 					 		 	
 								/*不是尾点的情况*/
 							 if($obj.attr('is_end_spot') != 1){
@@ -1417,7 +1422,7 @@
 								  
 								
 								var settings = param || this.line_style.result_line;
-								obj = obj || this.$event;
+								obj = obj || this.$svg_temporary_line;
 								is_clear = (is_clear === false) ? false :  true;
 								obj.svg();
 								var $svg = obj.svg('get');
@@ -1810,6 +1815,8 @@
                 
               </div>
               
+              <div id="svg_temporary_line" class="each_map_layer"></div>
+              
                <div id="enclosureEvent" class="each_map_layer" style="display:none;" > <img src="../static/img/drawing.png" id="line_start" title="围栏绘制起点"    style="position:absolute; display:none;"></div>
 
               
@@ -1865,7 +1872,11 @@
 				}
 				#svg_user_sign{
 					z-index:-10;
-					}
+				}
+				
+				#svg_temporary_line{
+					z-index:-1;
+				}
 					
 				#svg_event{
 					z-index:1;
