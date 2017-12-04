@@ -1,0 +1,28 @@
+
+#myCanvas{ position:relative;}
+#floor3 {
+	 
+	position: relative;
+	overflow: hidden;
+	border: 1px solid #b94a48;
+	min-width:1702px;
+	min-height:892px;
+	background:url(../img/cross.gif);
+	 
+ 
+	}
+#svg_map{
+	 
+	
+	 
+	position:absolute;
+	overflow:hidden;
+}
+#svg_path{
+ 
+	position:absolute;
+	z-index:10;
+}
+/*图基本设置*/
+.map_base_data{height:890px;width: 1700px;}
+ 

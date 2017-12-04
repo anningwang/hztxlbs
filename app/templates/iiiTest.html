@@ -1,26 +1,65 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta charset="utf-8">
-<title>菜鸟教程(runoob.com)</title>
-<script src="http://cdn.static.runoob.com/libs/jquery/1.10.2/jquery.min.js">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+</head>
+<script src="../static/js/jquery-v1.11.0.min.js">
 </script>
 <script>
 $(document).ready(function(){
-	$("button").click(function(){
-		var x=$("div").offset();
-		alert("上: " + x.top + " 左: " + x.left);
-	});
+ 
+    var a = [];
+	
+	
+	
+	
+ $('#div2').mousedown(function(e){
+ 
+	 a.push(ff);
+ 
+ });
+ 
+ function ff(){
+	test();	
+	test2();	
+ }
+ 
+ $('#div3').mousedown(function(){
+	 var a_length = a.length;
+	 for(var i = 0; i<a_length ; i++){
+		a[i]();	
+	 }	
+	 a = [];
+ });
+ 
+ function test(){
+	alert('test');	
+ }
+  function test2(){
+	alert('test2');	
+ }
+ 
 });
 </script>
 </head>
 <style>
-	* { margin:0;}
+	div{ width:60px;  height:6660px; float:left;}
 </style>
-<body>
-
-<div style = "position:absolute; top:0; left:0; border:20px solid #000;">这是一个段落。</div>
-<button style = "position:absolute; top:100px;">返回p元素的偏移坐标</button>
-
+<body style="height:2000px;">
+ 123123123
+ 
+    	<div style="background:#00F;" id="div2" aada = 1>
+         
+        </div>
+        <div style="background:#000;" id="div3" aada = 1>
+         
+        </div>
+ 
+ </div>
+ 
+    
+ 
+ 
 </body>
 </html>
