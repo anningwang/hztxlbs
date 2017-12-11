@@ -1792,7 +1792,55 @@
 				
  
 		 
+				/*人物标记位置*/
+				
+				    var namespace = '/HeZhong';
 
+					// Connect to the Socket.IO server.
+					// The connection URL has the following format:
+					//     http[s]://<domain>:<port>[/<namespace>]
+					var connStr = location.protocol + '//' + document.domain + ':' + location.port + namespace;
+					console.log(connStr);
+					var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+				
+				
+				socket.on('hz_position', function(msg) {
+				var json = eval(msg); // 数组
+				console.log(json);
+				$.each(json, function (index, item) {//index json 索引   item  为本索引内容
+					hz_user_xy[index] = [item['userId'], json[index]['x'], json[index]['y']];
+					//把每个人存起来
+				});
+		
+				console.log('json len:', json.length, ' hz_user_xy len:', hz_user_xy.length);
+				for (var i = 0; i< json.length; i++) {
+					
+					 
+					
+					//zoom:地图缩放级别  
+					//   hz_people_goto 把人放到对应位置函数 
+					
+					hz_people_goto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
+							hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
+				}
+				});
+				
+				
+				
+				//(用户)人位置函数
+					function hz_people_goto(x, y, people) {
+					 
+						
+						people = people || '1918E00103AA';      // 设置默认参数
+						
+					 
+						
+						/// 24, 45是定位图标的 针尖 位置。显示图片时，是以图片左上角为参考坐标。故需要对坐标进行偏移。
+						$("#"+people).stop(true, true).animate({
+							left: (x - 24),
+							top: (y - 45)
+						});
+					}
 			
 			
 	 })
@@ -1809,9 +1857,9 @@
               <div id="svg_sign"  class="each_map_layer"></div>
               <!--用户标识区域-->
               <div id="svg_user_sign" class="each_map_layer"> 
-                <!--<img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA"> 
-                      <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9"> 
-                      <img src="/static/img/dest.png" style="position:absolute" id="destination" title="终点">--> 
+                 <img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA"> 
+                 <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9"> 
+                    
                 
               </div>
               
