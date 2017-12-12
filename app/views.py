@@ -368,11 +368,11 @@ def get_history_location():
             0       成功
         msg         错误信息
             'ok'    成功
-        data[{      历史轨迹记录。排序方式 userId， datatime。如果查询多个用户，无法控制每个用户
+        data[{      历史轨迹记录。排序方式 userId， datetime。如果查询多个用户，无法控制每个用户
                         的记录条数，他们的总条数等于 输入参数 rows
             x       横坐标，实际物理坐标，单位 mm
             y       纵坐标
-            datatime    时间格式（北京时间）： yyyy-mm-dd HH-MM-SS
+            datetime    时间格式（北京时间）： yyyy-mm-dd HH-MM-SS
         }]
         total       符合条件的记录条数
     }
@@ -405,13 +405,13 @@ def get_history_location():
     for rec in records:
         if uid == rec.user_id:
             points.append({'x': rec.x, 'y': rec.y,
-                           'datatime': datetime.datetime.strftime(rec.timestamp, '%Y-%m-%d %H:%M:%S')})
+                           'datetime': datetime.datetime.strftime(rec.timestamp, '%Y-%m-%d %H:%M:%S')})
         else:
             if uid != -1:
                 data[uid] = points
             uid = rec.user_id
             points = [{'x': rec.x, 'y': rec.y,
-                       'datatime': datetime.datetime.strftime(rec.timestamp, '%Y-%m-%d %H:%M:%S')}]
+                       'datetime': datetime.datetime.strftime(rec.timestamp, '%Y-%m-%d %H:%M:%S')}]
 
     if uid != -1:
         data[uid] = points
@@ -498,7 +498,7 @@ def get_electronic_rail_info():
                 y           纵坐标
                 room        围栏名称
                 status      告警状态， 1 进入围栏，0 退出围栏
-                datatime    时间格式（北京时间）： yyyy-mm-dd HH-MM-SS
+                datetime    时间格式（北京时间）： yyyy-mm-dd HH-MM-SS
             }]
         }
     }

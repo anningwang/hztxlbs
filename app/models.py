@@ -182,4 +182,47 @@ class HzEtPoints(db.Model):
     y = db.Column(db.Float)
 
 
+class HzRoomStatCfg(db.Model):
+    """ 人员盘点区域配置表 """
+    id = db.Column(db.Integer, primary_key=True)
+    no = db.Column(db.String(40))       # 盘点区域编号
+    name = db.Column(db.String(40))     # 盘点区域名称
+    build_id = db.Column(db.String(40))
+    floor_no = db.Column(db.String(40))
+    create_at = db.Column(db.DateTime)
+
+    def create_no(self):
+        search_no = gen_code('QY')
+        dt = HzRoomStatCfg.query.filter(HzRoomStatCfg.no.like('%' + search_no + '%'))\
+            .order_by(HzRoomStatCfg.id.desc()).first()
+        number = 1 if dt is None else int(dt.no.rsplit('-', 1)[1]) + 1
+        self.no = search_no + ('%03d' % number)
+        return self.no
+
+
+class HzRoomStatPoints(db.Model):
+    """ 人员盘点区域顶点坐标表 """
+    id = db.Column(db.Integer, primary_key=True)
+    room_id = db.Column(db.Integer)     # 盘点区域id
+    x = db.Column(db.Float)             # 存储物理坐标
+    y = db.Column(db.Float)
+
+
+class HzRoomStatInfo(db.Model):
+    """ 人员盘点信息表 """
+    id = db.Column(db.Integer, primary_key=True)
+    no = db.Column(db.Integer)              # 盘点编号
+    room_id = db.Column(db.Integer)         # 盘点区域id
+    datetime = db.Column(db.DateTime)       # 盘点时间
+    people_num = db.Column(db.Integer)      # 人数
+
+    def create_no(self):
+        search_no = gen_code('PD')
+        pd = HzRoomStatInfo.query.filter(HzRoomStatInfo.no.like('%' + search_no + '%'))\
+            .order_by(HzRoomStatInfo.id.desc()).first()
+        number = 1 if pd is None else int(pd.no.rsplit('-', 1)[1]) + 1
+        self.no = search_no + ('%03d' % number)
+        return self.no
+
+
 whooshalchemy.whoosh_index(app, Post)
