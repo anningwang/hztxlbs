@@ -144,29 +144,32 @@
             <div class="" id="map_controller_panel" style="position:absolute; top:60px; left:80px; z-index:1000; width:370px;">
               <div class="btn-group btn-group-xs col-xs-12" id="map_panel_button" style="background:#FFF; border:1px solid #CCC;">
                 <button type="button" class="btn btn-primary" id="setEnclosure" hz_target = "#EnclosureConcent" >设置围栏</button>
+                <button type="button" class="btn btn-primary" id="setEnclosure" hz_target = "#EnclosureConcent1" >修改围栏</button>
+                <button type="button" class="btn btn-primary" id="setEnclosure" hz_target = "#EnclosureConcent3" >删除围栏</button>
                 <button type="button" class="btn btn-primary" id="setEnclosure2" hz_target = "#EnclosureConcent2" >查询围栏</button>
               </div>
               <div class="map_panel_content col-xs-12" style="background:#FFF; border:1px solid #CCC;">
                 <div class="col-xs-12"  style="display:none; " id="EnclosureConcent">
                   <div class="row" style="padding-right:10px; padding-top:20px;">
                     <form role="form" class="form-horizontal" id="form-validate">
-                      <div class="alert alert-info"> 设置围栏相关设置 <br />
+                      <div class="alert alert-info"> 设置围栏 <br />
                       </div>
+                      
                       <div class="form-group">
                         <label for="firstname" class="col-sm-3 control-label no-padding-right">围栏名称:</label>
                         <div class="col-sm-9">
-                          <input type="text"  id="set_enclosure_name" name="set_enclosure_name" placeholder=""  />
+                          <input type="text"  id="enclosure_name" name="name" placeholder=""  />
                         </div>
                       </div>
                       <div class="form-group">
-                        <label for="firstname"  class="col-sm-3 control-label no-padding-right">楼层:</label>
+                        <label for="floorNo"  class="col-sm-3 control-label no-padding-right">楼层:</label>
                         <div class="col-sm-9">
-                          <select class="form-control" id="set_enclosure_floor" name="set_enclosure_floor">
+                          <select class="form-control" id="enclosure_floorNo" name="floorNo">
                             <option value="floor3">3楼</option>
                           </select>
                         </div>
                       </div>
-                      <div class="form-group">
+                      <!--<div class="form-group">
                         <label for="firstname" class="col-sm-3 control-label no-padding-right">进入警报方式:</label>
                         <div class="col-sm-9">
                           <select class="form-control" id="set_enclosure_into_alert" name="set_enclosure_into_alert" >
@@ -193,7 +196,7 @@
                         <div class="col-sm-9">
                           <textarea class="form-control" id="set_enclosure_out_alert_content" name="set_enclosure_out_alert_content" rows="3"></textarea>
                         </div>
-                      </div>
+                      </div>-->
                       <div class="form-group">
                         <label for="firstname" class="col-sm-3 control-label no-padding-right">绘制范围:</label>
                         <div class="col-sm-9">
@@ -214,6 +217,111 @@
                         </div>
                       </div>
                     </form>
+                  </div>
+                </div>
+                <div class="col-xs-12"  style="display:none; " id="EnclosureConcent1">
+                  <div class="row" style="padding-right:10px; padding-top:20px;">
+                    <form role="form" class="form-horizontal" id="form-validate">
+                      <div class="alert alert-info"> 修改围栏 <br />
+                      </div>
+                      
+                      <div class="form-group">
+                        <label for="firstname" class="col-sm-3 control-label no-padding-right">围栏名称:</label>
+                        <div class="col-sm-9">
+                          <select class="form-control" id="alter_enclosure_name" name="name">
+                            <option value="floor3">3楼</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="floorNo"  class="col-sm-3 control-label no-padding-right">楼层:</label>
+                        <div class="col-sm-9">
+                          <select class="form-control" id="alter_enclosure_floorNo" name="floorNo">
+                            <option value="floor3">3楼</option>
+                          </select>
+                        </div>
+                      </div>
+                      <!--<div class="form-group">
+                        <label for="firstname" class="col-sm-3 control-label no-padding-right">进入警报方式:</label>
+                        <div class="col-sm-9">
+                          <select class="form-control" id="set_enclosure_into_alert" name="set_enclosure_into_alert" >
+                            <option value="text">文本</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="firstname"  class="col-sm-3 control-label no-padding-right">进入警报内容:</label>
+                        <div class="col-sm-9">
+                          <textarea class="form-control" rows="3" id="set_enclosure_into_alert_content" name="set_enclosure_into_alert_content"></textarea>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="firstname"  class="col-sm-3 control-label no-padding-right">退出警报方式:</label>
+                        <div class="col-sm-9">
+                          <select class="form-control" id="set_enclosure_out_alert" name="set_enclosure_out_alert">
+                            <option value="text">文本</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="firstname" class="col-sm-3 control-label no-padding-right">退出警报内容:</label>
+                        <div class="col-sm-9">
+                          <textarea class="form-control" id="set_enclosure_out_alert_content" name="set_enclosure_out_alert_content" rows="3"></textarea>
+                        </div>
+                      </div>-->
+                      <div class="form-group">
+                        <label for="firstname" class="col-sm-3 control-label no-padding-right">绘制范围:</label>
+                        <div class="col-sm-9">
+                          <div class="col-xs-6">
+                            <select class="form-control" id="enclosure_spot_method" >
+                              <option value="square">方形绘图</option>
+                              <option value="polyline">折线绘图</option>
+                            </select>
+                          </div>
+                          <div class="col-xs-6">
+                            <button type="button" id="start_draw" class="btn btn-xs btn-danger"> <span id="start_draw_span">开始绘制</span> <i class="ace-icon fa fa-arrow-right icon-on-right"></i> </button>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <div class="col-xs-6 col-xs-push-6">
+                          <input type="submit" class="btn btn-success btn-xs" id="set_enclosure_submit" value="提交" />
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+                <div class="col-xs-12" style="display:none;" id="EnclosureConcent3">
+                  <div class="row" style="padding-right:10px; height:200px;"> 
+                 
+                 		
+                         <form role="form" class="form-horizontal" id="form-validate">
+                      <div class="alert alert-info">查询围栏<br />
+                      </div>
+                      
+                      <div class="form-group">
+                        <label for="firstname" class="col-sm-6 control-label no-padding-right">电子围栏设置查询:</label>
+                        <div class="col-sm-6">
+                          <select id="electronic-fence-address" >
+                            <option value="0">请选择地址</option>
+                            <option value="Floor3">和仲通讯</option>
+                             
+                          </select>
+                        </div>
+                      </div>
+                      
+                      
+                      
+                      
+                      <div class="form-group">
+                        <div class="col-xs-6 col-xs-push-6">
+                          <button type="button" class="btn btn-success btn-xs" id="electronic-fence-query-button" />查询</button>
+                        </div>
+                      </div>
+                    </form>
+                      
+                      
+                      
                   </div>
                 </div>
                 <div class="col-xs-12" style="display:none;" id="EnclosureConcent2">
@@ -249,6 +357,7 @@
                       
                   </div>
                 </div>
+                
               </div>
             </div>
             
@@ -300,6 +409,23 @@
 				}else{
 					///alert("浏览暂不支持localStorage");
 				}
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
 				
 				
 				
@@ -1478,29 +1604,15 @@
 					focusInvalid: false,
 					ignore: "",
 					rules: {
-						set_enclosure_name: {
+						name: {
 							required: true,
 							 
 						},
-						set_enclosure_floor: {
+						floorNo: {
 							required: true,
 						 
-						},
-						set_enclosure_into_alert: {
-							required: true,
-						 
-						},
-						set_enclosure_into_alert_content: {
-							required: true
-						},
-						set_enclosure_out_alert: {
-							required: true,
-					 
-						},
-						set_enclosure_out_alert_content: {
-							required: true,
-							 
 						}
+						
 						 
 					},
 			
@@ -1526,23 +1638,35 @@
 							return;
 						}
 						
-						 var $form = $(form).serializeArray();
+						 var $form =$(form);
+						 
+						 var data = {
+						 	name:$form.find("#enclosure_name").val(),
+							floorNo:$form.find("#enclosure_floorNo").val(),
+						 }
+						 	
+						
 						 var rusultPoints = [];
 						 
 						 var points_length = enclosure1.points.length - 1;
 						 for(var i = 0; i<points_length ; i++){
-						 	var temporaryArr = [];
-							temporaryArr[0] = mmConversion(enclosure1.points[i][0]);
-							temporaryArr[1] = mmConversion(enclosure1.points[i][1]);
+						 	var temporaryArr = {};
+							temporaryArr.x = mmConversion(enclosure1.points[i][0]);
+							temporaryArr.y = mmConversion(enclosure1.points[i][1]);
 							rusultPoints.push(temporaryArr);
-							temporaryArr = [];
+							temporaryArr = null;
 						 }
-						 $form.push({name:'fence_coordinates',value:rusultPoints});
+						 data.points = rusultPoints;
 
 						  
 						 $('#start_draw').click();
 
-						 console.log('$form',$form);
+						  var result = ajaxRequest('/lbs/electronic_rail_cfg_modify',[data]);
+
+						 if(result.errorCode === 0){
+						 	alert(result.msg);
+						 }
+
 							 
 						
 					},
@@ -1550,19 +1674,11 @@
 					}
 				});
 						
-						
-						
-						
-					});
-                 	
-                 </script>
-                 
-            <script>
-
-	//iii	
-	 $(function(){
-	 		
-		 
+					
+					
+					
+					
+							 
 		
 			/**
 			 * 向服务器发送 Ajax 请求，查询相关数据, POST方式
@@ -1587,21 +1703,21 @@
 					url: url,
 					async: false,
 					type: 'POST',
-					data: {data: JSON.stringify(txData)}
-				}).done(function(data) {
-					console.log('接口调用成功');
-					console.log('receive:', data);
-					 
-					ajaxData = data;
+					data: {data: JSON.stringify(txData)},
+					success: function(data){
+						console.log('接口调用成功');
+						console.log('receive:', data);
+						 
+						ajaxData = data;
+					},
 					
-					
-					 
-				}).fail(function(jqXHR, textStatus, errorThrown) {
-					console.log('接口调用失败');
+				  error:function(qXHR, textStatus, errorThrown){
+				  	console.log('接口调用失败');
 					ajaxData = false;
+				  }
 					
-				 
 				});
+				
 				 return ajaxData;
 				 
 			}
@@ -1643,10 +1759,12 @@
 					"floorNo": address	
 				};
 				
-				data = ajaxRequest(url, txData);
+				data = ajaxRequest(url,txData);
 				
-				
+				console.log('dsssssss',address);
 				temporaryArr = data.data;
+				
+				
 				
 				
 				
@@ -1832,6 +1950,26 @@
 						});
 					}
 			
+
+					
+					
+						
+						
+						
+					});
+					
+					
+					
+					
+					
+                 	
+                 </script>
+                 
+            <script>
+
+	//iii	
+	 $(function(){
+	 		
 			
 	 })
 
@@ -1849,8 +1987,6 @@
               <div id="svg_user_sign" class="each_map_layer"> 
                  <img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA"> 
                  <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9"> 
-                    
-                
               </div>
               
               <div id="svg_temporary_line" class="each_map_layer"></div>
