@@ -7,4 +7,3 @@ flask
 
 .idea/
 *.log
-db_repository/versions/

@@ -6,7 +6,7 @@ import json
 from models import HzToken, HzLocation
 from app import db, socketio, app
 from flask import request
-from flask_socketio import emit, join_room, leave_room, close_room, rooms, disconnect
+from flask_socketio import emit, join_room, close_room
 import copy
 from threading import Lock
 import dijkstra
@@ -219,98 +219,6 @@ def hz_test_refresh_location():
     for loc in hz_location:  # 如果存在，则获取最新的一个坐标
         hz_uid_map[loc.user_id] = [loc.x, loc.y]
     return hz_uid_map
-
-
-# 实时查询用户的最新位置,  from other LBS engine
-# hz_token -- list, for class HzToken: token,refresh_token, timestamp, expires_in
-def hz_refresh_token_position():
-    time_now = datetime.datetime.today()
-    hz_token = HzToken.query.all()
-    if len(hz_token) > 0 and (time_now - hz_token[0].timestamp).total_seconds() < hz_token[0].expires_in - JOB_INTERVAL:
-        hz_get_location(hz_token[0].token)
-        return
-
-    test_data = {"licence": HZ_LICENSE}
-    url = "https://api.joysuch.com:46000/getAccessTokenV2"
-
-    # refresh access token
-    if len(hz_token) > 0 and (time_now - hz_token[0].timestamp).total_seconds() < hz_token[0].expires_in:
-        url = "https://api.joysuch.com:46000/refreshAccessToken"
-        test_data = {"refreshToken": hz_token[0].refresh_token}
-
-    data = json.dumps(test_data)
-    headers = {'Content-Type': 'application/json;charset=UTF-8'}
-    req = urllib2.Request(url=url, data=data, headers=headers)
-    res_data = urllib2.urlopen(req)
-    res = res_data.read()
-    obj = json.loads(res)
-    if obj['errorCode'] == 0:
-        if len(hz_token) == 0:      # 还没有获取过token
-            my_token = HzToken(license=HZ_LICENSE,
-                               token=obj['data']['token'],
-                               refresh_token=obj['data']['refreshToken'],
-                               expires_in=obj['data']['expiresIn'],
-                               timestamp=datetime.datetime.utcnow())
-            db.session.add(my_token)
-            db.session.commit()
-        else:           # 更新token
-            hz_token[0].token = obj['data']['token']
-            hz_token[0].refresh_token = obj['data']['refreshToken']
-            hz_token[0].expires_in = obj['data']['expiresIn']
-            hz_token[0].timestamp = time_now
-            print "Update token:", hz_token[0], "at", time_now, "[END]"
-            db.session.add(hz_token[0])
-            db.session.commit()
-
-        hz_get_location(obj['data']['token'])
-    else:
-        print "error in function: ", res
-        print "url= ", url
-        print "req data= ", test_data
-        return
-
-
-def hz_get_location(token):
-    url = "https://api.joysuch.com:46000/WebLocate/locateResults"
-    data = {'accessToken': token,
-            'userIds': HZ_UID,
-            'timePeriod': 3000}
-    headers = {'Content-Type': 'application/json;charset=UTF-8'}
-    req = urllib2.Request(url=url, data=json.dumps(data), headers=headers)
-    res_data = urllib2.urlopen(req)
-    res = res_data.read()
-    obj = json.loads(res)
-    if obj["errorCode"] == 0:
-        pos_to_client = []
-        if len(hz_uid_map) == 0:
-            hz_get_new_pos()
-        for item in obj["data"]:
-            uid = item['userId']
-            x = item["xMillimeter"]
-            y = item["yMillimeter"]
-            if uid in hz_uid_map and hz_uid_map[uid][0] == x and hz_uid_map[uid][1] == y:
-                # print "重复数据the same data: x=", x, " y=", y, " uid=", uid
-                continue
-
-            hz_location = HzLocation(build_id=item["buildId"],
-                                     floor_no=item["floorNo"],
-                                     user_id=item["userId"],
-                                     x=item["xMillimeter"],
-                                     y=item["yMillimeter"],
-                                     timestamp=datetime.datetime.today())
-            db.session.add(hz_location)
-            db.session.commit()
-            hz_uid_map[uid] = [x, y]
-            pos_to_client.append({'userId': uid, 'x': x, 'y': y})
-        if len(hz_client_id) > 0 and len(pos_to_client) > 0:
-            print 'Notify position to client.', pos_to_client
-            socketio.emit('hz_position', pos_to_client, namespace=HZ_NAMESPACE)
-    else:
-        print "error in function hz_get_location(): ", res
-        print "url= ", url
-        print "req data= ", data
-
-    return
 
 
 # 获取用户位置

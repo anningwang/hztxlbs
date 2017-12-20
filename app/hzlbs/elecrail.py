@@ -28,6 +28,7 @@ def screen2geo():
     for item in HZ_ROOM4:
         HZ_ROOM4_GEO.append({'x': item['x'] / GEO_SCALE, 'y': item['y'] / GEO_SCALE})
 
+
 screen2geo()
 
 

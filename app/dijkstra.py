@@ -116,4 +116,5 @@ def get_nearest_vertex(px, py):
 
     return ret_vertex
 
+
 load_pos()
