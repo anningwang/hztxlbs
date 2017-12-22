@@ -478,26 +478,119 @@
 
 
 							$(function () {
-								
+
 								//全局初始化变量
-								
-								
-								
+
+
+
 								/*
 									param cloneMap  克隆的基础地图
 									      zoomFnAfter   缩放需要执行的函数
-										  zoom_temporary_fn 缩放需要执行的临时函数      
+										  zoom_temporary_fn 缩放需要执行的临时函数
+										  enclosure_temporary  电子围栏临时函数
+										  initialization_temporary_fn 初始化需要执行的函数   调用一次就删除
 								*/
-								
-								
-								var cloneMap,
+
+
+								var  
 									zoomFnAfter = [],
-									zoom_temporary_fn = [],
-									enclosure_temporary;
+									zoom_temporary_fn = [];
+									 
 								
 								
 								
-																//以下变量可用可不用
+								//初始化对象
+								function init(){
+									//存运行函数的
+									this.stopFn = [];
+								}
+								/*
+									添加格式
+									1. (函数)
+									2. (对象,函数)
+									3. (函数,参数)
+									4. (对象,函数,参数)    (obj,fn,[param1,param2])
+									
+								*/
+								init.prototype.add = function(){
+									
+									var args = [].slice.call(arguments);
+									this.stopFn.push(args);
+								}
+								init.prototype.empty = function(){
+									this.stopFn = [];
+								}
+								init.prototype.run = function(){
+									
+									var stopFnLength = this.stopFn.length;
+									var current_item = null;
+									if(stopFnLength <= 0){
+										return false;
+									}
+
+									while(current_item = this.stopFn.pop()){
+										this.distribution(current_item);
+									}
+									
+									
+								}
+								init.prototype.distribution = function(param){
+									var param_length = param.length;
+									switch (param_length){
+										case 0:
+											param();
+											break;
+										case 1:
+											param[0]();
+											break;
+										case 2:
+											this.stopFn_param_2(param[0],param[1]);
+											break;
+										case 3:	
+											this.stopFn_param_3(param[0],param[1],param[2]);
+											break;
+
+									}
+								}
+								init.prototype.stopFn_param_2 = function(param1,param2){
+									console.log('param1',param2);
+									if(typeof param1 === 'function'){
+										if(param2 instanceof Array)
+										{
+											param1.apply(window,param2);
+											console.log('this12312312',window);
+										}else{
+											param1.apply(window,[param2]);
+										}
+										
+									}else{
+										param2.apply(param1);
+									}
+								}
+								
+								init.prototype.stopFn_param_3 = function(param1,param2,param3){
+										if(param3 instanceof Array)
+										{
+											param2.apply(param1,param3);;
+										}else{
+											param2.apply(param1,[param3]);;
+										}
+									
+									
+								}
+								
+								
+								/*初始化函数结束*/
+								
+								
+								
+								/*全局初始化对象*/
+								var global = new init();
+								
+								
+						 
+
+								//以下变量可用可不用
 
 								var $svg_map_base = $('#svg_map_base');
 								var $svg_event = $('#svg_event');
@@ -505,28 +598,25 @@
 								var $svg_map = $('#svg_image');
 
 								var $document = $(document);
+
+
+								
+								
+								//初始化函数
 								
 								
 								
 								
-								function initialization_map(){
-									
-									//初始化地图
-									$svg_map_base.replaceWith(cloneMap);
-									zoom_temporary_fn = [];
-									enclosure_temporary = null;
-								}
-								
-								
-								
-								
-								
-								
+						
+		
+
+
+
 								//缩放要调用的函数
-								function people_move_zoom(){
-								 
+								function people_move_zoom() {
+
 									var hz_user_xy_length = hz_user_xy.length;
-								 
+
 									for(var i = 0; i < hz_user_xy_length; i++) {
 
 
@@ -538,20 +628,14 @@
 											hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
 									}
 								}
-								
-								
-								zoomFnAfter.push(people_move_zoom);	
-								
+
+
+								zoomFnAfter.push(people_move_zoom);
+
 								//电子围栏查询缩放附加函数				
-								function enclosure_temporary_fn(){
+								function enclosure_temporary_fn() {
 									draw_enclosure(enclosure_temporary);
 								}
-									
-								
-
-
-
-
 
 
 
@@ -681,23 +765,23 @@
 													left: hzX + 'px',
 													top: hzY + 'px'
 												})
-												
+
 												var zoomFnAfter_length = zoomFnAfter.length;
-												 if(zoomFnAfter_length>0){
-													 
-													for(var zoomFnAfter_for = 0; zoomFnAfter_for < zoomFnAfter_length ; zoomFnAfter_for ++){
+												if(zoomFnAfter_length > 0) {
+
+													for(var zoomFnAfter_for = 0; zoomFnAfter_for < zoomFnAfter_length; zoomFnAfter_for++) {
 														zoomFnAfter[zoomFnAfter_for]();
 													}
-												 }
-												
-												
+												}
+
+
 												var zoom_temporary_fn_length = zoom_temporary_fn.length;
-												 if(zoom_temporary_fn_length>0){
-												 
-													for(var zoom_temporary_fn_for = 0; zoom_temporary_fn_for < zoom_temporary_fn_length ; zoom_temporary_fn_for ++){
+												if(zoom_temporary_fn_length > 0) {
+
+													for(var zoom_temporary_fn_for = 0; zoom_temporary_fn_for < zoom_temporary_fn_length; zoom_temporary_fn_for++) {
 														zoom_temporary_fn[zoom_temporary_fn_for]();
 													}
-												 }									 											
+												}
 
 												//hz_map_zoom(margin, margin, resultHeight , resultWidth);
 												//hz_change_item_in_map();
@@ -900,7 +984,12 @@
 
 								}
 
-
+								function enclosure_set_clear_fn(){
+								
+									$("#start_draw").find('span').text('开始绘制');
+									$('#enclosure_spot_method').removeAttr('disabled');
+									
+								}
 
 
 								var enclosure1 = new enclosure();
@@ -919,13 +1008,16 @@
 
 											enclosure1.remove_event();
 
-
+											
 
 
 										}
 										else {
 											$span.text('清空绘制');
-
+											
+											initialization_map();
+											
+											initialization_temporary_fn.push(enclosure_set_clear_fn);
 											$method_select.attr('disabled', 'disabled');
 											enclosure1.polyline();
 
@@ -943,6 +1035,10 @@
 										}
 										else {
 											$span.text('清空绘制');
+											
+											initialization_map();
+											
+											initialization_temporary_fn.push(enclosure_set_clear_fn);
 
 											$method_select.attr('disabled', 'disabled');
 											enclosure1.square();
@@ -1804,26 +1900,29 @@
 									enclosure_temporary = data;
 
 									draw_enclosure(data)
+									console.log('data111',data);
 
 									zoom_temporary_fn.push(enclosure_temporary_fn);
 
 								}
+								
+						 
 
-							    function draw_enclosure(data){
+								function draw_enclosure(data) {
 									var temporaryArr; //临时数据
 
 									var temporaryArrLength; //临时数据长度
 									temporaryArr = data.data;
-									
+
 									var draw_path = $('#svg_path');
 
 									var svg = draw_path.svg('get');
+
 									
-									
-									
+					
 									var svg_parent = draw_path.find('svg');
-									svg_parent.width(draw_path.width());
-									svg_parent.height(draw_path.height());
+									svg_parent.width(draw_path.width() + 10);
+									svg_parent.height(draw_path.height() + 10);
 									//svg.clear();	 
 									svg.clear();
 									/*console.log('temporaryArr[0].points:',temporaryArr[0].points);
@@ -1989,7 +2088,7 @@
 									});
 								}
 
-								cloneMap = $svg_map_base.clone(true,true);
+								 
 
 
 							})
@@ -2008,12 +2107,7 @@
 
 							});
 							</script>
-            <script>
-							$(function () {
-
-
-							});
-							</script>
+            
             <div id="svg_map_base" class="each_map_layer">
               <!--基础svg图-->
               <img src="../static/img/floor3.svg" id="svg_image" class="each_map_layer">
@@ -2099,8 +2193,7 @@
 				<i class="ace-icon fa fa-angle-double-up icon-only bigger-110"></i>
 			</a>-->
 </div>
-<!-- /.main-container --><!-- basic scripts -->
-<script type="text/javascript">
+<!-- /.main-container --><!-- basic scripts --><script type="text/javascript">
 	if('ontouchstart' in document.documentElement) document.write("<script src='../static/ace/components/_mod/jquery.mobile.custom/jquery.mobile.custom.js'>" + "<" + "/script>");
 	</script>
 <script src="../static/ace/components/bootstrap/dist/js/bootstrap.js"></script>
