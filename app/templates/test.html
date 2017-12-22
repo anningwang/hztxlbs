@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>接口测试</title>
+    <link rel="shortcut icon" href="/static/img/favicon.ico" />
+    <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
 </head>
 <script src="/static/js/jquery.min.js"></script>
 <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script>
@@ -27,7 +29,7 @@
             console.log('receive:', data);
             $('#receive').append($('<div/>').text('receive from server: <<<<<<<<<<').html());
             $('#receive').append('<br>' + JSON.stringify(data));
-        }).fail(function(jqXHR, textStatus, errorThrown) {
+        }).fail(function() {
             console.log('接口调用失败');
         });
     }
@@ -44,7 +46,7 @@
             console.log('receive:', data);
             $('#receive').append($('<div/>').text('receive from server: <<<<<<<<<<').html());
             $('#receive').append('<br>' + JSON.stringify(data));
-        }).fail(function(jqXHR, textStatus, errorThrown) {
+        }).fail(function() {
             console.log('接口调用失败');
         });
     }
@@ -66,7 +68,7 @@
                 "compress": false,       // 是否压缩，压缩的含义是，服务器会根据特定策略返回部分路径坐标。 保留参数
                 "page": 1,      // 查询的页码。 当记录很多时，需要分页查询。可选参数，默认为第一页
                 "rows": 50      // 当前页记录条数。可选参数。默认100条
-        };
+            };
 
             tx.append($('<div/>').text('send to server: >>>>>>>>>>').html());
             tx.append('<br>' + $('<div/>').text('url:  ' + url).html());
@@ -165,6 +167,49 @@
             console.log('send:', txData);
             ajaxJsonRequest(url, txData);
 
+        } else if (str == 'people_stat_add') {  // 新增盘点区域
+            url = '/lbs/people_stat_add';
+            txData = {
+                'name': '北斗羲和',
+                'points': [{'x': 25407, 'y': 1362}, {'x': 25407, 'y': 4981}, {'x': 28058, 'y': 4981}, {'x': 28058, 'y': 1362}],
+                'peopleNum': 1
+            };
+
+            tx.append($('<div/>').text('send to server: >>>>>>>>>>').html());
+            tx.append('<br>' + $('<div/>').text('url:  ' + url).html());
+            tx.append('<br>'+ JSON.stringify(txData));
+
+            console.log('send:', txData);
+            ajaxJsonRequest(url, txData);
+        } else {
+            apiTestGeneral(str);
+        }
+    }
+
+    function apiTestGeneral(str) {  // 接口测试API，通用调用方式
+        var tx = $('#send');
+        tx.empty();
+        var url = null;
+        var txData = null;
+
+        if (str == 'people_stat_do') {  // 立即盘点 ===================================================================
+            url = '/lbs/people_stat_do';
+            txData = {};
+        } else if (str == 'people_stat_get') {  // 人员盘点--查询盘点结果 =============================================
+            url = '/lbs/people_stat_get';
+            txData = {};
+        } else if (str == 'people_stat_del') {  // 人员盘点--删除盘点区域 =============================================
+            url = '/lbs/hz_data_del';
+            txData = {who: 'people_stat_cfg', ids: [1,2,3]};  // 这里为示例，ids数组内应为从数据库查询的实际id
+        }
+
+        if (url != null) {
+            tx.append($('<div/>').text('send to server: >>>>>>>>>>').html());
+            tx.append('<br>' + $('<div/>').text('url:  ' + url).html());
+            tx.append('<br>'+ JSON.stringify(txData));
+
+            console.log('send:', txData);
+            ajaxJsonRequest(url, txData);
         }
     }
 
@@ -188,6 +233,10 @@
     <option value="add_elect_rail_cfg">增加电子围栏配置</option>
     <option value="del_elect_rail_cfg">删除电子围栏配置</option>
     <option value="get_loc">查询位置</option>
+    <option value="people_stat_add">人员盘点--新增盘点区域</option>
+    <option value="people_stat_do">人员盘点--立即盘点</option>
+    <option value="people_stat_get">人员盘点--查询盘点结果</option>
+    <option value="people_stat_del">人员盘点--删除盘点区域</option>
 
 </select>
 

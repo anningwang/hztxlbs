@@ -13,7 +13,7 @@ import dijkstra
 import random
 import logging
 from utils.getip import is_windows_os
-from hzlbs.hzglobal import HZ_ACCESS_TOKEN
+from hzlbs.hzglobal import HZ_ACCESS_TOKEN, HZ_UID, TEST_UID
 
 
 log = logging.getLogger('apscheduler.executors.default')
@@ -26,15 +26,12 @@ log.addHandler(h)
 
 HZ_LICENSE = "cb5537fd8e684827b7e4f83b742c8f2c"
 JOB_INTERVAL = 60 * 10                  # seconds
-TEST_UID = "1918E00103AA"               # 测试用标签UID
-TEST_UID_2 = "1918E00103A9"             # 测试用标签UID
 CUR_MAP_SCALE = 0.3                     # 当前屏幕地图缩放比例 30%
 HZ_MAP_GEO_WIDTH = 39023.569023569024   # 毫米
 HZ_MAP_GEO_HEIGHT = 19854.09652076319
 # [{"name":"Floor3","mapImage":"Floor3.jpg","mapImageWidth":3477,"mapImageHeight":1769,"geoScale":{"x":89.1,"y":89.1}}]
 HZ_TEST_ADD_POS = False                 # 为真，则向数据库随机插入坐标点
 HZ_TEST_DEBUG = False                   # 为真，不从 LBS 引擎获取数据，从数据库刷新位置
-HZ_UID = [TEST_UID, TEST_UID_2]
 hz_uid_map = {}                         # 保存 uid 对应的最新坐标 { 'userId': [x,y], '1918E00103AA': [100, 200] }
 hz_uid_old_map = {}
 hz_client_id = {}                       # 在线客户表

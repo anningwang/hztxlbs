@@ -5,7 +5,8 @@ from flask_sqlalchemy import get_debug_queries
 from flask_babel import gettext
 from app import app, db, lm, oid, babel
 from forms import LoginForm, EditForm, PostForm, SearchForm
-from models import User, ROLE_USER, Post, HzToken, HzLocation, HzElecTail, HzElecTailCfg, HzEtPoints
+from models import User, ROLE_USER, Post, HzToken, HzLocation, HzElecTail, HzElecTailCfg, HzEtPoints, HzRoomStatInfo,\
+    HzRoomStatCfg, HzRoomStatPoints
 from emails import follower_notification
 from guess_language import guessLanguage
 from translate import microsoft_translate
@@ -17,6 +18,9 @@ from lbs import TEST_UID, CUR_MAP_SCALE, HZ_MAP_GEO_WIDTH, HZ_MAP_GEO_HEIGHT
 import json
 from hzlbs.elecrail import get_elecrail
 from hzlbs.hzglobal import HZ_BUILDING_ID, g_upd_et_cfg
+import hzlbs.peoplestat
+
+ps = hzlbs.peoplestat.PeopleStat()
 
 
 @lm.user_loader
@@ -652,6 +656,7 @@ def lbs_hz_data_del():
     {
         who:        要删除的模块。字符串
             == 'elect_rail_cfg'     电子围栏配置 模块
+            == 'people_stat_cfg'    盘点区域配置 模块
         ids: [id1, id2, ...]    电子围栏 id list
     }
     :return:
@@ -668,7 +673,9 @@ def lbs_hz_data_del():
         ids = request.json['ids']
         who = request.json['who']
         if who == 'elect_rail_cfg':
-            return hz_elect_rail_cfg_del(ids)
+            return electronic_rail_cfg_del(ids)
+        elif who == 'people_stat_cfg':
+            return people_stat_del(ids)
         else:
             return jsonify({'errorCode': 202, 'msg': u'未知模块[ %s ]' % who})
 
@@ -676,7 +683,7 @@ def lbs_hz_data_del():
         return jsonify({'errorCode': 101, 'msg': u'输入参数错误！'})
 
 
-def hz_elect_rail_cfg_del(ids):
+def electronic_rail_cfg_del(ids):
     """
     删除电子围栏配置
     :param ids:
@@ -734,3 +741,173 @@ def api_hz_lbs_locate_results():
                      'time': datetime.datetime.strftime(lo.timestamp, '%Y-%m-%d %H:%M:%S')})
 
     return jsonify({'errorCode': 0, 'errorMsg': [], 'data': data, 'valid': True})
+
+
+@app.route('/lbs/people_stat_add', methods=['POST'])
+def people_stat_add():
+    """
+    新增盘点区域
+    输入参数：
+    {
+        name:       盘点区域名称
+        points:[{'x': 1, 'y': 2}, {'x': 3, 'y': 4},...]     盘点区域顶点坐标
+        peopleNum:  应到人数，optional，不填或者填写值<=0，则认为该参数无效。否则，实际盘点人数不符时，给出告警提示
+    }
+    :return:
+    {
+        errorCode   msg
+        ---------   --------------------------------------------------------
+        0           新增成功！
+        101         输入参数错误！
+        1001        名称[%s]已经存在！
+        105         盘点区域顶点数须大于等于3！
+    }
+    """
+    try:
+        name = request.json['name']
+        points = request.json['points']
+        people_num = 0 if 'peopleNum' not in request.json else request.json['peopleNum']
+        if people_num < 0:
+            people_num = 0
+        return jsonify(ps.add_zone(name, points, people_num))
+
+    except KeyError:
+        return jsonify({'errorCode': 101, 'msg': u'输入参数错误！'})
+
+
+def people_stat_del(ids):
+    """
+    删除 盘点区域
+    :param ids:     盘点区域id
+    :return:
+    """
+    vt = 0
+    pd_num = 0
+    for i in ids:
+        vt += HzRoomStatPoints.query.filter_by(room_id=i).delete()  # 删除顶点坐标
+
+        """ 删除 盘点数据 """
+        pd_num += HzRoomStatInfo.query.filter_by(room_id=i).delete()
+
+    """ 删除 盘点区域 基本信息 """
+    num = 0
+    num += HzRoomStatCfg.query.filter(HzRoomStatCfg.id.in_(ids)).delete(synchronize_session=False)
+
+    db.session.commit()
+    return jsonify({'errorCode': 0,
+                    'msg': u'[%d]个盘点区域，[%d]个顶点信息被删除，[%d]个盘点记录被删除。' % (num, vt, pd_num)})
+
+
+@app.route('/lbs/people_stat_do', methods=['POST'])
+def people_stat_do():
+    """
+    立即盘点
+    输入参数：
+        无
+    :return:
+    {
+        errorCode   msg
+        ---------   --------------------------------------------------------
+        0           ok
+
+        statInfo:       盘点信息
+                id
+                statNo
+                roomName
+                roomId
+                roomNo
+                roomCreateAt
+                curPeopleNum        盘点时人数
+    }
+    """
+    return jsonify(ps.stat())
+
+
+@app.route('/lbs/people_stat_get', methods=['POST'])
+def people_stat_get():
+    """
+    查询盘点结果
+
+    输入参数：
+        statNo:         盘点编号， 例如：'PD-20171222-165201', 可选，若不填写，该字段不作为过滤条件
+        roomName:       盘点区域名称，例如：["北斗羲和", "智慧消防"], 可选，若不填写，该字段不作为过滤条件
+        datetimeFrom:   查询起始时间，例如："2017-08-17 11:17:35",   可选，若不填写，该字段不作为过滤条件
+        datetimeTo:     查询结束时间，例如："2017-09-23 11:17:35",   可选，不填写时，该字段不作为过滤条件
+        page:           查询的页码。 当记录很多时，需要分页查询。可选参数，默认为第1页
+        rows:           当前页记录条数。可选参数。默认100条
+        sort: [{"field": "datetime", "oper": "desc"},   记录排序规则， 可选参数，默认按照时间降序排序
+               {"field": "roomName", "oper": "desc"}]   按照房间名称排序，可选参数，默认按照升序排序
+            当前条件只支持 and 。
+            oper 取值： desc 降序（默认）， asc 升序。 可以不填oper，默认降序
+            字段顺序 代表 查询时的排序顺序。
+            目前支持 datetime, roomName 排序
+
+    :return:
+    {
+        errorCode   msg
+        ---------   --------------------------------------------------------
+        0           ok
+
+        data{       数据内容
+            total   符合条件的记录条数
+            rows[{  记录详情
+                statInfo:       盘点信息
+                        id                  记录ID
+                        statNo              盘点编号
+                        roomName            盘点区域名称
+                        roomId              盘点区域ID
+                        roomNo              盘点区域编号
+                        roomCreateAt        盘点区域创建时间
+                        curPeopleNum        盘点时人数
+                        expectNum           期望人数
+                        datetime            盘点时间
+                }]
+    }
+    """
+    hzq = HzRoomStatInfo.query.join(HzRoomStatCfg, HzRoomStatCfg.id == HzRoomStatInfo.room_id)
+
+    if 'statNo' in request.json and request.json['statNo'] != '':
+        hzq = hzq.filter(HzRoomStatInfo.no == request.json['statNo'])
+
+    if 'roomName' in request.json and request.json['roomName'] != []:
+        hzq = hzq.filter(HzRoomStatInfo.name.in_(request.json['roomName']))
+
+    if 'datetimeFrom' in request.json:
+        hzq = hzq.filter(HzRoomStatInfo.datetime >= request.json['datetimeFrom'])
+    if 'datetimeTo' in request.json:
+        hzq = hzq.filter(HzRoomStatInfo.datetime <= request.json['datetimeTo'])
+    page = 1 if 'page' not in request.json or request.json['page'] == '' else int(request.json['page'])
+    rows = 100 if 'rows' not in request.json or request.json['rows'] == '' else int(request.json['rows'])
+
+    total = hzq.count()
+
+    if 'sort' in request.json:
+        for st in request.json['sort']:
+            is_desc = True if 'oper' not in st or st['oper'] == 'desc' else False
+            if st['field'] == 'datetime':
+                if is_desc:
+                    hzq = hzq.order_by(HzRoomStatInfo.datetime.desc())
+                else:
+                    hzq = hzq.order_by(HzRoomStatInfo.datetime)
+            elif st['field'] == 'roomName':
+                if is_desc:
+                    hzq = hzq.order_by(HzRoomStatCfg.name.desc())
+                else:
+                    hzq = hzq.order_by(HzRoomStatCfg.name)
+    else:
+        hzq = hzq.order_by(HzRoomStatInfo.datetime.desc())
+
+    if page < 1:
+        page = 1
+    offset = (page - 1) * rows
+    hzq = hzq.add_columns(HzRoomStatCfg.name, HzRoomStatCfg.no, HzRoomStatCfg.create_at, HzRoomStatCfg.expect_num)
+    records = hzq.limit(rows).offset(offset).all()
+
+    rs = []
+    for info in records:
+        rs.append({'id': info[0].id, 'statNo': info[0].no, 'roomName': info[1], 'roomId': info[0].room_id,
+                   'roomNo': info[2], 'curPeopleNum': info[0].people_num,
+                   'roomCreateAt': datetime.datetime.strftime(info[3], '%Y-%m-%d %H:%M:%S'),
+                   'datetime': datetime.datetime.strftime(info[0].datetime, '%Y-%m-%d %H:%M:%S'),
+                   'expectNum': info[4]})
+    return jsonify({'errorCode': 0, 'msg': 'ok', 'data': {'total': total, 'rows': rs}})

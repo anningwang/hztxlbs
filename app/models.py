@@ -1,11 +1,11 @@
 # -*- coding:utf-8 -*-
-from hashlib import md5
+import hashlib
 from app import db
 from app import app
 import flask_whooshalchemy as whooshalchemy
 import re
 import datetime
-from hzlbs.hzglobal import gen_code
+from hzlbs.hzglobal import gen_code, gen_code_seconds
 
 
 ROLE_USER = 0
@@ -47,13 +47,16 @@ class User(db.Model):
                 break
             version += 1
         return new_nickname
-        
+
+    @property
     def is_authenticated(self):
         return True
 
+    @property
     def is_active(self):
         return True
 
+    @property
     def is_anonymous(self):
         return False
 
@@ -61,7 +64,7 @@ class User(db.Model):
         return unicode(self.id)
 
     def avatar(self, size):
-        return 'http://cn.gravatar.com/avatar/' + md5(self.email).hexdigest() + '?d=mm&s=' + str(size)
+        return 'http://cn.gravatar.com/avatar/' + hashlib.md5(self.email).hexdigest() + '?d=mm&s=' + str(size)
         # http://www.gravatar.com/avatar/
         
     def follow(self, user):
@@ -190,6 +193,17 @@ class HzRoomStatCfg(db.Model):
     build_id = db.Column(db.String(40))
     floor_no = db.Column(db.String(40))
     create_at = db.Column(db.DateTime)
+    expect_num = db.Column(db.Integer)  # 期望人数
+
+    def __init__(self, param):
+        self.no = self.create_no()
+        self.name = param['name']
+        if 'buildingId' in param:
+            self.build_id = param['buildingId']
+        if 'floorNo' in param:
+            self.floor_no = param['floorNo']
+        self.create_at = datetime.datetime.today()
+        self.expect_num = 0 if 'expectNum' not in param else param['expectNum']
 
     def create_no(self):
         search_no = gen_code('QY')
@@ -216,13 +230,25 @@ class HzRoomStatInfo(db.Model):
     datetime = db.Column(db.DateTime)       # 盘点时间
     people_num = db.Column(db.Integer)      # 人数
 
+    def __init__(self, param):
+        self.no = self.create_no() if 'no' not in param else param['no']
+        self.room_id = param['roomId']
+        if 'datetime' in param:
+            self.datetime = param['datetime']
+        self.people_num = param['peopleNum']
+
     def create_no(self):
-        search_no = gen_code('PD')
+        self.no = self.gen_no()
+        return self.no
+
+    @staticmethod
+    def gen_no():
+        search_no = gen_code_seconds('PD')
         pd = HzRoomStatInfo.query.filter(HzRoomStatInfo.no.like('%' + search_no + '%'))\
             .order_by(HzRoomStatInfo.id.desc()).first()
         number = 1 if pd is None else int(pd.no.rsplit('-', 1)[1]) + 1
-        self.no = search_no + ('%03d' % number)
-        return self.no
+        no = search_no + ('%03d' % number)
+        return no
 
 
 whooshalchemy.whoosh_index(app, Post)
