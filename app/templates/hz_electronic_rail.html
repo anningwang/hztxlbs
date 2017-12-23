@@ -158,65 +158,64 @@
                 </div>
                 <div class="col-xs-12" style="display:none; " id="EnclosureConcent1">
                   <div class="row" style="padding-right:10px; padding-top:20px;">
-                    <form role="form" class="form-horizontal" id="form-validate">
+                    <form role="form" class="form-horizontal" id="form-validate2">
                       <div class="alert alert-info">修改围栏 <br />
                       </div>
                       <div class="form-group">
-                        <label for="firstname" class="col-sm-3 control-label no-padding-right">围栏名称:</label>
+                        <label for="firstname" class="col-sm-3 control-label no-padding-right">修改围栏名称:</label>
                         <div class="col-sm-9">
                           <select class="form-control" id="alter_enclosure_name" name="name">
                             <option value="floor3">3楼</option>
                           </select>
                         </div>
                       </div>
+                      
+                      
                       <div class="form-group">
-                        <label for="floorNo" class="col-sm-3 control-label no-padding-right">楼层:</label>
+                        <label for="enclosure_new_name" class="col-sm-3 control-label no-padding-right">新围栏名称:</label>
                         <div class="col-sm-9">
-                          <select class="form-control" id="alter_enclosure_floorNo" name="floorNo">
-                            <option value="floor3">3楼</option>
-                          </select>
+                          <input type="text" id="enclosure_new_name" name="name" placeholder="不填为不修改!" />
                         </div>
                       </div>
+                      
+                      
                       <div class="form-group">
                         <label for="firstname" class="col-sm-3 control-label no-padding-right">绘制范围:</label>
                         <div class="col-sm-9">
                           <div class="col-xs-6">
-                            <select class="form-control" id="enclosure_spot_method">
+                            <select class="form-control" id="enclosure_spot_method2">
                               <option value="square">方形绘图</option>
                               <option value="polyline">折线绘图</option>
                             </select>
                           </div>
                           <div class="col-xs-6">
-                            <button type="button" id="start_draw" class="btn btn-xs btn-danger"> <span id="start_draw_span">开始绘制</span> <i class="ace-icon fa fa-arrow-right icon-on-right"></i> </button>
+                            <button type="button" id="start_draw2" class="btn btn-xs btn-danger"> <span id="start_draw_span">开始绘制</span> <i class="ace-icon fa fa-arrow-right icon-on-right"></i> </button>
                           </div>
                         </div>
                       </div>
                       <div class="form-group">
                         <div class="col-xs-6 col-xs-push-6">
-                          <input type="submit" class="btn btn-success btn-xs" id="set_enclosure_submit" value="提交" />
+                          <input type="submit" class="btn btn-success btn-xs" id="set_enclosure_submit2" value="提交" />
                         </div>
                       </div>
                     </form>
                   </div>
                 </div>
                 <div class="col-xs-12" style="display:none;" id="EnclosureConcent3">
-                  <div class="row" style="padding-right:10px; height:200px;">
-                    <form role="form" class="form-horizontal" id="form-validate">
-                      <div class="alert alert-info">查询围栏 <br />
+                  <div class="row" style="padding-right:10px; height:200px; padding-bottom:20px;">
+                    <form role="form" class="form-horizontal" id="form-validate3">
+                      <div class="alert alert-info">删除电子围栏 <br />
                       </div>
-                      <div class="form-group">
-                        <label for="firstname" class="col-sm-6 control-label no-padding-right">电子围栏设置查询:</label>
-                        <div class="col-sm-6">
-                          <select id="electronic-fence-address">
-                            <option value="0">请选择地址</option>
-                            <option value="Floor3">和仲通讯</option>
-                          </select>
-                        </div>
+                      
+                      <div class="form-group" id="enclosure_item">
+                        
+                        
+                        
                       </div>
                       <div class="form-group">
                         <div class="col-xs-6 col-xs-push-6">
-                          <button type="button" class="btn btn-success btn-xs" id="electronic-fence-query-button" />
-                          查询
+                          <button type="button" class="btn btn-success btn-xs" id="enclosure_item_button" />
+                          删除
                           </button>
                         </div>
                       </div>
@@ -488,13 +487,15 @@
 									      zoomFnAfter   缩放需要执行的函数
 										  zoom_temporary_fn 缩放需要执行的临时函数
 										  enclosure_temporary  电子围栏临时函数
-										  initialization_temporary_fn 初始化需要执行的函数   调用一次就删除
+									 
 								*/
 
 
 								var  
 									zoomFnAfter = [],
-									zoom_temporary_fn = [];
+									zoom_temporary_fn = [],
+									enclosure_temporary;
+									 
 									 
 								
 								
@@ -585,7 +586,7 @@
 								
 								
 								/*全局初始化对象*/
-								var global = new init();
+								var global_init = new init();
 								
 								
 						 
@@ -993,9 +994,9 @@
 
 
 								var enclosure1 = new enclosure();
-								$("#start_draw").on('click', function () {
-
-									var $this = $(this);
+								
+								
+								function text_change($this){
 									var $span = $this.find('span');
 									var buttonText = $span.text();
 									var $method_select = $('#enclosure_spot_method');
@@ -1005,25 +1006,18 @@
 											$span.text('开始绘制');
 
 											$method_select.removeAttr('disabled');
+ 										 	
 
-											enclosure1.remove_event();
-
+							          
 											
 
 
 										}
 										else {
 											$span.text('清空绘制');
-											
-											initialization_map();
-											
-											initialization_temporary_fn.push(enclosure_set_clear_fn);
+		
 											$method_select.attr('disabled', 'disabled');
-											enclosure1.polyline();
-
-
-
-
+		
 										}
 									}
 									//方形绘图
@@ -1031,14 +1025,66 @@
 										if(buttonText === '清空绘制') {
 											$span.text('开始绘制');
 											$method_select.removeAttr('disabled');
-											enclosure1.remove_square();
+					
+										}
+										else {
+											$span.text('清空绘制');
+
+											$method_select.attr('disabled', 'disabled');
+										}
+									}
+
+									
+									
+								}
+								
+
+								$("#start_draw").on('click', function () {
+
+									var $this = $(this);
+									var $span = $this.find('span');
+									var buttonText = $span.text();
+									var $method_select = $('#enclosure_spot_method');
+									if($method_select.val() === 'polyline') {
+										
+										
+
+										if(buttonText === '清空绘制') {
+											
+ 										 	
+											global_init.run();
+							          
+									
+
+
 										}
 										else {
 											$span.text('清空绘制');
 											
-											initialization_map();
+											global_init.run();
+											global_init.add(enclosure1,enclosure1.remove_event);
+											global_init.add(text_change,$this);
+											 
+											$method_select.attr('disabled', 'disabled');
+											enclosure1.polyline();
 											
-											initialization_temporary_fn.push(enclosure_set_clear_fn);
+
+
+
+										}
+									}
+									//方形绘图
+									if($method_select.val() === 'square') {
+										if(buttonText === '清空绘制') {
+											 
+											global_init.run();
+										}
+										else {
+											$span.text('清空绘制');
+											
+											 global_init.run();
+											global_init.add(enclosure1,enclosure1.remove_square);
+											global_init.add(text_change,$this); 
 
 											$method_select.attr('disabled', 'disabled');
 											enclosure1.square();
@@ -1050,8 +1096,196 @@
 
 								});
 
+								var enclosure2 = new enclosure();
+								
+								
+								 function text_change2($this){
+									var $span = $this.find('span');
+									var buttonText = $span.text();
+									var $method_select = $('#enclosure_spot_method2');
+									if($method_select.val() === 'polyline') {
+
+										if(buttonText === '清空绘制') {
+											$span.text('开始绘制');
+
+											$method_select.removeAttr('disabled');
+ 										 	
+											 
+							          
+											
 
 
+										}
+										else {
+											$span.text('清空绘制');
+		
+											$method_select.attr('disabled', 'disabled');
+		
+										}
+									}
+									//方形绘图
+									if($method_select.val() === 'square') {
+										if(buttonText === '清空绘制') {
+											$span.text('开始绘制');
+											$method_select.removeAttr('disabled');
+					
+										}
+										else {
+											$span.text('清空绘制');
+
+											$method_select.attr('disabled', 'disabled');
+										}
+									}
+
+									
+									
+								}
+								
+
+
+
+
+								$("#start_draw2").on('click', function () {
+
+									var $this = $(this);
+									var $span = $this.find('span');
+									var buttonText = $span.text();
+									var $method_select = $('#enclosure_spot_method2');
+									if($method_select.val() === 'polyline') {
+										
+										
+
+										if(buttonText === '清空绘制') {
+											
+ 										 	
+											global_init.run();
+							          
+									
+
+
+										}
+										else {
+											$span.text('清空绘制');
+											
+											global_init.run();
+											global_init.add(enclosure2,enclosure2.remove_event);
+											global_init.add(text_change2,$this);
+											
+											
+										 
+											 
+											$method_select.attr('disabled', 'disabled');
+											enclosure2.polyline();
+											
+
+
+
+										}
+									}
+									//方形绘图
+									if($method_select.val() === 'square') {
+										if(buttonText === '清空绘制') {
+											 
+											global_init.run();
+										}
+										else {
+											$span.text('清空绘制');
+											
+											 global_init.run();
+											global_init.add(enclosure2,enclosure2.remove_square);
+											global_init.add(text_change2,$this); 
+
+											$method_select.attr('disabled', 'disabled');
+											enclosure2.square();
+
+
+										}
+									}
+
+
+								});
+								
+								
+								
+								$('#set_enclosure_submit2').on('click',function(){
+									var alter_enclosure_name = $('#alter_enclosure_name').val();
+									var alter_enclosure_text = $("#alter_enclosure_name").find("option:selected").text();
+									var enclosure_new_name =  $('#enclosure_new_name').val();
+									
+									var enclosure2_points = enclosure2.points;
+									
+									
+									console.log('enclosure2_points',enclosure2_points);
+									
+									
+									if(alter_enclosure_name == 'undefined'){
+										alert('该围栏不能修改!');
+										return false;
+									}
+									
+									
+									if(alter_enclosure_name == 0){
+										alert('请选择围栏!');
+										return false;
+									}	
+									if(enclosure2.points[0] == undefined || enclosure2.points[0] != enclosure2.points[enclosure2.points.length - 1]) {
+											alert('您没有画图');
+											return false;
+										}
+									
+										var rusultPoints = [];
+
+										var points_length = enclosure2_points.length - 1;
+										for(var i = 0; i < points_length; i++) {
+											var temporaryArr = {};
+											temporaryArr.x = mmConversion(enclosure2.points[i][0]);
+											temporaryArr.y = mmConversion(enclosure2.points[i][1]);
+											rusultPoints.push(temporaryArr);
+											temporaryArr = null;
+										}
+										
+									
+									
+									
+									var data = {};
+									// data.data = [];
+									
+									//var data_item = {};
+									
+								 
+									data.id = alter_enclosure_name;
+									if(enclosure_new_name == ''){
+										data.name = alter_enclosure_text;
+									}else{
+										data.name = enclosure_new_name;
+									}
+									data.points = rusultPoints;
+									
+									
+									
+									
+						 
+
+								console.log('datadta',data);
+										
+
+									var result = ajaxRequest('/lbs/electronic_rail_cfg_modify',[data]);
+
+									if(result.errorCode === 0) {
+										query_electronic();
+										$('#start_draw2').click();
+									}
+									alert(result.msg);
+									
+									
+									
+									
+									
+									return false;
+									
+								});
+								
+								
 
 								/*
 						param object obj jquery对象
@@ -1804,6 +2038,7 @@
 										var result = ajaxRequest('/lbs/electronic_rail_cfg_modify', [data]);
 
 										if(result.errorCode === 0) {
+											query_electronic();
 											alert(result.msg);
 										}
 
@@ -1859,17 +2094,113 @@
 									return ajaxData;
 
 								}
+								
+									function ajaxJsonRequest(url, txData) {
+										
+										var ajaxData;
+										$.ajax({
+											url: url,
+											async: false,        // 异步请求
+											type: 'POST',
+											contentType: "application/json;charset=UTF-8",
+											data: JSON.stringify(txData) ,   // 发送json数据到服务器
+											
+										success: function (data) {
+											console.log('接口调用成功');
+											console.log('receive:', data);
 
+											ajaxData = data;
+										},
 
+										error: function (qXHR, textStatus, errorThrown) {
+											console.log('接口调用失败');
+											ajaxData = false;
+										}
+											
+											
+										});
+										
+										return ajaxData;
+									}
+								
+								function query_electronic(){
+									var id = id || null;
+									var url, txData;
+									var data; //后台传来的数据
+									
+									url = '/lbs/get_electronic_rail_cfg';
+									txData = {
+										"floorNo": 'floor3'
+									};
+									data = ajaxRequest(url, txData);
+									
+								
+						  			var dataData = data.data;
+									var dataDataLength = dataData.length;
+									var selectHtml = '<option value="0">请选择围栏</option>';
+									var checkboxHtml = '';
+									for (var i = 0; i<dataDataLength; i++){
+										selectHtml += '<option value="'+dataData[i].id+'">'+dataData[i].name+'</option>';
+										
+										if(dataData[i].id != undefined){
+										 
+										checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar'+i+'" autocomplete="off" value = "'+dataData[i].id+'" /><label class="lbl" for="ace-settings-navbar'+i+'">'+dataData[i].name+'</div></div>'}
+									}
+									$('#alter_enclosure_name').html(selectHtml);
+									
+									$('#enclosure_item').html(checkboxHtml);
+									
+						
+									 
+									
+									
+									
+									
+								}
+								
+								query_electronic();
+
+								$('#enclosure_item_button').on('click',function(){
+									var $enclosure_item = $('#enclosure_item');
+									var items = $enclosure_item.find(':checked');
+									
+									global_init.run();
+									
+									if(items == undefined){
+										alert('请选择要删除的围栏!');
+										return false;
+									}
+									var ids = [];
+									
+									items.each(function(){
+										ids.push($(this).val());
+									});
+									
+									
+									var url = '/lbs/hz_data_del';
+									var data = {
+									 who:'elect_rail_cfg',
+									 ids:ids
+
+									};
+									console.log('aaaaaaa',data);
+									
+									var result = ajaxJsonRequest(url,data);
+									
+									
+									alert(result.msg);
+								
+									if(result.errorCode  == 0)
+									{
+										query_electronic()
+									}
+									
+								})
 
 
 								$('#electronic-fence-query-button').click(function () {
 
-									var buttonText = $('#start_draw_span').text();
-
-									if(buttonText === '清空绘制') {
-										$('#start_draw').click();
-									}
+									global_init.run();
 
 									electronicFence();
 								});
@@ -1896,17 +2227,26 @@
 
 									data = ajaxRequest(url, txData);
 
-									console.log('dsssssss', data);
+									 
 									enclosure_temporary = data;
 
 									draw_enclosure(data)
-									console.log('data111',data);
+									 
 
 									zoom_temporary_fn.push(enclosure_temporary_fn);
+									
+									global_init.add(clear_cach);
 
 								}
 								
-						 
+						 		function clear_cach (){
+									enclosure_temporary = [];
+									zoom_temporary_fn = [];
+									var draw_path = $('#svg_path');
+									var svg = draw_path.svg('get');
+									svg.clear();
+									
+								}
 
 								function draw_enclosure(data) {
 									var temporaryArr; //临时数据
