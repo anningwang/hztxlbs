@@ -54,12 +54,10 @@
             <ul class="nav">
               <li><a href="{{ url_for('index') }}">{{ _('Home') }}</a></li>
               <li><a href="{{ url_for('gettoken') }}">{{ _('位置服务平台') }}</a></li>
-              <li><a href="{{ url_for('hz_test') }}">{{ _('TestAPI') }}</a></li>
-              <li><a href="{{ url_for('hz_electronic_rail') }}">{{ _('电子围栏') }}</a></li>
-              <li><a href="{{ url_for('hz_history_loc') }}">{{ _('历史轨迹') }}</a></li>
-              <li><a href="{{ url_for('hz_page1') }}">{{ _('Page1') }}</a></li>
-              <li><a href="{{ url_for('hz_page2') }}">{{ _('Page2') }}</a></li>
-              <li><a href="{{ url_for('mytest') }}">{{ _('mytest.html') }}</a></li>
+              <li><a href="{{ url_for('hz_test') }}">{{ _('接口测试') }}</a></li>
+              <li><a href="{{ url_for('hz_3d_map') }}">{{ _('3D地图') }}</a></li>
+              <li><a href="{{ url_for('hz_new_function') }}">{{ _('新版实现') }}</a></li>
+
               {% if g.user.is_authenticated %}
               <li><a href="{{ url_for('user', nickname = g.user.nickname) }}">{{ _('Your Profile') }}</a></li>
               <li><a href="{{ url_for('show_all_users') }}">{{ _('All Users') }}</a></li>

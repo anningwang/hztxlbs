@@ -350,9 +350,14 @@ def hz_page2():
     return render_template('hz_page2.html')
 
 
-@app.route('/mytest')
-def mytest():
-    return render_template('mytest.html')
+@app.route('/hz_3d_map')
+def hz_3d_map():
+    return render_template('hz_3dmap.html')
+
+
+@app.route('/hz_new_function')
+def hz_new_function():
+    return render_template('hz_new.html')
 
 
 @app.route('/lbs/get_history_location', methods=['POST'])
