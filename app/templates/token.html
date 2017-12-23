@@ -34,6 +34,7 @@
 <script src="../static/ace/assets/js/ace-extra.js"></script>
 <link rel="shortcut icon" href="/static/img/favicon.ico" />
 <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
+<script src="/static/js/jquery.min.js"></script> 
 </head>
 
 <body class="no-skin"  style=" min-width:1905px;">
@@ -101,7 +102,7 @@
         <!-- /section:basics/sidebar.layout.shortcuts --> 
       </div>
       
-      <!--<div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
+      <div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
 						<span class="btn btn-success"></span>
 
 						<span class="btn btn-info"></span>
@@ -109,106 +110,14 @@
 						<span class="btn btn-warning"></span>
 
 						<span class="btn btn-danger"></span>
-					</div>--> 
+					</div> 
     </div>
     <!-- /.sidebar-shortcuts -->
     
-    <ul class="nav nav-list">
+            <!--导航JS-->
+    <script src="../static/js/hztx/common_nav.js"></script>
+    <ul class="nav nav-list" id="hz_nav">
       
-    
-    <li class="">
-						<a href="#" class="dropdown-toggle">
-							<i class="menu-icon  fa fa-home"></i>
-							<span class="menu-text">
-								我的建筑
-							</span>
-
-							<b class="arrow fa fa-angle-down"></b>
-						</a>
-
-						<b class="arrow"></b>
-
-						<ul class="submenu">
-							
-
-							<li class="">
-								<a href="/token">
-									<i class="menu-icon fa fa-caret-right"></i>
-									地图导航
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-							
-                            <li class="">
-								<a href="/hz_page2">
-									<i class="menu-icon fa fa-caret-right"></i>
-									坐标拾取
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-                            
-							<li class="active">
-								<a href="/hz_history_loc">
-									<i class="menu-icon fa fa-caret-right"></i>
-									历史轨迹
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-                            
-                            
-                            
-                        <li class="">
-						<a href="#" class="dropdown-toggle">
-							<i class="menu-icon fa fa-caret-right"></i>
-							<span class="menu-text"> 电子围栏 </span>
-
-							<b class="arrow fa fa-angle-down"></b>
-						</a>
-
-						<b class="arrow"></b>
-
-						<ul class="submenu">
-							<li class="">
-								<a href="/hz_electronic_rail">
-									<i class="menu-icon fa fa-caret-right"></i>
-									实时信息
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-
-							<li class="">
-								<a href="/hz_page1">
-									<i class="menu-icon fa fa-caret-right"></i>
-									历史警报
-								</a>
-
-								<b class="arrow"></b>
-							</li>
-
-							
-
-							
-
-							
-						</ul>
-					</li>
-                            
-
-							
-
-							
-
-							
-						</ul>
-					</li>
-    
-    
-    
-    
     </ul>
     <!-- /.nav-list --> 
     
@@ -259,7 +168,7 @@
         }
  
     </style>
-          <script src="/static/js/jquery.min.js"></script> 
+          
           <script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script> 
           <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script> 
           <script src="../static/js/jquery.mousewheel.js"></script>
