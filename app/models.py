@@ -243,12 +243,7 @@ class HzRoomStatInfo(db.Model):
 
     @staticmethod
     def gen_no():
-        search_no = gen_code_seconds('PD')
-        pd = HzRoomStatInfo.query.filter(HzRoomStatInfo.no.like('%' + search_no + '%'))\
-            .order_by(HzRoomStatInfo.id.desc()).first()
-        number = 1 if pd is None else int(pd.no.rsplit('-', 1)[1]) + 1
-        no = search_no + ('%03d' % number)
-        return no
+        return gen_code_seconds('PD')
 
 
 whooshalchemy.whoosh_index(app, Post)

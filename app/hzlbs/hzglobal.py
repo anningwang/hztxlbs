@@ -29,7 +29,7 @@ def gen_code(tag, date=None):
     """
     if date is None:
         date = datetime.datetime.today()
-    data_str = datetime.datetime.strftime(date, '%y%m%d-')
+    data_str = datetime.datetime.strftime(date, '%Y%m%d-')
     code_str = '%s-%s' % (tag, data_str)
     return code_str
 
@@ -43,7 +43,7 @@ def gen_code_seconds(tag, date=None):
     """
     if date is None:
         date = datetime.datetime.today()
-    data_str = datetime.datetime.strftime(date, '%y%m%d-%H%M%S-')
+    data_str = datetime.datetime.strftime(date, '%Y%m%d-%H%M%S')
     code_str = '%s-%s' % (tag, data_str)
     return code_str
 

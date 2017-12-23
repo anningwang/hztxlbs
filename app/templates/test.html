@@ -141,6 +141,37 @@
             console.log('send:', txData);
             ajaxRequest(url, txData);
 
+        } else if (str === 'elect_rail_cfg_modify'){   // 电子围栏——修改配置 ========================================
+            url = '/lbs/electronic_rail_cfg_modify';
+            txData = [{
+                id: 1,      // 记录ID，新增时 ID可不填或者填 <=0 的数值。 修改时，必须返回记录ID。
+                            // 若查询返回的围栏配置没有记录ID，则不允许修改。
+                name: 'lobby_new',  // 电子围栏名称，不允许重复
+                floorNo: 'floor3',   // 楼层号
+                points: [   //  围栏顶点坐标。（坐标应符合连续逆时针或者顺时针的顺序。当前要求：按逆时针顺序）
+                    // 可选参数。 当修改记录时，不涉及顶点修改，可以不传递。其他情况（新增，修改顶点）都需要
+                    // 传递最终状态的完整顶点信息。
+                    // 横坐标，物理坐标，单位 毫米 mm
+                    {'y': 6248, 'x': 26394},
+                    {'y': 8958, 'x': 26394},
+                    {'y': 8958, 'x': 27685},
+                    {'y': 8135, 'x': 27685},
+                    {'y': 8135, 'x': 28766},
+                    {'y': 8958, 'x': 28766},
+                    {'y': 8958, 'x': 30171},
+                    {'y': 8111, 'x': 30171},
+                    {'y': 7470, 'x': 29482},
+                    {'y': 6702, 'x': 30171},
+                    {'y': 6248, 'x': 30171}
+                ]
+            }];
+            tx.append($('<div/>').text('send to server: >>>>>>>>>>').html());
+            tx.append('<br>' + $('<div/>').text('url:  ' + url).html());
+            tx.append('<br>'+ JSON.stringify(txData));
+
+            console.log('send:', txData);
+            ajaxRequest(url, txData);
+
         } else if (str === 'del_elect_rail_cfg') {
             url = '/lbs/hz_data_del';
             txData = {who: 'elect_rail_cfg', ids: [1,2,3]};  // 这里为示例，ids数组内应为从数据库查询的实际id
@@ -167,12 +198,17 @@
             console.log('send:', txData);
             ajaxJsonRequest(url, txData);
 
-        } else if (str == 'people_stat_add') {  // 新增盘点区域
-            url = '/lbs/people_stat_add';
+        } else if (str == 'people_stat_cfg_add') {  // 新增盘点区域
+            url = '/lbs/people_stat_cfg_add';
             txData = {
-                'name': '北斗羲和',
-                'points': [{'x': 25407, 'y': 1362}, {'x': 25407, 'y': 4981}, {'x': 28058, 'y': 4981}, {'x': 28058, 'y': 1362}],
-                'peopleNum': 1
+                data: [{
+                    'name': '北斗羲和',
+                    'points': [{'x': 25407, 'y': 1362}, {'x': 25407, 'y': 4981}, {'x': 28058, 'y': 4981}, {'x': 28058, 'y': 1362}],
+                    'peopleNum': 1
+                },{
+                    'name': '会议室',
+                    'points': [{'x': 1343, 'y': 1362}, {'x': 1343, 'y': 6785}, {'x': 5733, 'y': 6785}, {'x': 5733, 'y': 1362}]
+                }]
             };
 
             tx.append($('<div/>').text('send to server: >>>>>>>>>>').html());
@@ -198,9 +234,18 @@
         } else if (str == 'people_stat_get') {  // 人员盘点--查询盘点结果 =============================================
             url = '/lbs/people_stat_get';
             txData = {};
-        } else if (str == 'people_stat_del') {  // 人员盘点--删除盘点区域 =============================================
+        } else if (str == 'people_stat_cfg_del') {  // 人员盘点--删除盘点区域 =========================================
             url = '/lbs/hz_data_del';
             txData = {who: 'people_stat_cfg', ids: [1,2,3]};  // 这里为示例，ids数组内应为从数据库查询的实际id
+        } else if (str == 'people_stat_cfg_get') {  // 人员盘点--查询盘点区域==========================================
+            url = '/lbs/people_stat_cfg_get';
+            txData = {
+                page: 1,
+                rows: 20
+            };
+        } else if (str == 'people_stat_result_del') {   // 人员盘点——删除盘点结果 ===================================
+            url = '/lbs/hz_data_del';
+            txData = {who: 'people_stat_result', ids: [1,2,3,4]};  // 这里为示例，ids数组内应为从数据库查询的实际id
         }
 
         if (url != null) {
@@ -228,15 +273,18 @@
 <select id="userId" onchange="selectApi(this.value)">
     <option value="choose">选择接口</option>
     <option value="get_history_location">获取历史轨迹</option>
-    <option value="get_electronic_rail_cfg">获取电子围栏配置</option>
-    <option value="get_electronic_rail_info">查询电子围栏告警信息</option>
-    <option value="add_elect_rail_cfg">增加电子围栏配置</option>
-    <option value="del_elect_rail_cfg">删除电子围栏配置</option>
+    <option value="get_electronic_rail_cfg">电子围栏——查询配置</option>
+    <option value="get_electronic_rail_info">电子围栏——查询告警信息</option>
+    <option value="add_elect_rail_cfg">电子围栏——新增配置</option>
+    <option value="elect_rail_cfg_modify">电子围栏——修改配置</option>
+    <option value="del_elect_rail_cfg">电子围栏——删除配置</option>
     <option value="get_loc">查询位置</option>
-    <option value="people_stat_add">人员盘点--新增盘点区域</option>
-    <option value="people_stat_do">人员盘点--立即盘点</option>
-    <option value="people_stat_get">人员盘点--查询盘点结果</option>
-    <option value="people_stat_del">人员盘点--删除盘点区域</option>
+    <option value="people_stat_cfg_add">人员盘点——新增盘点区域</option>
+    <option value="people_stat_do">人员盘点——立即盘点</option>
+    <option value="people_stat_get">人员盘点——查询盘点结果</option>
+    <option value="people_stat_cfg_del">人员盘点——删除盘点区域</option>
+    <option value="people_stat_cfg_get">人员盘点——查询盘点区域</option>
+    <option value="people_stat_result_del">人员盘点——删除盘点结果</option>
 
 </select>
 

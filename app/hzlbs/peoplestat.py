@@ -48,9 +48,66 @@ class PeopleStat:
             self.zone[pd.name] = item
 
     @staticmethod
+    def add_zones(param):
+        """
+        增加盘点区域 —— 可以一次增加多个区域
+
+        输入参数：
+        {
+            data: [{
+                name:       盘点区域名称
+                points:[{'x': 1, 'y': 2}, {'x': 3, 'y': 4},...]     盘点区域顶点坐标
+                peopleNum:  应到人数，optional，不填或者填写值<=0，则认为该参数无效。否则，实际盘点人数不符时，给出告警提示
+            }]
+        ]
+        :return:
+        {
+            errorCode   msg
+            ---------   --------------------------------------------------------
+            0           新增成功！
+            101         输入参数错误！
+            1001        名称[%s]已经存在！
+            105         盘点区域顶点数须大于等于3！
+        }
+        """
+
+        if 'data' not in param:
+            return {'errorCode': 101, 'msg': u'输入参数错误！缺少[data]字段'}
+
+        for dt in param['data']:
+            if 'name' not in dt:
+                return {'errorCode': 101, 'msg': u'输入参数错误！缺少[name]字段'}
+            name = dt['name']
+
+            if 'points' not in dt:
+                return {'errorCode': 101, 'msg': u'输入参数错误！缺少[points]字段'}
+            points = dt['points']
+
+            people_num = 0 if 'peopleNum' not in dt or dt['peopleNum'] == '' else int(dt['peopleNum'])
+
+            # 判断名称是否重复
+            has = HzRoomStatCfg.query.filter(HzRoomStatCfg.name == name).first()
+            if has is not None:
+                return {'errorCode': 1001, 'msg': u'名称[%s]已经存在！' % name}
+            param = {'name': name, 'buildingId': HZ_BUILDING_ID, 'floorNo': HZ_FLOOR_NO, 'expectNum': people_num}
+            pd = HzRoomStatCfg(param)
+            db.session.add(pd)
+            pd = HzRoomStatCfg.query.filter_by(no=pd.no).first()
+
+            """ 增加盘点区域顶点配置 """
+            if len(points) < 3:
+                return {'errorCode': 105, 'msg': u'盘点区域顶点数须大于等于3！'}
+            for vt in points:
+                pdp = HzRoomStatPoints(room_id=pd.id, x=vt['x'], y=vt['y'])
+                db.session.add(pdp)
+
+        db.session.commit()
+        return {'errorCode': 0, 'msg': u'新增成功！'}
+
+    @staticmethod
     def add_zone(name, points, people_num=0):
         """
-        增加盘点区域配置
+        增加盘点区域配置 ——每次只能增加一个
         返回值：
             errorCode   msg
             ---------   --------------------------------------------------------
@@ -93,6 +150,25 @@ class PeopleStat:
         """
         立即盘点
 
+        输入参数：
+        无
+        :return:
+        {
+            errorCode       msg
+            ------------    -----------------------------
+            0               'ok'
+
+            statInfo:       盘点信息
+                id                  记录ID
+                statNo              盘点编号
+                roomName            盘点区域名称
+                roomId              盘点区域ID
+                roomNo              盘点区域编号
+                roomCreateAt        盘点区域创建时间
+                curPeopleNum        盘点时人数
+                expectNum           期望人数
+                datetime            盘点时间
+        }
         """
         self.get_data()
         tm = datetime.datetime.today()
@@ -128,8 +204,10 @@ class PeopleStat:
         查询盘点信息
         :param no:         盘点编号 -- 查询过滤条件
         :return:
-            errorCode
-            msg
+            errorCode       msg
+            ------------    -----------------------------
+            0               'ok'
+
             statInfo:       盘点信息
                 id                  记录ID
                 statNo              盘点编号
@@ -152,3 +230,114 @@ class PeopleStat:
                               'datetime': datetime.datetime.strftime(info[0].datetime, '%Y-%m-%d %H:%M:%S'),
                               'expectNum': info[4]})
         return {'errorCode': 0, 'msg': 'ok', 'statInfo': stat_info}
+
+    @staticmethod
+    def get_zone(param):
+        """
+        查询盘点区域配置
+
+        输入参数(JSON格式)：
+        {
+            floorNo:    查询的楼层, 可选参数，不填则不作为过滤条件。目前该参数无实际意义
+            page:       查询的页码。 当记录很多时，需要分页查询。可选参数，默认为第1页
+            rows:       当前页记录条数。可选参数。默认50条
+
+        }
+        :return:
+        {
+            errorCode       msg
+            ---------       -----------------------
+            0               'ok'
+
+            data:{     盘点区域配置
+                total:      符合条件的记录总条数
+                rows:[{     盘点信息详情
+                    name:   盘点区域名称（所在房间）
+                    points:[{   盘点区域顶点坐标。（坐标应符合连续逆时针或者顺时针的顺序。当前要求：按逆时针顺序）
+                        x:  横坐标，物理坐标，单位 毫米 mm
+                        y:  纵坐标，物理坐标，单位 mm
+                    }]
+                    zoneNo:     盘点区域编号。后台生成的唯一编号。
+                    id:         盘点区域 Id
+                    expectNum:  期望人数
+                    createAt:   区域创建时间
+                    buildId:    建筑ID
+                    floorNo:    楼层号
+                }]
+            }
+        }
+        """
+        hzq = HzRoomStatCfg.query
+        floor_no = param['floorNo'] if 'floorNo' in param else ''
+        if floor_no != '':
+            hzq = hzq.filter_by(floor_no=floor_no)
+        page = 1 if 'page' not in param or param['page'] == '' else int(param['page'])
+        rows = 50 if 'rows' not in param or param['rows'] == '' else int(param['rows'])
+
+        total = hzq.count()
+
+        if page < 1:
+            page = 1
+        offset = (page - 1) * rows
+
+        records = hzq.limit(rows).offset(offset).all()
+        rs = []
+        for rec in records:
+            """ 查询 盘点区域的顶点信息 """
+            pts = HzRoomStatPoints.query.filter_by(room_id=rec.id).order_by(HzRoomStatPoints.id.asc()).all()
+            points = []
+            for pt in pts:
+                points.append({'x': pt.x, 'y': pt.y})
+            rs.append({'id': rec.id, 'zoneNo': rec.no, 'buildId': rec.build_id, 'floorNo': rec.floor_no,
+                       'expectNum': rec.expect_num, 'name': rec.name,
+                       'createAt': datetime.datetime.strftime(rec.create_at, '%Y-%m-%d %H:%M:%S'),
+                       'points': points
+                       })
+
+        return {'errorCode': 0, 'msg': 'ok', 'data': {'total': total, 'rows': rs}}
+
+    @staticmethod
+    def del_zones(ids):
+        """
+        删除 盘点区域
+        :param ids:     盘点区域id 列表
+        :return: {
+            errorCode       msg
+            ----------      ------------------------------
+            0               [%d]个盘点区域，[%d]个顶点信息被删除，[%d]条盘点记录被删除。
+        }
+        """
+        vt = 0
+        pd_num = 0
+        for i in ids:
+            """ 删除盘点区域顶点坐标 """
+            vt += HzRoomStatPoints.query.filter_by(room_id=i).delete()
+
+            """ 删除 盘点数据 """
+            pd_num += HzRoomStatInfo.query.filter_by(room_id=i).delete()
+
+        """ 删除 盘点区域 基本信息 """
+        num = 0
+        num += HzRoomStatCfg.query.filter(HzRoomStatCfg.id.in_(ids)).delete(synchronize_session=False)
+
+        db.session.commit()
+        return {'errorCode': 0,
+                'msg': u'[%d]个盘点区域，[%d]个顶点信息被删除，[%d]条盘点记录被删除。' % (num, vt, pd_num)}
+
+    @staticmethod
+    def del_stat_results(ids):
+        """
+        删除 盘点结果
+        :param ids:     记录id
+        :return:
+        {
+            errorCode       msg
+            ----------      ------------------------------
+            0               [%d]条盘点记录被删除。
+        }
+        """
+        num = 0
+        num += HzRoomStatInfo.query.filter(HzRoomStatInfo.id.in_(ids)).delete(synchronize_session=False)
+
+        db.session.commit()
+        return {'errorCode': 0, 'msg': u'[%d]条盘点记录被删除。' % num}
