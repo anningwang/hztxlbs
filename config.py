@@ -7,16 +7,19 @@ SECRET_KEY = 'you-will-never-guess'
 APP_NAME = 'hztxlbs'
 
 OPENID_PROVIDERS = [
-    { 'name': 'Google', 'url': 'https://www.google.com/accounts/o8/id' },
-    { 'name': 'Yahoo', 'url': 'https://me.yahoo.com' },
-    { 'name': 'AOL', 'url': 'http://openid.aol.com/<username>' },
-    { 'name': 'Flickr', 'url': 'http://www.flickr.com/<username>' },
-    { 'name': 'MyOpenID', 'url': 'https://www.myopenid.com' }]
+    {'name': 'Google', 'url': 'https://www.google.com/accounts/o8/id'},
+    {'name': 'Yahoo', 'url': 'https://me.yahoo.com'},
+    {'name': 'AOL', 'url': 'http://openid.aol.com/<username>'},
+    {'name': 'Flickr', 'url': 'http://www.flickr.com/<username>'},
+    {'name': 'MyOpenID', 'url': 'https://www.myopenid.com'}]
     
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 SQLALCHEMY_RECORD_QUERIES = True
 WHOOSH_BASE = os.path.join(basedir, 'search.db')
+
+# APScheduler(Advanced Python Scheduler) 的 job store
+SQLALCHEMY_DB_SCHEDULER_URL = 'sqlite:///' + os.path.join(basedir, 'jobs.sqlite')
 
 FILENAME_VERTEX = os.path.join(basedir, "app/static/ajax/vertex.json")
 FILENAME_APP_LOG = basedir + '/tmp/' + APP_NAME + '.log'
@@ -39,8 +42,8 @@ LANGUAGES = {
 }
 
 # microsoft translation service
-MS_TRANSLATOR_CLIENT_ID = '' # enter your MS translator app id here
-MS_TRANSLATOR_CLIENT_SECRET = '' # enter your MS translator app secret here
+MS_TRANSLATOR_CLIENT_ID = ''        # enter your MS translator app id here
+MS_TRANSLATOR_CLIENT_SECRET = ''    # enter your MS translator app secret here
 
 # administrator list
 ADMINS = ['you@example.com']

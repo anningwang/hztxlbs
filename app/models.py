@@ -205,6 +205,16 @@ class HzRoomStatCfg(db.Model):
         self.create_at = datetime.datetime.today()
         self.expect_num = 0 if 'expectNum' not in param else param['expectNum']
 
+    def update(self, param):
+        if 'name' in param:
+            self.name = param['name']
+        if 'buildingId' in param:
+            self.build_id = param['buildingId']
+        if 'floorNo' in param:
+            self.floor_no = param['floorNo']
+        if 'expectNum' in param:
+            self.expect_num = param['expectNum']
+
     def create_no(self):
         search_no = gen_code('QY')
         dt = HzRoomStatCfg.query.filter(HzRoomStatCfg.no.like('%' + search_no + '%'))\
@@ -225,7 +235,7 @@ class HzRoomStatPoints(db.Model):
 class HzRoomStatInfo(db.Model):
     """ 人员盘点信息表 """
     id = db.Column(db.Integer, primary_key=True)
-    no = db.Column(db.Integer)              # 盘点编号
+    no = db.Column(db.String(40))           # 盘点编号
     room_id = db.Column(db.Integer)         # 盘点区域id
     datetime = db.Column(db.DateTime)       # 盘点时间
     people_num = db.Column(db.Integer)      # 人数
@@ -244,6 +254,29 @@ class HzRoomStatInfo(db.Model):
     @staticmethod
     def gen_no():
         return gen_code_seconds('PD')
+
+
+class Jobs(db.Model):
+    """ 定时任务表"""
+    id = db.Column(db.Integer, primary_key=True)
+    no = db.Column(db.String(40))       # job编号，唯一
+    name = db.Column(db.String(40))     # 任务名称
+    hour = db.Column(db.String(40))
+    minute = db.Column(db.String(40))
+    second = db.Column(db.String(40))
+    day_of_week = db.Column(db.String(20))      # 周几 比如周一至周五
+    start_date = db.Column(db.DateTime)
+    end_date = db.Column(db.DateTime)
+    create_at = db.Column(db.DateTime)
+
+    @staticmethod
+    def gen_no():
+        search_no = gen_code_seconds('JOB')
+        dt = Jobs.query.filter(Jobs.no.like('%' + search_no + '%')) \
+            .order_by(Jobs.id.desc()).first()
+        number = 1 if dt is None else int(dt.no.rsplit('-', 1)[1]) + 1
+        no = search_no + ('-%03d' % number)
+        return no
 
 
 whooshalchemy.whoosh_index(app, Post)

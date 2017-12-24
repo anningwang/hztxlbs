@@ -5,8 +5,7 @@ from flask_sqlalchemy import get_debug_queries
 from flask_babel import gettext
 from app import app, db, lm, oid, babel
 from forms import LoginForm, EditForm, PostForm, SearchForm
-from models import User, ROLE_USER, Post, HzToken, HzLocation, HzElecTail, HzElecTailCfg, HzEtPoints, HzRoomStatInfo,\
-    HzRoomStatCfg, HzRoomStatPoints
+from models import User, ROLE_USER, Post, HzToken, HzLocation, HzElecTail, HzElecTailCfg, HzEtPoints
 from emails import follower_notification
 from guess_language import guessLanguage
 from translate import microsoft_translate
@@ -18,9 +17,7 @@ from lbs import TEST_UID, CUR_MAP_SCALE, HZ_MAP_GEO_WIDTH, HZ_MAP_GEO_HEIGHT
 import json
 from hzlbs.elecrail import get_elecrail
 from hzlbs.hzglobal import HZ_BUILDING_ID, g_upd_et_cfg
-import hzlbs.peoplestat
-
-ps = hzlbs.peoplestat.PeopleStat()
+from hzlbs.peoplestat import ps
 
 
 @lm.user_loader
@@ -639,12 +636,12 @@ def electronic_rail_cfg_modify():
 
                 if 'points' in rec:
                     HzEtPoints.query.filter_by(et_id=rec['id']).delete()
-                """ 增加围栏顶点配置 """
-                if len(rec['points']) < 3:
-                    return jsonify({'errorCode': 105, 'msg': u'围栏顶点数须大于等于3！'})
-                for vt in rec['points']:
-                    etp = HzEtPoints(et_id=rec['id'], x=vt['x'], y=vt['y'])
-                    db.session.add(etp)
+                    """ 增加围栏顶点配置 """
+                    if len(rec['points']) < 3:
+                        return jsonify({'errorCode': 105, 'msg': u'围栏顶点数须大于等于3！'})
+                    for vt in rec['points']:
+                        etp = HzEtPoints(et_id=rec['id'], x=vt['x'], y=vt['y'])
+                        db.session.add(etp)
     except KeyError:
         return jsonify({'errorCode': 101, 'msg': u'输入参数错误！'})
 
@@ -663,7 +660,8 @@ def lbs_hz_data_del():
             == 'elect_rail_cfg'     电子围栏配置
             == 'people_stat_cfg'    盘点区域配置
             == 'people_stat_result' 盘点记录
-        ids: [id1, id2, ...]    电子围栏 id list
+            == 'people_stat_job'    定时盘点任务
+        ids: [id1, id2, ...]    记录 id list
     }
     :return:
     {
@@ -684,6 +682,8 @@ def lbs_hz_data_del():
             return jsonify(ps.del_zones(ids))
         elif who == 'people_stat_result':
             return jsonify(ps.del_stat_results(ids))
+        elif who == 'people_stat_job':
+            return jsonify(ps.del_jobs(ids))
         else:
             return jsonify({'errorCode': 202, 'msg': u'未知模块[ %s ]' % who})
 
@@ -749,111 +749,3 @@ def api_hz_lbs_locate_results():
                      'time': datetime.datetime.strftime(lo.timestamp, '%Y-%m-%d %H:%M:%S')})
 
     return jsonify({'errorCode': 0, 'errorMsg': [], 'data': data, 'valid': True})
-
-
-@app.route('/lbs/people_stat_cfg_add', methods=['POST'])
-def people_stat_cfg_add():
-    """ 新增盘点区域 """
-    return jsonify(ps.add_zones(request.json))
-
-
-@app.route('/lbs/people_stat_cfg_get', methods=['POST'])
-def people_stat_cfg_get():
-    """ 查询盘点区域配置 """
-    return jsonify(ps.get_zone(request.json))
-
-
-@app.route('/lbs/people_stat_do', methods=['POST'])
-def people_stat_do():
-    """ 立即盘点 """
-    return jsonify(ps.stat())
-
-
-@app.route('/lbs/people_stat_get', methods=['POST'])
-def people_stat_get():
-    """
-    查询盘点结果
-
-    输入参数：
-        statNo:         盘点编号， 例如：'PD-20171222-165201', 可选，若不填写，该字段不作为过滤条件
-        roomName:       盘点区域名称，例如：["北斗羲和", "智慧消防"], 可选，若不填写，该字段不作为过滤条件
-        datetimeFrom:   查询起始时间，例如："2017-08-17 11:17:35",   可选，若不填写，该字段不作为过滤条件
-        datetimeTo:     查询结束时间，例如："2017-09-23 11:17:35",   可选，不填写时，该字段不作为过滤条件
-        page:           查询的页码。 当记录很多时，需要分页查询。可选参数，默认为第1页
-        rows:           当前页记录条数。可选参数。默认100条
-        sort: [{"field": "datetime", "oper": "desc"},   记录排序规则， 可选参数，默认按照时间降序排序
-               {"field": "roomName", "oper": "desc"}]   按照房间名称排序，可选参数，默认按照升序排序
-            当前条件只支持 and 。
-            oper 取值： desc 降序（默认）， asc 升序。 可以不填oper，默认降序
-            字段顺序 代表 查询时的排序顺序。
-            目前支持 datetime, roomName 排序
-
-    :return:
-    {
-        errorCode       msg
-        ---------       --------------------------------------------------------
-        0               ok
-
-        data:{          数据内容
-            total:      符合条件的记录条数
-            rows:[{     盘点信息详情
-                id:             记录ID
-                statNo:         盘点编号
-                roomName:       盘点区域名称
-                roomId:         盘点区域ID
-                roomNo:         盘点区域编号
-                roomCreateAt:   盘点区域创建时间
-                curPeopleNum:   盘点时人数
-                expectNum:      期望人数
-                datetime:       盘点时间
-            }]
-        }
-    }
-    """
-    hzq = HzRoomStatInfo.query.join(HzRoomStatCfg, HzRoomStatCfg.id == HzRoomStatInfo.room_id)
-
-    if 'statNo' in request.json and request.json['statNo'] != '':
-        hzq = hzq.filter(HzRoomStatInfo.no == request.json['statNo'])
-
-    if 'roomName' in request.json and request.json['roomName'] != []:
-        hzq = hzq.filter(HzRoomStatInfo.name.in_(request.json['roomName']))
-
-    if 'datetimeFrom' in request.json:
-        hzq = hzq.filter(HzRoomStatInfo.datetime >= request.json['datetimeFrom'])
-    if 'datetimeTo' in request.json:
-        hzq = hzq.filter(HzRoomStatInfo.datetime <= request.json['datetimeTo'])
-    page = 1 if 'page' not in request.json or request.json['page'] == '' else int(request.json['page'])
-    rows = 100 if 'rows' not in request.json or request.json['rows'] == '' else int(request.json['rows'])
-
-    total = hzq.count()
-
-    if 'sort' in request.json:
-        for st in request.json['sort']:
-            is_desc = True if 'oper' not in st or st['oper'] == 'desc' else False
-            if st['field'] == 'datetime':
-                if is_desc:
-                    hzq = hzq.order_by(HzRoomStatInfo.datetime.desc())
-                else:
-                    hzq = hzq.order_by(HzRoomStatInfo.datetime)
-            elif st['field'] == 'roomName':
-                if is_desc:
-                    hzq = hzq.order_by(HzRoomStatCfg.name.desc())
-                else:
-                    hzq = hzq.order_by(HzRoomStatCfg.name)
-    else:
-        hzq = hzq.order_by(HzRoomStatInfo.datetime.desc())
-
-    if page < 1:
-        page = 1
-    offset = (page - 1) * rows
-    hzq = hzq.add_columns(HzRoomStatCfg.name, HzRoomStatCfg.no, HzRoomStatCfg.create_at, HzRoomStatCfg.expect_num)
-    records = hzq.limit(rows).offset(offset).all()
-
-    rs = []
-    for info in records:
-        rs.append({'id': info[0].id, 'statNo': info[0].no, 'roomName': info[1], 'roomId': info[0].room_id,
-                   'roomNo': info[2], 'curPeopleNum': info[0].people_num,
-                   'roomCreateAt': datetime.datetime.strftime(info[3], '%Y-%m-%d %H:%M:%S'),
-                   'datetime': datetime.datetime.strftime(info[0].datetime, '%Y-%m-%d %H:%M:%S'),
-                   'expectNum': info[4]})
-    return jsonify({'errorCode': 0, 'msg': 'ok', 'data': {'total': total, 'rows': rs}})

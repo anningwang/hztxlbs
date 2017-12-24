@@ -236,7 +236,10 @@
             txData = {};
         } else if (str == 'people_stat_cfg_del') {  // 人员盘点--删除盘点区域 =========================================
             url = '/lbs/hz_data_del';
-            txData = {who: 'people_stat_cfg', ids: [1,2,3]};  // 这里为示例，ids数组内应为从数据库查询的实际id
+            txData = {
+                who: 'people_stat_cfg',
+                ids: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16] // 这里为示例，ids数组应为从数据库查询的实际id
+            };
         } else if (str == 'people_stat_cfg_get') {  // 人员盘点--查询盘点区域==========================================
             url = '/lbs/people_stat_cfg_get';
             txData = {
@@ -246,6 +249,55 @@
         } else if (str == 'people_stat_result_del') {   // 人员盘点——删除盘点结果 ===================================
             url = '/lbs/hz_data_del';
             txData = {who: 'people_stat_result', ids: [1,2,3,4]};  // 这里为示例，ids数组内应为从数据库查询的实际id
+        } else if (str == 'people_stat_cfg_chg') {  // 人员盘点——修改盘点区域 =======================================
+            url = '/lbs/people_stat_cfg_chg';
+            txData = {
+               data:[{
+                   id: 1,
+                   expectNum: 5
+               }, {
+                   id: 2,
+                   name: '大会议室',
+                   points: [{'x': 1343, 'y': 1362}, {'x': 1343, 'y': 6785}, {'x': 5733, 'y': 6785}, {'x': 5733, 'y': 1362}]
+               }]
+            };
+        } else if (str == 'people_stat_cfg_add_default') {  // 人员盘点——增加默认盘点区域 ===========================
+            url = '/lbs/people_stat_cfg_add_default';
+        } else if (str == 'people_stat_task_add') { // 人员盘点——新增定时盘点任务 ===================================
+            url = '/lbs/people_stat_task_add';
+            txData = {
+                data: [{
+                    name: '定时任务1',
+                    hour: '14',
+                    minute: '20'
+                },{
+                    name: '定时任务2',      // 该任务在 每周一至周五的10点和11点 运行
+                    hour: '10-11',
+                    dayOfWeek: '0-4'
+                }]
+            };
+        } else if (str == 'people_stat_task_chg') { // 人员盘点——修改定时盘点任务 ===================================
+            url = '/lbs/people_stat_task_chg';
+            txData = {
+                data: [{
+                    id: 1,
+                    name: 'job_1',
+                    hour: '16',
+                    minute: '00'
+                }]
+            };
+        } else if (str == 'people_stat_task_del') { // 人员盘点——删除定时盘点任务 ===================================
+            url = '/lbs/hz_data_del';
+            txData = {
+                who: 'people_stat_job',
+                ids: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16] // 这里为示例，ids数组应为从数据库查询的实际id
+            };
+        } else if (str == 'people_stat_task_get') { // 人员盘点——查询定时盘点任务 ===================================
+            url = '/lbs/people_stat_task_get';
+            txData = {
+                page: 1,
+                rows: 20
+            };
         }
 
         if (url != null) {
@@ -271,7 +323,7 @@
 <body>
 
 <select id="userId" onchange="selectApi(this.value)">
-    <option value="choose">选择接口</option>
+    <option value="choose">===请选择接口===</option>
     <option value="get_history_location">获取历史轨迹</option>
     <option value="get_electronic_rail_cfg">电子围栏——查询配置</option>
     <option value="get_electronic_rail_info">电子围栏——查询告警信息</option>
@@ -280,10 +332,16 @@
     <option value="del_elect_rail_cfg">电子围栏——删除配置</option>
     <option value="get_loc">查询位置</option>
     <option value="people_stat_cfg_add">人员盘点——新增盘点区域</option>
-    <option value="people_stat_do">人员盘点——立即盘点</option>
-    <option value="people_stat_get">人员盘点——查询盘点结果</option>
     <option value="people_stat_cfg_del">人员盘点——删除盘点区域</option>
+    <option value="people_stat_cfg_chg">人员盘点——修改盘点区域</option>
     <option value="people_stat_cfg_get">人员盘点——查询盘点区域</option>
+    <option value="people_stat_cfg_add_default">人员盘点——增加默认盘点区域</option>
+    <option value="people_stat_do">人员盘点——立即盘点</option>
+    <option value="people_stat_task_add">人员盘点——新增定时盘点任务</option>
+    <option value="people_stat_task_del">人员盘点——删除定时盘点任务</option>
+    <option value="people_stat_task_chg">人员盘点——修改定时盘点任务</option>
+    <option value="people_stat_task_get">人员盘点——查询定时盘点任务</option>
+    <option value="people_stat_get">人员盘点——查询盘点结果</option>
     <option value="people_stat_result_del">人员盘点——删除盘点结果</option>
 
 </select>
