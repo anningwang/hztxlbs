@@ -3,8 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <title>3d map</title>
+
+    <link rel="shortcut icon" href="/static/img/favicon.ico" />
+    <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
+
+    <script src="/static/js/fmap/fengmap.min.js" ></script>
+    <style type="text/css">
+        body {
+            margin:0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #map-container {
+            position: absolute;
+            width:100%;
+            height: 100%;
+        }
+    </style>
+
 </head>
 <body>
-hz 3D map
+
+<div id="map-container"></div>
+
+<script type="text/javascript">
+    // 定义全局map变量
+    var fmapID = 'hztx-hy-f3'; //mapId
+    var map = new fengmap.FMMap({
+        container: document.getElementById('map-container'), //渲染dom
+
+        // 开发者申请应用名称
+        appName:'hztxLbs',
+
+        // 开发者申请应用下web服务的key
+        key:'0a6829a356caea4bb98fa0f2dea423ed',
+
+        // 主题数据位置
+        mapThemeURL : '/static/js/fmap/data/theme',
+
+        // [15, 29], 比例尺级别范围， 16级到23级
+        // mapScaleLevelRange: [16, 23],
+
+        // 默认比例尺级别  内部创建的1-29级的比例尺级别
+        defaultMapScaleLevel: 22
+    });
+
+    // 打开Fengmap服务器的地图数据和主题
+    map.openMapById(fmapID);
+</script>
+
 </body>
 </html>
