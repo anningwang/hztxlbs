@@ -50,6 +50,30 @@
 
     // 打开Fengmap服务器的地图数据和主题
     map.openMapById(fmapID);
+
+    map.showCompass = true; // 显示指北针控件
+
+    var ctlOpt1 = new fengmap.controlOptions({
+        position: fengmap.controlPositon.LEFT_TOP, // 位置 左上角
+
+        // 位置x,y的偏移量
+        offset: {
+            x: 20,
+            y: 60
+        },
+
+        imgURL: '/static/img/',
+
+        // 点击放大、缩小控件回调的方法
+        scaleLevelcallback:function(level,result) {
+            /*console.log("当前级别"+result);
+             console.log("最小级别："+map.minScaleLevel,"最大级别："+map.maxScaleLevel);*/
+        }
+    });
+    // 放大、缩小控件
+    // map为FMMap对象，初始化需在地图加载后完成。
+    var zoomControl = new fengmap.zoomControl(map, ctlOpt1);
+
 </script>
 
 </body>
