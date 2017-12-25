@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>3d map</title>
+    <title>和仲通讯3D地图</title>
 
     <link rel="shortcut icon" href="/static/img/favicon.ico" />
     <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
@@ -29,50 +29,104 @@
 <script type="text/javascript">
     // 定义全局map变量
     var fmapID = 'hztx-hy-f3'; //mapId
-    var map = new fengmap.FMMap({
-        container: document.getElementById('map-container'), //渲染dom
+    var map;
 
-        // 开发者申请应用名称
-        appName:'hztxLbs',
+    window.onload = function() {
+        map = new fengmap.FMMap({
+            container: document.getElementById('map-container'), //渲染dom
 
-        // 开发者申请应用下web服务的key
-        key:'0a6829a356caea4bb98fa0f2dea423ed',
+            // 开发者申请应用名称
+            appName:'hztxLbs',
 
-        // 主题数据位置
-        mapThemeURL : '/static/js/fmap/data/theme',
+            // 开发者申请应用下web服务的key
+            key:'0a6829a356caea4bb98fa0f2dea423ed',
 
-        // [15, 29], 比例尺级别范围， 16级到23级
-        // mapScaleLevelRange: [16, 23],
+            // 主题数据位置
+            mapThemeURL : '/static/js/fmap/data/theme',
 
-        // 默认比例尺级别  内部创建的1-29级的比例尺级别
-        defaultMapScaleLevel: 22
-    });
+            // [15, 29], 比例尺级别范围， 16级到23级
+            // mapScaleLevelRange: [16, 23],
 
-    // 打开Fengmap服务器的地图数据和主题
-    map.openMapById(fmapID);
+            // 默认比例尺级别  内部创建的1-29级的比例尺级别
+            defaultMapScaleLevel: 22
+        });
 
-    map.showCompass = true; // 显示指北针控件
+        // 打开Fengmap服务器的地图数据和主题
+        map.openMapById(fmapID);
 
-    var ctlOpt1 = new fengmap.controlOptions({
-        position: fengmap.controlPositon.LEFT_TOP, // 位置 左上角
+        map.showCompass = true; // 显示指北针控件
 
-        // 位置x,y的偏移量
-        offset: {
-            x: 20,
-            y: 60
-        },
+        var ctlOpt1 = new fengmap.controlOptions({
+            position: fengmap.controlPositon.LEFT_TOP, // 位置 左上角
 
-        imgURL: '/static/img/',
+            // 位置x,y的偏移量
+            offset: {
+                x: 20,
+                y: 60
+            },
 
-        // 点击放大、缩小控件回调的方法
-        scaleLevelcallback:function(level,result) {
-            /*console.log("当前级别"+result);
-             console.log("最小级别："+map.minScaleLevel,"最大级别："+map.maxScaleLevel);*/
-        }
-    });
-    // 放大、缩小控件
-    // map为FMMap对象，初始化需在地图加载后完成。
-    var zoomControl = new fengmap.zoomControl(map, ctlOpt1);
+            imgURL: '/static/img/',
+
+            // 点击放大、缩小控件回调的方法
+            scaleLevelcallback:function(level,result) {
+                /*console.log("当前级别"+result);
+                 console.log("最小级别："+map.minScaleLevel,"最大级别："+map.maxScaleLevel);*/
+            }
+        });
+        // 放大、缩小控件
+        // map为FMMap对象，初始化需在地图加载后完成。
+        var zoomControl = new fengmap.zoomControl(map, ctlOpt1);
+
+        // 地图加载完成回掉方法
+        map.on('loadComplete',function() {
+            var toolControl = new fengmap.toolControl(map, {
+                // 初始化2D模式
+                init2D: false,
+
+                // 设置为false表示只显示2D,3D切换按钮
+                groupsButtonNeeded: false,
+
+                imgURL: '/static/img/',
+
+                // 点击按钮的回调方法,返回type表示按钮类型,value表示对应的功能值
+                clickCallBack: function(type, value) {
+                    // console.log(type,value);
+                }
+            });
+
+            addMarkers({x: 10000, y: 20000});
+
+        });
+
+    };
+
+    // 添加Marker
+    function addMarkers(coord) {
+        // 获取焦点层
+        var currentGid = map.focusGroupID;
+        var group = map.getFMGroup(currentGid);
+
+        // 返回当前层中第一个imageMarkerLayer,如果没有，则自动创建
+        var layer = group.getOrCreateLayer('imageMarker');
+
+        // 图标标注对象，默认位置为该楼层中心点
+        var im = new fengmap.FMImageMarker({
+            //x: coord.x,
+            //y: coord.y,
+
+            // 设置图片路径
+            url: '/static/img/blueImageMarker.png',
+            // 设置图片显示尺寸
+            size: 32,
+            height: 2,
+            callback: function() {
+                // 在图片载入完成后，设置 "一直可见"
+                im.alwaysShow();
+            }
+        });
+
+        layer.addMarker(im);
+    }
 
 </script>
 
