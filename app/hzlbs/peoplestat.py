@@ -584,7 +584,7 @@ class PeopleStat:
         db.session.commit()
 
         for jp in job_parm:
-            scheduler.add_job(job_stat, trigger='cron', day_of_week=jp['day_of_week'],
+            ps_scheduler.add_job(job_stat, trigger='cron', day_of_week=jp['day_of_week'],
                               hour=jp['hour'], minute=jp['minute'],
                               second=jp['second'], start_date=jp['start_date'], end_date=jp['end_date'],
                               name=jp['name'], id=jp['id'])
@@ -608,9 +608,9 @@ class PeopleStat:
             job = Jobs.query.get(i)
             if job is not None:
                 job_id = PeopleStat.gen_job_id(job.id)
-                task = scheduler.get_job(job_id)
+                task = ps_scheduler.get_job(job_id)
                 if task is not None:
-                    scheduler.remove_job(job_id)
+                    ps_scheduler.remove_job(job_id)
                     real_task_num += 1
 
         """ 删除 定时任务 """
@@ -714,18 +714,18 @@ class PeopleStat:
         db.session.commit()
         for jp in job_parm:
             job_id = PeopleStat.gen_job_id(jp['id'])
-            job = scheduler.get_job(job_id)
+            job = ps_scheduler.get_job(job_id)
             if job is not None:
                 name = jp['name']
                 if name is not None:
-                    scheduler.modify_job(job_id, name=name)
+                    ps_scheduler.modify_job(job_id, name=name)
                 day_of_week = jp['day_of_week']
                 hour = jp['hour']
                 minute = jp['minute']
                 second = jp['second']
                 start_date = jp['start_date']
                 end_date = jp['end_date']
-                scheduler.reschedule_job(job_id, trigger='cron', day_of_week=day_of_week, hour=hour,
+                ps_scheduler.reschedule_job(job_id, trigger='cron', day_of_week=day_of_week, hour=hour,
                                          minute=minute, second=second,
                                          start_date=start_date, end_date=end_date)
         return {'errorCode': 0, 'msg': 'ok'}
@@ -767,8 +767,8 @@ class PeopleStat:
             }]
         }
         """
-        print scheduler.get_jobs()          # Return type:	list[Job] --> Job 对象 列表
-        scheduler.print_jobs()
+        print ps_scheduler.get_jobs()          # Return type:	list[Job] --> Job 对象 列表
+        ps_scheduler.print_jobs()
 
         if param is None:
             return {'errorCode': 100, 'msg': u'缺少输入参数！'}
@@ -811,9 +811,9 @@ def job_stat():
         ps.stat()
 
 
-scheduler = BackgroundScheduler()
-scheduler.add_jobstore('sqlalchemy', url=SQLALCHEMY_DB_SCHEDULER_URL)
-scheduler.start()
+ps_scheduler = BackgroundScheduler()
+ps_scheduler.add_jobstore('sqlalchemy', url=SQLALCHEMY_DB_SCHEDULER_URL)
+ps_scheduler.start()
 
 
 # 人员盘点功能 +++++ route begin +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
