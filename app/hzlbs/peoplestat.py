@@ -813,7 +813,7 @@ def job_stat():
 
 ps_scheduler = BackgroundScheduler()
 ps_scheduler.add_jobstore('sqlalchemy', url=SQLALCHEMY_DB_SCHEDULER_URL)
-ps_scheduler.start()
+# ps_scheduler.start()
 
 
 # 人员盘点功能 +++++ route begin +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
