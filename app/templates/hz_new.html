@@ -421,7 +421,7 @@
 									fontSize: 16,
 									fontFamily: 'Verdana',
 									fill: 'blue'
-								})
+								});
 
 
 								var intelligent_security_x = 31000;
@@ -434,7 +434,7 @@
 									fontSize: 16,
 									fontFamily: 'Verdana',
 									fill: 'blue'
-								})
+								});
 
 								var intelligent_fire_protection_x = 28403;
 								var intelligent_fire_protection_y = 3101;
@@ -446,7 +446,7 @@
 									fontSize: 16,
 									fontFamily: 'Verdana',
 									fill: 'blue'
-								})
+								});
 
 								var beidou_xihe_x = 25588;
 								var beidou_xihe_y = 3101;
@@ -458,7 +458,7 @@
 									fontSize: 16,
 									fontFamily: 'Verdana',
 									fill: 'blue'
-								})
+								});
 
 
 								var computer_room_x = 19244;
@@ -471,7 +471,7 @@
 									fontSize: 20,
 									fontFamily: 'Verdana',
 									fill: 'blue'
-								})
+								});
 
 								var reception_x = 19244;
 								var reception_y = 7456;
@@ -483,9 +483,7 @@
 									fontSize: 20,
 									fontFamily: 'Verdana',
 									fill: 'blue'
-								})
-
-
+								});
 							}
 
 
@@ -532,10 +530,10 @@
 									
 									var args = [].slice.call(arguments);
 									this.stopFn.push(args);
-								}
+								};
 								init.prototype.empty = function(){
 									this.stopFn = [];
-								}
+								};
 								init.prototype.run = function(){
 									
 									var stopFnLength = this.stopFn.length;
@@ -547,9 +545,7 @@
 									while(current_item = this.stopFn.pop()){
 										this.distribution(current_item);
 									}
-									
-									
-								}
+								};
 								init.prototype.distribution = function(param){
 									var param_length = param.length;
 									switch (param_length){
@@ -565,9 +561,8 @@
 										case 3:	
 											this.stopFn_param_3(param[0],param[1],param[2]);
 											break;
-
 									}
-								}
+								};
 								init.prototype.stopFn_param_2 = function(param1,param2){
 									console.log('param1',param2);
 									if(typeof param1 === 'function'){
@@ -582,7 +577,7 @@
 									}else{
 										param2.apply(param1);
 									}
-								}
+								};
 								
 								init.prototype.stopFn_param_3 = function(param1,param2,param3){
 										if(param3 instanceof Array)
@@ -593,10 +588,10 @@
 										}
 									
 									
-								}
+								};
 								
 								
-								/*初始化函数结束*/
+								/*	初始化函数结束 */
 								
 								
 								
@@ -614,32 +609,16 @@
 								var $svg_map = $('#svg_image');
 
 								var $document = $(document);
-
-
-								
 								
 								//初始化函数
-								
-								
-								
-								
-						
-		
-
 
 
 								//缩放要调用的函数
 								function people_move_zoom() {
-
 									var hz_user_xy_length = hz_user_xy.length;
-
 									for(var i = 0; i < hz_user_xy_length; i++) {
-
-
-
 										//zoom:地图缩放级别  
-										//   hz_people_goto 把人放到对应位置函数 
-
+										//   hz_people_goto 把人放到对应位置函数
 										hz_people_goto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
 											hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
 									}
@@ -654,50 +633,31 @@
 								}
 
 
-
-
 								//地图标识
 								var $svg_sign = $('#svg_sign');
 								$svg_sign.svg();
 								var svg_sign_svg = $svg_sign.svg('get');
 								transformDemo(svg_sign_svg);
 
-
 								//地图缩放
-
 								//地图缩放函数
-
-
-
-
-								//iii
 								//鼠标滚轮缩放svg图
-
-
 								//localStorage.clear();
-
 
 								$svg_event.ready(
 									function () {
-
-
-
 										//获取svg图对象
 										var mapSign = $svg_map_base;
 										//设置缩放速度   比例缩放
 										var zoomSpeed = 0.05;
 
-
 										// using the event helper
 										$svg_event.on('mousewheel', addMousewheelEvent);
 
 										function addMousewheelEvent(event, delta, deltaX, deltaY) {
-
 											//svg图的最小 最大  X和Y
 											var mapMinX, mapMaxX, mapMinY, mapMaxY;
-
 											var mapOffset = mapSign.offset();
-
 											var mapOuterWidth = mapSign.outerWidth();
 											var mapOuterHeight = mapSign.outerHeight();
 
@@ -706,16 +666,11 @@
 											mapMinY = mapOffset.top;
 											mapMaxY = mapOffset.top + mapOuterHeight;
 
-
-
-
 											if(event.pageX > mapMinX && event.pageX < mapMaxX && event.pageY > mapMinY && event.pageY < mapMaxY) {
 
-
 												/*取消默认事件*/
-												event.preventDefault()
+												event.preventDefault();
 												/*计算速度*/
-
 
 												var mapHeight, mapWidth, mapTopBorder, mapLeftBorder, mapTop, mapLeft, speedTop, speedLeft;
 												/*#map 的基本参数*/
@@ -729,8 +684,7 @@
 												mapLeft = parseInt(mapSign.css('left'));
 
 
-
-												/*计算缩放速度  单独的top  或  left*/
+												// 计算缩放速度  单独的top  或  left
 
 												if(delta == 1) {
 													speedTop = parseInt(zoomSpeed * mapHeight);
@@ -743,7 +697,7 @@
 												}
 
 
-												/*更改后的高*/
+												// 更改后的高
 												var resultHeight = mapHeight + (speedTop * 2);
 												var resultWidth = mapWidth + (speedLeft * 2);
 
@@ -755,32 +709,23 @@
 												var mouseTop = Math.round(currentMouseTop - (currentMouseTop / mapHeight * resultHeight));
 												var mouseLeft = Math.round(currentMouseLeft - (currentMouseLeft / mapWidth * resultWidth));
 
-
-
-
 												/*计算svg偏离距离*/
 												/*svg图的left*/
 
-
-
 												hzY = mapTop + mouseTop;
 												hzX = mapLeft + mouseLeft;
-
 
 												/*保存缩放比例*/
 												zoom = resultWidth / map_w;
 												storage['hz_zoom'] = zoom;
 
-
-
 												console.log('margin', margin, 'resultHeight', resultHeight, 'resultWidth', resultWidth);
-
 												zoomFn(resultHeight, resultWidth);
 
 												$svg_map_base.css({
 													left: hzX + 'px',
 													top: hzY + 'px'
-												})
+												});
 
 												var zoomFnAfter_length = zoomFnAfter.length;
 												if(zoomFnAfter_length > 0) {
@@ -793,7 +738,6 @@
 
 												var zoom_temporary_fn_length = zoom_temporary_fn.length;
 												if(zoom_temporary_fn_length > 0) {
-
 													for(var zoom_temporary_fn_for = 0; zoom_temporary_fn_for < zoom_temporary_fn_length; zoom_temporary_fn_for++) {
 														zoom_temporary_fn[zoom_temporary_fn_for]();
 													}
@@ -803,16 +747,13 @@
 												//hz_change_item_in_map();
 
 												/*计算图片相对父元素位置*/
-
 											}
-
 										}
 									}
 								);
 
 
-
-								//缩放函数
+								// 缩放函数
 								zoomFn(map_h * zoom, map_w * zoom);
 
 								function zoomFn(height, width) {
@@ -825,17 +766,12 @@
 									//地图标识;
 									svg_sign_svg.clear();
 									transformDemo(svg_sign_svg);
-
 								}
 
 
-
-
-								//地图移动变量
-
+								// 地图移动变量
 								var mapMoveMousedownX, mapMoveMousedownY;
 								var currentX, currentY;
-
 
 								function addMapMoveEvent() {
 									$svg_event.on('mousedown', mapMoveMousedownFn);
@@ -845,29 +781,20 @@
 									mapMoveMousedownX = e.pageX;
 									mapMoveMousedownY = e.pageY;
 
-
-
 									$document.on('mousemove', mapMoveMousemoveFn);
-
 									$document.on('mouseup', mapMoveMouseupFn);
-
 									return false;
-
 								}
 
 								function mapMoveMousemoveFn(e) {
 									var svg_map_base_offset = $svg_map_base.offset();
-
 									currentX = e.pageX - mapMoveMousedownX + parseInt(hzX);
 									currentY = e.pageY - mapMoveMousedownY + parseInt(hzY);
-
-
 
 									$svg_map_base.css({
 										left: currentX + 'px',
 										top: currentY + 'px'
 									});
-
 								}
 
 								function mapMoveMouseupFn() {
@@ -886,8 +813,6 @@
 								addMapMoveEvent();
 
 
-
-
 								/*
 							param $this obg   要检查的对象   
 							      data  arr  [0]位X坐标   [1]为Y坐标
@@ -895,9 +820,7 @@
 								function test_range($this, data) {
 
 									var mapMinX, mapMaxX, mapMinY, mapMaxY;
-
 									var mapOffset = $this.offset();
-
 									var mapOuterWidth = $this.outerWidth();
 									var mapOuterHeight = $this.outerHeight();
 
@@ -910,9 +833,7 @@
 										return true;
 									}
 									return false;
-
 								}
-
 
 
 								function start_draw() {
@@ -921,9 +842,9 @@
 									var $svg_path_offset = $svg_path.offset();
 									$svg_path.svg();
 									var $svg = $svg_path.svg('get');
-									//画图位置数据
+									// 画图位置数据
 									var drawLineData = [];
-									//相对于svg图数据
+									// 相对于svg图数据
 
 									$svg_path.on('click', function (e) {
 										var pageX = e.pageX;
@@ -939,11 +860,7 @@
 										map_path_line = [];
 
 										drawLine($svg, drawLineData);
-
-
 									})
-
-
 								}
 
 								function drawLine(svg_obj, LineData) {
@@ -955,62 +872,42 @@
 								}
 
 
-
-
 								//svg地图 控制面板
 								$("#map_panel_button button").on('click', function () {
-
-
-
 									var $this = $(this);
-
 
 									if($this.hasClass('active')) {
 										map_button_slide_up($this);
 									}
 									else {
 										map_button_slide_down($this)
-									};
-
+									}
 								});
-
-
 
 
 								function map_button_slide_down($this) {
 									$this.addClass('active');
-
 									$this.siblings().removeClass('active');
-
 									var $target = $($this.attr('hz_target'));
-
 									$target.siblings().slideUp('100', function () {
 										$target.slideDown();
 									})
-
-
-
-
 								}
 
 								function map_button_slide_up($this) {
 									$this.removeClass('active');
 									var $target = $($this.attr('hz_target'));
 									$target.slideUp();
-
 								}
 
 								function enclosure_set_clear_fn(){
-								
 									$("#start_draw").find('span').text('开始绘制');
 									$('#enclosure_spot_method').removeAttr('disabled');
-									
 								}
 
 
 								var enclosure1 = new enclosure();
-								
-								
+
 								function text_change($this){
 									var $span = $this.find('span');
 									var buttonText = $span.text();
@@ -1019,38 +916,24 @@
 
 										if(buttonText === '清空绘制') {
 											$span.text('开始绘制');
-
 											$method_select.removeAttr('disabled');
- 										 	
-
-							          
-											
-
-
 										}
 										else {
 											$span.text('清空绘制');
-		
 											$method_select.attr('disabled', 'disabled');
-		
 										}
 									}
-									//方形绘图
+									// 方形绘图
 									if($('#enclosure_spot_method').val() === 'square') {
 										if(buttonText === '清空绘制') {
 											$span.text('开始绘制');
 											$method_select.removeAttr('disabled');
-					
 										}
 										else {
 											$span.text('清空绘制');
-
 											$method_select.attr('disabled', 'disabled');
 										}
 									}
-
-									
-									
 								}
 								
 
@@ -1061,17 +944,9 @@
 									var buttonText = $span.text();
 									var $method_select = $('#enclosure_spot_method');
 									if($method_select.val() === 'polyline') {
-										
-										
 
 										if(buttonText === '清空绘制') {
-											
- 										 	
 											global_init.run();
-							          
-									
-
-
 										}
 										else {
 											$span.text('清空绘制');
@@ -1082,39 +957,28 @@
 											 
 											$method_select.attr('disabled', 'disabled');
 											enclosure1.polyline();
-											
-
-
-
 										}
 									}
-									//方形绘图
+									// 方形绘图
 									if($method_select.val() === 'square') {
 										if(buttonText === '清空绘制') {
-											 
 											global_init.run();
 										}
 										else {
 											$span.text('清空绘制');
-											
-											 global_init.run();
+											global_init.run();
 											global_init.add(enclosure1,enclosure1.remove_square);
 											global_init.add(text_change,$this); 
 
 											$method_select.attr('disabled', 'disabled');
 											enclosure1.square();
-
-
 										}
 									}
-
-
 								});
 
 								var enclosure2 = new enclosure();
-								
-								
-								 function text_change2($this){
+
+								function text_change2($this){
 									var $span = $this.find('span');
 									var buttonText = $span.text();
 									var $method_select = $('#enclosure_spot_method2');
@@ -1122,20 +986,11 @@
 
 										if(buttonText === '清空绘制') {
 											$span.text('开始绘制');
-
 											$method_select.removeAttr('disabled');
- 										 	
-											 
-							          
-											
-
-
 										}
 										else {
 											$span.text('清空绘制');
-		
 											$method_select.attr('disabled', 'disabled');
-		
 										}
 									}
 									//方形绘图
@@ -1143,21 +998,14 @@
 										if(buttonText === '清空绘制') {
 											$span.text('开始绘制');
 											$method_select.removeAttr('disabled');
-					
 										}
 										else {
 											$span.text('清空绘制');
-
 											$method_select.attr('disabled', 'disabled');
 										}
 									}
-
-									
-									
 								}
 								
-
-
 
 
 								$("#start_draw2").on('click', function () {
@@ -1167,17 +1015,8 @@
 									var buttonText = $span.text();
 									var $method_select = $('#enclosure_spot_method2');
 									if($method_select.val() === 'polyline') {
-										
-										
-
 										if(buttonText === '清空绘制') {
-											
- 										 	
 											global_init.run();
-							          
-									
-
-
 										}
 										else {
 											$span.text('清空绘制');
@@ -1185,22 +1024,14 @@
 											global_init.run();
 											global_init.add(enclosure2,enclosure2.remove_event);
 											global_init.add(text_change2,$this);
-											
-											
-										 
-											 
+
 											$method_select.attr('disabled', 'disabled');
 											enclosure2.polyline();
-											
-
-
-
 										}
 									}
 									//方形绘图
 									if($method_select.val() === 'square') {
 										if(buttonText === '清空绘制') {
-											 
 											global_init.run();
 										}
 										else {
@@ -1212,21 +1043,15 @@
 
 											$method_select.attr('disabled', 'disabled');
 											enclosure2.square();
-
-
 										}
 									}
-
-
 								});
 								
 								
 								$('#default_inventory').click(function(){
 									var result = ajaxJsonRequest('/lbs/people_stat_cfg_add_default', {});
-									
 									alert(result.msg);
-									
-								})
+								});
 								
 								
 								$('#set_enclosure_submit2').on('click', function () {
@@ -1237,15 +1062,11 @@
 
 									var enclosure2_points = enclosure2.points;
 
-
 									console.log('enclosure2_points', enclosure2_points);
-
-
 									if(alter_enclosure_name == 'undefined') {
 										alert('该围栏不能修改!');
 										return false;
 									}
-
 
 									if(alter_enclosure_name == 0) {
 										alert('请选择围栏!');
@@ -1267,17 +1088,11 @@
 										temporaryArr = null;
 									}
 
-
-
-
 									var data = {};
 									// data.data = [];
-
 									//var data_item = {};
-									 
 
 									data.id = parseInt(alter_enclosure_name);
-
 									if(enclosure_new_name == '') {
 										data.name = alter_enclosure_text;
 									}
@@ -1291,12 +1106,7 @@
 									
 									data.points = rusultPoints;
 
-
-
-
 									console.log('datadta22222222222222222', data);
-
-
 									var result = ajaxJsonRequest('/lbs/people_stat_cfg_chg', {data:[data]});
 
 									if(result.errorCode === 0) {
@@ -1305,18 +1115,11 @@
 									}
 									alert(result.msg);
 
-
-
-
 									return false;
-
 								});
 								
-								
 
-								/*
-						param object obj jquery对象
-						*/
+								// param object obj jquery对象
 								function enclosure() {
 
 									//坐标资料格式 [[1,2],[3,4]]
@@ -1350,9 +1153,6 @@
 										//画线开始图标
 										line_start: '#line_start',
 										line_switch: '#start_draw'
-
-
-
 									};
 									/*线样式*/
 									this.line_style = {
@@ -1368,14 +1168,12 @@
 											stroke: 'red',
 											strokeWidth: 4
 										}
-
-
-									}
+									};
 									/*热点大小*/
 									this.hotspot_size = {
 										width: 20,
 										height: 20
-									}
+									};
 									/*移动需要画的虚线*/
 									this.spot_move_line = [];
 									/*热点 线坐标*/
@@ -1389,31 +1187,27 @@
 										for(var i = 0; i < map_up_cache_length; i++) {
 											console.log(this.map_up_cache[i]);
 											this.map_up_cache[i]();
-
 										}
 										this.map_up_cache = [];
-									}
-
+									};
 
 
 									this.__set = function (name, value) {
 										this[name] = value;
-									}
-
-
+									};
 
 
 									this.again_map = function () {
 										this.remove_event();
 										this.polyline();
 
-									}
+									};
 
 
 									this.remove_polyline = function () {
 										this.remove_hotspot();
 										this.remove_event();
-									}
+									};
 
 									//移除事件绑定    
 									/*
@@ -1448,10 +1242,6 @@
 											top: 0,
 											display: 'none'
 										});
-
-
-
-
 									};
 									//围栏绘制功能入口
 									this.polyline = function () {
@@ -1487,45 +1277,30 @@
 											_this: _this
 										}, this.line_end);
 
-
-
-									}
+									};
 
 									this.line_click_package = function (e) {
-
-
 										e.data._this.line_click(e);
-
-									}
+									};
 
 
 									//划线函数
 									this.line_click = function (e) {
-
-
-
 										var mapObjOffset = this.$map.offset();
 										var map_path_line = [];
 										map_path_line[0] = e.pageX - mapObjOffset.left - parseInt(this.$map.css('border-left-width'));
 										map_path_line[1] = e.pageY - mapObjOffset.top - parseInt(this.$map.css('border-top-width'));
 
-
-
 										if(this.points.length === 0) {
-
-
-
 											var $line_start = $(this.htmlObj.line_start);
 											var line_start_width = $line_start.outerWidth() / 2;
 											var line_start_height = $line_start.outerWidth() / 2;
-
 
 											$line_start.css({
 												left: map_path_line[0] - line_start_width + 'px',
 												top: map_path_line[1] - line_start_height + 'px',
 												display: 'block'
 											})
-
 										}
 										//画直角线的情况  且不是第一个数据
 										if(this.is_coordinate_offset && this.points.length !== 0) {
@@ -1543,58 +1318,43 @@
 										var points_length = this.points.length;
 
 										if(points_length > 1) this.create_hotspot($('#svg_map_base'), this.points[points_length - 1], points_length - 1);
-
 										this.svgPolyline(this.points, this.line_style.result_line, this.$board);
-
 										console.log('square_mouse_up', this.points);
-									}
+									};
 									//按键抬起函数
 									this.keyup_fn = function (e) {
 
 										if(e.which === e.data._this.right_angle_key && e.data._this.mousemove_points.length > 1) {
-
 											e.data._this.is_coordinate_offset = false;
 											e.data._this.svgPolyline(e.data._this.mousemove_points, e.data._this.line_style.demo_line);
 										}
-
-									}
+									};
 
 									//直线函数包
 									this.right_angle_package = function (e) {
-
-
-
 										if(e.data._this.mousemove_points.length > 1 && e.which === e.data._this.right_angle_key) {
 											//是否直线函数判断  鼠标移动也直线函数
 											e.data._this.is_coordinate_offset = true;
 											e.data._this.right_angle(e.data._this.mousemove_points[1]);
-
 										}
-
-									}
+									};
 									//直线函数
 									this.right_angle = function (new_points) {
-
 										this.dotted_line[0] = this.points[this.points.length - 1];
-
 										if(Math.abs(this.dotted_line[0][0] - new_points[0]) >= Math.abs(this.dotted_line[0][1] - new_points[1])) {
 											this.dotted_line[1] = [new_points[0], this.dotted_line[0][1]];
-
 										}
 										else {
-
 											this.dotted_line[1] = [this.dotted_line[0][0], new_points[1]];
 										}
 										this.svgPolyline(this.dotted_line, this.line_style.demo_line);
-									}
+									};
 									//鼠标移动划线函数包
 									this.mousemove_line_package = function (e) {
-
 										if(e.data._this.points.length > 0) {
 											e.data._this.mousemove_line(e);
 										}
-
-									}
+									};
 									//鼠标移动划线函数
 									this.mousemove_line = function (e) {
 										var mapObjOffset = this.$map.offset();
@@ -1609,16 +1369,11 @@
 										else {
 											this.svgPolyline(this.mousemove_points, this.line_style.demo_line);
 										}
-
-
-
-
-									}
+									};
 									//围栏结束
 									this.line_end = function (e) {
 										/*_this 本函数的对象*/
 										var _this = e.data._this;
-
 										var points_length = _this.points.length;
 
 										//this 判定该函数的对象 
@@ -1632,48 +1387,34 @@
 											_this.points.push(_this.points[0]);
 											//画热点
 											_this.create_hotspot($('#svg_map_base'), _this.points[points_length], _this.points.length - 1, true);
-
-
 										}
 
 										_this.svgPolyline(_this.points, _this.line_style.result_line, _this.$board);
-
-
-
-
 										_this.remove_event(false, false);
-
-
-
 
 										//结束绘制
 										//$(_this.htmlObj.line_switch).find('span').text('清空绘制');
-
-
-									}
+									};
 									//方框
 									this.square = function () {
-
 										//打开事件绑定div
 										$('#enclosureEvent').css('display', 'block');
 
 										this.$event.on('mousedown', {
 											_this: this
 										}, this.square_mouse_down_package);
-									}
+									};
 									this.square_mouse_down_package = function (e) {
 										var _this = e.data._this;
 										_this.square_mouse_down(e);
 										return false;
-									}
+									};
 									this.square_mouse_down = function (e) {
 										//第一个点
 										var spot0 = [];
-
 										var $map = this.$map;
 										var mapObjOffset = $map.offset();
 										this.points = [];
-
 
 										spot0[0] = e.pageX - mapObjOffset.left - parseInt($map.css('border-left-width'));
 										spot0[1] = e.pageY - mapObjOffset.top - parseInt($map.css('border-top-width'));
@@ -1685,14 +1426,12 @@
 										$window.on('mouseup', {
 											_this: this
 										}, this.square_mouse_up_package);
-
-
-									}
+									};
 
 									this.square_mouse_move_package = function (e) {
 										var _this = e.data._this;
 										_this.square_mouse_move(e);
-									}
+									};
 									this.square_mouse_move = function (e) {
 										var spot1 = [],
 											spot2 = [],
@@ -1701,14 +1440,11 @@
 										var mapObjOffset = $map.offset();
 										/*移动原点*/
 
-
 										spot2[0] = e.pageX - mapObjOffset.left - parseInt($map.css('border-left-width'));
 										spot2[1] = e.pageY - mapObjOffset.top - parseInt($map.css('border-top-width'));
 
 										spot1[0] = spot2[0];
 										spot1[1] = this.points[0][1];
-
-
 
 										spot3[0] = this.points[0][0];
 										spot3[1] = spot2[1];
@@ -1719,13 +1455,12 @@
 										this.points[4] = this.points[0];
 
 										this.svgPolyline(this.points, this.line_style.demo_line, this.$svg_temporary_line);
-
-									}
+									};
 
 									this.square_mouse_up_package = function (e) {
 										var _this = e.data._this;
 										_this.square_mouse_up(e);
-									}
+									};
 
 									this.square_mouse_up = function (e) {
 										this.svgPolyline([], {}, this.$svg_temporary_line);
@@ -1749,7 +1484,7 @@
 											}
 										}
 										console.log('square_mouse_up', this.points);
-									}
+									};
 
 
 									/*创建热点*/
@@ -1765,7 +1500,6 @@
 										var hotspot_class = 'enclosure_spot';
 										var is_end_spot = is_end_spot || false;
 
-
 										var hotspot_left = position[0] - Math.round((this.hotspot_size.width) / 2);
 										var hotspot_top = position[1] - Math.round((this.hotspot_size.height) / 2);
 
@@ -1775,8 +1509,6 @@
 										$create_hotspot.attr('index', index);
 										//创建尾点标记
 										if(is_end_spot) $create_hotspot.attr('is_end_spot', 1);
-
-
 
 										$create_hotspot.css({
 											left: hotspot_left + 'px',
@@ -1788,7 +1520,7 @@
 										}, this.hotspot_mouse_down_package);
 
 										$parent.append($create_hotspot);
-									}
+									};
 
 									this.hotspot_mouse_down_package = function (e) {
 										var _this = e.data._this;
@@ -1820,16 +1552,13 @@
 											current_spot_index: current_spot_index,
 											points_size: points_size
 										}, this.hotspot_mouse_up_package);
-
-
-
-									}
+									};
 
 									this.hotspot_mouse_move_package = function (e) {
 										var _this = e.data._this;
 										_this.hotspot_mouse_move(e);
 
-									}
+									};
 									this.hotspot_mouse_move = function (e) {
 										console.log('hotspot_mouse_move')
 
@@ -1839,18 +1568,14 @@
 										var points_size = e.data.points_size;
 										var mapObjOffset = this.$map.offset();
 
-
-
 										var map_path_line1 = [];
 										map_path_line1[0] = e.pageX - mapObjOffset.left - parseInt(this.$map.css('border-left-width'));
 										map_path_line1[1] = e.pageY - mapObjOffset.top - parseInt(this.$map.css('border-top-width'));
-
 
 										$obj.css({
 											left: (map_path_line1[0] - Math.round((this.hotspot_size.width) / 2)) + 'px',
 											top: (map_path_line1[1] - Math.round((this.hotspot_size.height) / 2)) + 'px'
 										});
-
 
 										//线位置
 										if($obj.attr('is_end_spot') != 1) { /*不是尾点的情况*/
@@ -1882,15 +1607,12 @@
 												this.hotspot_new_position = map_path_line1;
 											}
 										}
+									};
 
-
-
-
-									}
 									this.hotspot_mouse_up_package = function (e) {
 										var _this = e.data._this;
 										_this.hotspot_mouse_up(e);
-									}
+									};
 									this.hotspot_mouse_up = function (e) {
 										console.log('hotspot_mouse_up')
 										var $obj = e.data.$obj;
@@ -1908,8 +1630,6 @@
 											this.points[0] = this.hotspot_new_position;
 										}
 
-
-
 										console.log('this.spot_move_line[1]', this.spot_move_line[1]);
 										$(window).off('mousemove', this.hotspot_mouse_move_package);
 
@@ -1921,32 +1641,21 @@
 										this.spot_move_line = [];
 
 										$(window).off('mouseup', this.hotspot_mouse_up_package);
-
-									}
+									};
 
 									this.remove_hotspot = function () {
-
-
-
 										$('#svg_map_base > .enclosure_spot').remove();
-
-									}
+									};
 
 									this.remove_square = function () {
 										$('#enclosureEvent').css('display', 'none');
 										this.$event.off('mousedown', this.square_mouse_down_package);
 										this.$board_svg.clear();
 										this.remove_hotspot();
-
-									}
-
-
+									};
 
 									//曲线函数
 									this.svgPolyline = function (points, param, obj, is_clear) {
-
-
-
 										var settings = param || this.line_style.result_line;
 										obj = obj || this.$svg_temporary_line;
 										is_clear = (is_clear === false) ? false : true;
@@ -1954,12 +1663,8 @@
 										var $svg = obj.svg('get');
 										if(is_clear) $svg.clear();
 										if(points.length !== 0) $svg.polyline(points, settings);
-
 									}
-
-
 								}
-
 
 
 
@@ -2013,11 +1718,7 @@
 											digits: true
 
 										}
-
-
-
 									},
-
 
 
 									highlight: function (e) {
@@ -2032,7 +1733,6 @@
 									},
 
 
-
 									submitHandler: function (form) {
 
 										if(enclosure1.points[0] == undefined || enclosure1.points[0] != enclosure1.points[enclosure1.points.length - 1]) {
@@ -2045,20 +1745,15 @@
 										var data = {
 											name: $form.find("#inventory_name").val(),
 
-										}
+										};
 
 										var inventory_peopleNum = $form.find("#inventory_peopleNum").val();
-
-
-
 										if(inventory_peopleNum) {
 
 											data.peopleNum = parseInt(inventory_peopleNum);
 										}
 
-
 										var rusultPoints = [];
-
 										var points_length = enclosure1.points.length - 1;
 										for(var i = 0; i < points_length; i++) {
 											var temporaryArr = {};
@@ -2071,9 +1766,7 @@
 
 
 										$('#start_draw').click();
-
 										console.log('datadata', data);
-
 
 										var result = ajaxJsonRequest('/lbs/people_stat_cfg_add', {
 											data: [data]
@@ -2081,7 +1774,6 @@
 
 										if(result.errorCode === 0) {
 											query_electronic();
-
 										}
 										alert(result.msg);
 
@@ -2107,10 +1799,9 @@
                 "compress": false       // 是否压缩，压缩的含义是，服务器会根据特定策略返回部分路径坐标。 保留参数
             };
 			 */
-
 								function ajaxRequest(url, txData) {
 									//接受到的数据 
-									var ajaxData;
+									var ajaxData = null;
 									$.ajax({
 										url: url,
 										async: false,
@@ -2121,7 +1812,6 @@
 										success: function (data) {
 											console.log('接口调用成功');
 											console.log('receive:', data);
-
 											ajaxData = data;
 										},
 
@@ -2129,38 +1819,28 @@
 											console.log('接口调用失败');
 											ajaxData = false;
 										}
-
 									});
-
 									return ajaxData;
-
 								}
 								
 									function ajaxJsonRequest(url, txData) {
-										
-										var ajaxData;
+										var ajaxData = null;
 										$.ajax({
 											url: url,
 											async: false,        // 异步请求
 											type: 'POST',
 											contentType: "application/json;charset=UTF-8",
 											data: JSON.stringify(txData) ,   // 发送json数据到服务器
-											
-										success: function (data) {
-											console.log('接口调用成功');
-											console.log('receive:', data);
-
-											ajaxData = data;
-										},
-
-										error: function (qXHR, textStatus, errorThrown) {
-											console.log('接口调用失败');
-											ajaxData = false;
-										}
-											
-											
+                                            success: function (data) {
+                                                console.log('接口调用成功');
+                                                console.log('receive:', data);
+                                                ajaxData = data;
+                                            },
+                                            error: function (qXHR, textStatus, errorThrown) {
+                                                console.log('接口调用失败');
+                                                ajaxData = false;
+                                            }
 										});
-										
 										return ajaxData;
 									}
 								
@@ -2171,13 +1851,10 @@
 									
 									url = '/lbs/people_stat_cfg_get';
 									txData = {
-										 
 										rows:2000
 									};
 									data = ajaxJsonRequest(url, txData);
-									
-									
-									 
+
 								
 						  			var dataData = data.data.rows;
 									var dataDataLength = dataData.length;
@@ -2191,15 +1868,7 @@
 										checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar'+i+'" autocomplete="off" value = "'+dataData[i].id+'" /><label class="lbl" for="ace-settings-navbar'+i+'">'+dataData[i].name+'</div></div>'}
 									}
 									$('#alter_enclosure_name').html(selectHtml);
-									
 									$('#enclosure_item').html(checkboxHtml);
-									
-						
-									 
-									
-									
-									
-									
 								}
 								
 								query_electronic();
@@ -2228,18 +1897,14 @@
 
 									};
 									console.log('aaaaaaa',data);
-									
 									var result = ajaxJsonRequest(url,data);
-									
-									
 									alert(result.msg);
 								
 									if(result.errorCode  == 0)
 									{
 										query_electronic()
 									}
-									
-								})
+								});
 
 
 								$('#electronic-fence-query-button').click(function () {
@@ -2251,18 +1916,13 @@
 
 								function electronicFence() {
 									var url, txData;
-
 									var data; //后台传来的数据
-
-
 
 									var address = $('#electronic-fence-address').val();
 									if(address == 0) {
 										alert('请选择查询地址');
 										return;
 									}
-
-
 
 									url = '/lbs/people_stat_cfg_get';
 									txData = {
@@ -2271,19 +1931,12 @@
 									};
 
 									data = ajaxJsonRequest(url, txData);
-									
 									console.log('dadadadada',data);
-
-									 
 									enclosure_temporary = data;
-
 									draw_enclosure(data)
-									 
 
 									zoom_temporary_fn.push(enclosure_temporary_fn);
-									
 									global_init.add(clear_cach);
-
 								}
 								
 						 		function clear_cach (){
@@ -2292,7 +1945,6 @@
 									var draw_path = $('#svg_path');
 									var svg = draw_path.svg('get');
 									svg.clear();
-									
 								}
 
 								function draw_enclosure(data) {
@@ -2300,13 +1952,8 @@
 
 									var temporaryArrLength; //临时数据长度
 									temporaryArr = data.data.rows;
-
 									var draw_path = $('#svg_path');
-
 									var svg = draw_path.svg('get');
-
-									
-					
 									var svg_parent = draw_path.find('svg');
 									svg_parent.width(draw_path.width() + 10);
 									svg_parent.height(draw_path.height() + 10);
@@ -2326,8 +1973,6 @@
 											temporatyPositionFor.push(unitConversion(temporaryArrDatas[PositionI].x));
 											temporatyPositionFor.push(unitConversion(temporaryArrDatas[PositionI].y));
 
-
-
 											temporatyPosition.push(temporatyPositionFor);
 											temporatyPositionFor = null;
 
@@ -2338,10 +1983,7 @@
 												temporatyPositionFor.push(unitConversion(temporaryArrDatas[0].y));
 												temporatyPosition.push(temporatyPositionFor);
 											}
-
 										}
-
-
 
 
 										svg.polyline(temporatyPosition, {
@@ -2353,11 +1995,8 @@
 										temporaryArrDatas = null;
 										temporaryArrDatasLength = null;
 										temporatyPosition = null;
-
 									}
-
 								}
-
 
 								var electronic_fence_namespace = '/HeZhong';
 								var electronic_fence_socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + electronic_fence_namespace);
@@ -2373,15 +2012,8 @@
 										electronic_fence_socket_state = '离开';
 									}
 									//alert('用户ID:'+msg[0].userId+electronic_fence_socket_state+'了房间'+msg[0].name);
-
 									gritter_alert('电子围栏警报', '用户ID:' + msg[0].userId + electronic_fence_socket_state + '了房间' + msg[0].name);
-
-
 									console.log('$.gritter', $.gritter);
-
-
-
-
 								});
 
 
@@ -2390,45 +2022,29 @@
 									$.gritter.add({
 										title: title,
 										text: text,
-
 										class_name: 'gritter-warning'
 									});
-
 									return false;
-
-								};
-
-
-
+								}
 
 								//单位转换
 								function unitConversion(number) {
 									return Math.round(number * real_loc_to_pix * zoom);
 								}
 
-
-
-
 								//以下为时间日历插件
-
-
-
 
 								$('.date-timepicker').datetimepicker({
 									//ormat: 'MM/DD/YYYY h:mm:ss A',//use this option to display seconds
 									language: 'zh-CN',
 									format: 'yyyy-mm-dd hh:ii:ss',
 									autoclose: true,
-
 								});
 
 
 
-
 								/*人物标记位置*/
-
 								var namespace = '/HeZhong';
-
 								// Connect to the Socket.IO server.
 								// The connection URL has the following format:
 								//     http[s]://<domain>:<port>[/<namespace>]
@@ -2448,11 +2064,8 @@
 									console.log('hz_user_xy:', hz_user_xy);
 									for(var i = 0; i < json.length; i++) {
 
-
-
 										//zoom:地图缩放级别  
-										//   hz_people_goto 把人放到对应位置函数 
-
+										//   hz_people_goto 把人放到对应位置函数
 										hz_people_goto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
 											hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
 									}
@@ -2462,38 +2075,24 @@
 
 								//(用户)人位置函数
 								function hz_people_goto(x, y, people) {
-
-
 									people = people || '1918E00103AA'; // 设置默认参数
-
-
-
 									/// 24, 45是定位图标的 针尖 位置。显示图片时，是以图片左上角为参考坐标。故需要对坐标进行偏移。
 									$("#" + people).stop(true, true).animate({
 										left: (x - 24),
 										top: (y - 45)
 									});
 								}
-
-								 
-
-
 							})
 							</script>
             <script>
-							/*像素转换物理单位*/
-							function mmConversion(number) {
-								return Math.round(number / real_loc_to_pix / zoom);
-							}
+                /*像素转换物理单位*/
+                function mmConversion(number) {
+                    return Math.round(number / real_loc_to_pix / zoom);
+                }
 
-
-
-
-							$(function () {
-
-
-							});
-							</script>
+                $(function () {
+                });
+            </script>
             
             <div id="svg_map_base" class="each_map_layer">
               <!--基础svg图-->
@@ -2531,25 +2130,17 @@
 						}
 						/*所有事件在floor3父类上面   下面的子元素层级应该全部小于父元素层级*/
 						#svg_map_base {
-						 
 						 	position:absolute;
-		 
 		 					z-index:2;
-							
 						}
 						#svg_image{
-							 
 							z-index:-100;
-							
 						}
 						#svg_path{
-						 
 		 					z-index:-90;
-							 
 						}
 						#svg_sign{
 						 	z-index:-80;
-						 
 						}
 						#svg_user_sign{
 							z-index:-10;
