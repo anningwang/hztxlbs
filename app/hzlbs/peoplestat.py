@@ -585,9 +585,9 @@ class PeopleStat:
 
         for jp in job_parm:
             ps_scheduler.add_job(job_stat, trigger='cron', day_of_week=jp['day_of_week'],
-                              hour=jp['hour'], minute=jp['minute'],
-                              second=jp['second'], start_date=jp['start_date'], end_date=jp['end_date'],
-                              name=jp['name'], id=jp['id'])
+                                 hour=jp['hour'], minute=jp['minute'],
+                                 second=jp['second'], start_date=jp['start_date'], end_date=jp['end_date'],
+                                 name=jp['name'], id=jp['id'])
 
         return {'errorCode': 0, 'msg': 'ok'}
 
@@ -726,8 +726,8 @@ class PeopleStat:
                 start_date = jp['start_date']
                 end_date = jp['end_date']
                 ps_scheduler.reschedule_job(job_id, trigger='cron', day_of_week=day_of_week, hour=hour,
-                                         minute=minute, second=second,
-                                         start_date=start_date, end_date=end_date)
+                                            minute=minute, second=second,
+                                            start_date=start_date, end_date=end_date)
         return {'errorCode': 0, 'msg': 'ok'}
 
     @staticmethod
@@ -812,7 +812,7 @@ def job_stat():
 
 
 ps_scheduler = BackgroundScheduler()
-ps_scheduler.add_jobstore('sqlalchemy', url=SQLALCHEMY_DB_SCHEDULER_URL)
+ps_scheduler.add_jobstore('SQLAlchemy', url=SQLALCHEMY_DB_SCHEDULER_URL)
 ps_scheduler.start()
 
 
