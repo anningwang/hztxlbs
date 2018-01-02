@@ -1,11 +1,26 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta charset="utf-8" />
     <title>和仲通讯3D地图</title>
-
-    <link rel="shortcut icon" href="/static/img/favicon.ico" />
-    <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <link rel="stylesheet" href="/static/ace/assets/css/bootstrap.css" />
+    <link rel="stylesheet" href="/static/ace/components/font-awesome/css/font-awesome.css" />
+    <link rel="stylesheet" href="/static/components/jquery.gritter/css/jquery.gritter.css" />
+    <link rel="stylesheet" href="/static/ace/assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
+    <link rel="stylesheet" href="/static/ace/assets/css/ace-skins.css" />
+    <link rel="stylesheet" href="/static/ace/assets/css/ace-rtl.css" />
+    <link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css">
+    <link rel="stylesheet" href="/static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" />
+    <script src="/static/ace/assets/js/ace-extra.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script>
+    <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script>
+    <script src="/static/js/jquery.mousewheel.js"></script>
+    <script src="/static/js/hzlbs/hzlbs.tools.js"></script>
+    <link rel="stylesheet" href="/static/css/hzmap.css" />
 
     <script src="/static/js/fmap/fengmap.min.js" ></script>
     <style type="text/css">
@@ -15,7 +30,7 @@
             margin: 0;
             height: 100%;
             overflow: hidden;
-            font-family: "Microsoft YaHei",微软雅黑,"MicrosoftJhengHei",华文细黑,STHeiti,MingLiu
+            font-family: "Microsoft YaHei",微软雅黑,"MicrosoftJhengHei",华文细黑,STHeiti,MingLiu,sans-serif;
         }
 
         #map-container {
@@ -32,13 +47,99 @@
         }
     </style>
 
+    <link rel="shortcut icon" href="/static/img/favicon.ico" />
+    <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
+
 </head>
-<body>
 
-<div id="map-container"></div>
+<body class="no-skin">
 
-<!-- 坐标转换示例 -->
-<div id="prompt" >点击地图</div>
+<div id="navbar" class="navbar navbar-default ace-save-state" style="min-width:190px;">
+    <div class="navbar-container ace-save-state" id="navbar-container">
+        <!-- #section:basics/sidebar.mobile.toggle -->
+        <button type="button" class="navbar-toggle menu-toggler pull-left" id="menu-toggler" data-target="#sidebar"> <span class="sr-only">Toggle sidebar</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
+        <!-- /section:basics/sidebar.mobile.toggle -->
+        <div class="navbar-header pull-left">
+            <a href="http://www.hezhongsz.com" class="navbar-brand" style="padding-top:0; padding-bottom:0;" target="_blank"> <img src="/static/img/logo.jpg" /> </a>
+        </div>
+
+        <div class="navbar-buttons navbar-header pull-right" role="navigation">
+            <ul class="nav ace-nav">
+                <li class="light-blue dropdown-modal"> <a data-toggle="dropdown" href="#" class="dropdown-toggle"> <img class="nav-user-photo" src="/static/ace/assets/avatars/user.jpg" alt="Jason's Photo" /> <span class="user-info"> <small>欢迎登入,</small> 欧先生 </span> <i class="ace-icon fa fa-caret-down"></i> </a>
+                    <ul class="user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
+                        <li> <a href="#"> <i class="ace-icon fa fa-cog"></i> Settings</a> </li>
+                        <li> <a href="#"> <i class="ace-icon fa fa-user"></i> Profile</a> </li>
+                        <li class="divider"></li>
+                        <li> <a href="#"> <i class="ace-icon fa fa-power-off"></i> Logout</a> </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+<div class="main-container ace-save-state" style="" id="main-container">
+    <script type="text/javascript">
+        try {
+            ace.settings.loadState('main-container')
+        }
+        catch(e) {}
+    </script>
+    <!-- #section:basics/sidebar -->
+    <div id="sidebar" class="sidebar responsive ace-save-state">
+        <script type="text/javascript">
+            try {
+                ace.settings.loadState('sidebar')
+            }
+            catch(e) {}
+        </script>
+        <div class="sidebar-shortcuts" id="sidebar-shortcuts">
+            <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
+                <button class="btn btn-success"> <i class="ace-icon fa fa-signal"></i> </button>
+                <button class="btn btn-info"> <i class="ace-icon fa fa-pencil"></i> </button>
+                <!-- #section:basics/sidebar.layout.shortcuts -->
+                <button class="btn btn-warning"> <i class="ace-icon fa fa-users"></i> </button>
+                <button class="btn btn-danger"> <i class="ace-icon fa fa-cogs"></i> </button>
+                <!-- /section:basics/sidebar.layout.shortcuts -->
+            </div>
+            <div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini"> <span class="btn btn-success"></span> <span class="btn btn-info"></span> <span class="btn btn-warning"></span> <span class="btn btn-danger"></span> </div>
+        </div>
+
+        <script src="/static/js/hztx/common_nav.js"></script>
+        <ul class="nav nav-list" id="hz_nav"></ul>
+        <!-- /.nav-list -->
+        <!-- #section:basics/sidebar.layout.minimize -->
+        <div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse"> <i id="sidebar-toggle-icon" class="ace-icon fa fa-angle-double-left ace-save-state" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i> </div>
+        <!-- /section:basics/sidebar.layout.minimize -->
+    </div>
+
+    <!-- /section:basics/sidebar -->
+    <div class="main-content">
+        <div class="main-content-inner">
+            <!-- #section:basics/content.breadcrumbs -->
+            <!-- /section:basics/content.breadcrumbs -->
+            <div class="page-content" style="padding-bottom:0;">
+                <div class="row">
+                    <div id="myCanvas">
+
+                        <div id="map-container"></div>
+
+                        <!-- 坐标转换示例 -->
+                        <div id="prompt" >点击地图</div>
+
+                    </div>
+                </div>
+
+            </div>
+            <!-- /.page-content -->
+        </div>
+    </div>
+    <!-- /.main-content -->
+
+
+</div>
+<!-- /.main-container -->
 
 <script type="text/javascript">
     // 定义全局map变量
@@ -90,6 +191,7 @@
         // 放大、缩小控件
         // map为FMMap对象，初始化需在地图加载后完成。
         var zoomControl = new fengmap.zoomControl(map, ctlOpt1);
+        console.log('zoomControl', zoomControl);
 
         // 地图加载完成回掉方法
         map.on('loadComplete',function() {
@@ -107,6 +209,8 @@
                     // console.log(type,value);
                 }
             });
+
+            console.log('toolControl', toolControl);
 
             addMarkers({x: 1000, y: 2000, z: 10});
 
@@ -250,5 +354,39 @@
 
 </script>
 
+
+<script type="text/javascript">
+    if('ontouchstart' in document.documentElement)
+        document.write("<script src='/static/ace/components/_mod/jquery.mobile.custom/jquery.mobile.custom.js'>" + "<" + "/script>");
+</script>
+<script src="/static/ace/components/bootstrap/dist/js/bootstrap.js"></script>
+<script src="/static/ace/components/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.min.js"></script>
+<script src="/static/components/jquery.gritter/js/jquery.gritter.js"></script>
+<script src="/static/ace/assets/js/src/elements.scroller.js"></script>
+<script src="/static/ace/assets/js/src/elements.colorpicker.js"></script>
+<script src="/static/ace/assets/js/src/elements.fileinput.js"></script>
+<script src="/static/ace/assets/js/src/elements.typeahead.js"></script>
+<script src="/static/ace/assets/js/src/elements.wysiwyg.js"></script>
+<script src="/static/ace/assets/js/src/elements.spinner.js"></script>
+<script src="/static/ace/assets/js/src/elements.treeview.js"></script>
+<script src="/static/ace/assets/js/src/elements.wizard.js"></script>
+<script src="/static/ace/assets/js/src/elements.aside.js"></script>
+<script src="/static/ace/assets/js/src/ace.js"></script>
+<script src="/static/ace/assets/js/src/ace.basics.js"></script>
+<script src="/static/ace/assets/js/src/ace.scrolltop.js"></script>
+<script src="/static/ace/assets/js/src/ace.ajax-content.js"></script>
+<script src="/static/ace/assets/js/src/ace.touch-drag.js"></script>
+<script src="/static/ace/assets/js/src/ace.sidebar.js"></script>
+<script src="/static/ace/assets/js/src/ace.sidebar-scroll-1.js"></script>
+<script src="/static/ace/assets/js/src/ace.submenu-hover.js"></script>
+<script src="/static/ace/assets/js/src/ace.widget-box.js"></script>
+<script src="/static/ace/assets/js/src/ace.settings.js"></script>
+<script src="/static/ace/assets/js/src/ace.settings-rtl.js"></script>
+<script src="/static/ace/assets/js/src/ace.settings-skin.js"></script>
+<script src="/static/ace/assets/js/src/ace.widget-on-reload.js"></script>
+<script src="/static/ace/assets/js/src/ace.searchbox-autocomplete.js"></script>
+<script src="/static/ace/components/jquery-validation/dist/jquery.validate.js"></script>
 </body>
+
 </html>
+

@@ -20,10 +20,19 @@ $(function(){
 
 		'<li class=""><a href="#" class="dropdown-toggle"><i class="menu-icon fa fa-caret-right"></i><span class="menu-text">人员盘点</span><b class="arrow fa fa-angle-down"></b></a><b class="arrow"></b>' +
 		'<ul class="submenu">' +
-		'<li class=""><a href="/hz_new_function"><i class="menu-icon fa fa-caret-right"></i>人员盘点围栏</a><b class="arrow"></b></li>' +
+		'<li class=""><a href="/hz_new_function"><i class="menu-icon fa fa-caret-right"></i>盘点区域</a><b class="arrow"></b></li>' +
 		'</ul></li>' +
 
-		'</ul></li>');
+		'</ul></li>' +
+
+		'<li class="">' +
+			'<a href="/hz_3d_map">' +
+				'<i class="menu-icon fa fa-desktop"></i>' +
+				'<span class="menu-text"> 3D地图 </span>' +
+			'</a>' +
+			'<b class="arrow"></b>'
+		+'</li>'
+	);
 
 	$sign_position = $nav.find('[href="'+location.pathname+'"]').parent('li').addClass('active').parent('ul');
 	while (!$nav.is($sign_position)){
