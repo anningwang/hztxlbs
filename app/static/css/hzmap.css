@@ -1,28 +1,51 @@
 
-#myCanvas{ position:relative;}
-#floor3 {
-	 
-	position: relative;
-	overflow: hidden;
-	border: 1px solid #b94a48;
-	min-width:1702px;
-	min-height:892px;
-	background:url(../img/cross.gif);
-	 
- 
-	}
-#svg_map{
-	 
-	
-	 
+.enclosure_spot{
 	position:absolute;
-	overflow:hidden;
-}
-#svg_path{
- 
-	position:absolute;
+	background:url(/static/img/spot.png) no-repeat;
+	width:20px;
+	height:20px;
+	cursor: pointer;
 	z-index:10;
 }
-/*图基本设置*/
-.map_base_data{height:890px;width: 1700px;}
- 
+
+#myCanvas{
+	position: relative;
+	overflow: hidden;
+	border: 1px solid brown;
+	//min-width:1702px;
+	width: 100%;
+	min-height:852px;
+	z-index:1;
+	//background:url(/static/img/cross.gif);
+	background-color: #B1B1B1;
+}
+/* 所有事件在floor3父类上面   下面的子元素层级应该全部小于父元素层级 */
+#svg_map_base {
+	position:absolute;
+	z-index:2;
+}
+#svg_image{
+	z-index:-100;
+}
+#svg_path{
+	z-index:-90;
+}
+#svg_sign{
+	z-index:-80;
+}
+#svg_user_sign{
+	z-index:-10;
+}
+
+#svg_temporary_line{
+	z-index:-1;
+}
+
+#svg_event{
+	z-index:1;
+}
+#enclosureEvent{
+	z-index:2;
+}
+
+.each_map_layer{ position:absolute; height:850px; width:1700px;}

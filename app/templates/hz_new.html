@@ -6,21 +6,15 @@
 <title>和仲位置服务平台</title>
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-<!-- bootstrap & fontawesome -->
-<link rel="stylesheet" href="../static/ace/assets/css/bootstrap.css" />
-<link rel="stylesheet" href="../static/ace/components/font-awesome/css/font-awesome.css" />
-<!-- page specific plugin styles -->
-<link rel="stylesheet" href="../static/components/jquery.gritter/css/jquery.gritter.css" />
-<!-- text fonts --><!-- ace styles -->
-<link rel="stylesheet" href="../static/ace/assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
-<link rel="stylesheet" href="../static/ace/assets/css/ace-skins.css" />
-<link rel="stylesheet" href="../static/ace/assets/css/ace-rtl.css" />
-<!-- svg样式 -->
+<link rel="stylesheet" href="/static/ace/assets/css/bootstrap.css" />
+<link rel="stylesheet" href="/static/ace/components/font-awesome/css/font-awesome.css" />
+<link rel="stylesheet" href="/static/components/jquery.gritter/css/jquery.gritter.css" />
+<link rel="stylesheet" href="/static/ace/assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
+<link rel="stylesheet" href="/static/ace/assets/css/ace-skins.css" />
+<link rel="stylesheet" href="/static/ace/assets/css/ace-rtl.css" />
 <link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css">
-<!-- inline styles related to this page --><!--时间插件-->
-<link rel="stylesheet" href="../static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" />
-<!--hz地图样式--><!-- ace settings handler -->
-<script src="../static/ace/assets/js/ace-extra.js"></script>
+<link rel="stylesheet" href="/static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" />
+<script src="/static/ace/assets/js/ace-extra.js"></script>
 <link rel="shortcut icon" href="/static/img/favicon.ico" />
 <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
 </head>
@@ -60,20 +54,20 @@
 </div>
 <!-- /section:basics/navbar.layout -->
 <div class="main-container ace-save-state" style="" id="main-container">
-  <script type="text/javascript">
+	<script type="text/javascript">
 		try {
 			ace.settings.loadState('main-container')
 		}
 		catch(e) {}
-		</script>
-  <!-- #section:basics/sidebar -->
-  <div id="sidebar" class="sidebar                  responsive                    ace-save-state">
-    <script type="text/javascript">
+	</script>
+	<!-- #section:basics/sidebar -->
+	<div id="sidebar" class="sidebar responsive ace-save-state">
+		<script type="text/javascript">
 			try {
 				ace.settings.loadState('sidebar')
 			}
 			catch(e) {}
-			</script>
+		</script>
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script>
     <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script>
@@ -122,19 +116,19 @@
                       <div class="alert alert-info">新增人员盘点 <br />
                       </div>
                       <div class="form-group">
-                        <label for="firstname" class="col-sm-3 control-label no-padding-right">盘点名称:</label>
+                        <label for="inventory_name" class="col-sm-3 control-label no-padding-right">盘点名称:</label>
                         <div class="col-sm-9">
                           <input type="text" id="inventory_name" name="name" placeholder="" />
                         </div>
                       </div>
                       <div class="form-group">
-                        <label for="firstname" class="col-sm-3 control-label no-padding-right">盘点区域期望人数:</label>
+                        <label for="inventory_peopleNum" class="col-sm-3 control-label no-padding-right">盘点区域期望人数:</label>
                         <div class="col-sm-9">
                           <input type="text" id="inventory_peopleNum" name="peopleNum" placeholder="" />
                         </div>
                       </div>
                       <div class="form-group">
-                        <label for="firstname" class="col-sm-3 control-label no-padding-right">绘制范围:</label>
+                        <label for="enclosure_spot_method" class="col-sm-3 control-label no-padding-right">绘制方式:</label>
                         <div class="col-sm-9">
                           <div class="col-xs-6">
                             <select class="form-control" id="enclosure_spot_method">
@@ -161,7 +155,7 @@
                       <div class="alert alert-info">修改盘点 <br />
                       </div>
                       <div class="form-group">
-                        <label for="firstname" class="col-sm-3 control-label no-padding-right">修改的盘点:</label>
+                        <label for="alter_enclosure_name" class="col-sm-3 control-label no-padding-right">修改的盘点:</label>
                         <div class="col-sm-9">
                           <select class="form-control" id="alter_enclosure_name" name="name">
                             <option value="floor3">3楼</option>
@@ -187,7 +181,7 @@
                       
                       
                       <div class="form-group">
-                        <label for="firstname" class="col-sm-3 control-label no-padding-right">绘制范围:</label>
+                        <label for="enclosure_spot_method2" class="col-sm-3 control-label no-padding-right">绘制范围:</label>
                         <div class="col-sm-9">
                           <div class="col-xs-6">
                             <select class="form-control" id="enclosure_spot_method2">
@@ -221,7 +215,7 @@
                       </div>
                       <div class="form-group">
                         <div class="col-xs-6 col-xs-push-6">
-                          <button type="button" class="btn btn-success btn-xs" id="enclosure_item_button" />
+                          <button type="button" class="btn btn-success btn-xs" id="enclosure_item_button" >
                           删除
                           </button>
                         </div>
@@ -235,7 +229,7 @@
                       <div class="alert alert-info">查询盘点 <br />
                       </div>
                       <div class="form-group">
-                        <label for="firstname" class="col-sm-6 control-label no-padding-right">盘点查询:</label>
+                        <label for="electronic-fence-address" class="col-sm-6 control-label no-padding-right">盘点查询:</label>
                         <div class="col-sm-6">
                           <select id="electronic-fence-address">
                             <option value="0">请选择地址</option>
@@ -245,7 +239,7 @@
                       </div>
                       <div class="form-group">
                         <div class="col-xs-6 col-xs-push-6">
-                          <button type="button" class="btn btn-success btn-xs" id="electronic-fence-query-button" />
+                          <button type="button" class="btn btn-success btn-xs" id="electronic-fence-query-button" >
                           查询
                           </button>
                         </div>
@@ -263,11 +257,10 @@
                 </div>
               </div>
             </div>
-            <div id="gritter-notice-wrapper" style="position:absolute; right:0px; z-index:1001;"></div>
+            <div id="gritter-notice-wrapper" style="position:absolute; right:0; z-index:1001;"></div>
             <script>
 							'use strict';
-							var hzX = 0,
-								hzY = 0; // 坐标系原点
+							var hzX = 0, hzY = 0; // 坐标系原点
 							var margin = 0; //外边距
 							var real_loc_to_pix = 0.0891; //物理单位转像素单位 比例      比例转换计算公式x为传来的数据   x * real_loc_to_pix * zoom
 							var map_w = 3477; /// px
@@ -283,9 +276,6 @@
 
 							var storage = window.localStorage;
 
-
-
-
 							if(storage) {
 								//storage.clear();
 								///alert("浏览支持localStorage");
@@ -299,17 +289,12 @@
 									zoom = hz_zoom;
 								}
 
-								var _dest = parseInt(storage['hz_destination']);
-								isNaN(_dest) ? hz_destination = HZ_DESTINATION_MEETING_ROOM : hz_destination = _dest;
-
 								///alert(storage['hz_is_navigating'] + "  " + Boolean(storage['hz_is_navigating']));
 								hz_is_navigating = Boolean(storage['hz_is_navigating']);
 							}
 							else {
 								///alert("浏览暂不支持localStorage");
 							}
-
-
 
 
 							function transformDemo(svg) {
@@ -582,35 +567,25 @@
 								init.prototype.stopFn_param_3 = function(param1,param2,param3){
 										if(param3 instanceof Array)
 										{
-											param2.apply(param1,param3);;
+											param2.apply(param1,param3);
 										}else{
-											param2.apply(param1,[param3]);;
+											param2.apply(param1,[param3]);
 										}
-									
-									
 								};
 								
 								
 								/*	初始化函数结束 */
-								
-								
+
 								
 								/*全局初始化对象*/
 								var global_init = new init();
-								
-								
-						 
+
 
 								//以下变量可用可不用
 
 								var $svg_map_base = $('#svg_map_base');
 								var $svg_event = $('#svg_event');
-								var $svg_board = $('#svg_path');
-								var $svg_map = $('#svg_image');
-
 								var $document = $(document);
-								
-								//初始化函数
 
 
 								//缩放要调用的函数
@@ -624,14 +599,12 @@
 									}
 								}
 
-
 								zoomFnAfter.push(people_move_zoom);
 
 								//电子围栏查询缩放附加函数				
 								function enclosure_temporary_fn() {
 									draw_enclosure(enclosure_temporary);
 								}
-
 
 								//地图标识
 								var $svg_sign = $('#svg_sign');
@@ -852,13 +825,10 @@
 
 										if(!test_range($map, [pageX, pageY])) return false;
 
-
 										var map_path_line = [];
 										map_path_line[0] = e.pageX - $svg_path_offset.left - parseInt($svg_path.css('border-left-width'));
 										map_path_line[1] = e.pageY - $svg_path_offset.top - parseInt($svg_path.css('border-top-width'));
 										drawLineData.push(map_path_line);
-										map_path_line = [];
-
 										drawLine($svg, drawLineData);
 									})
 								}
@@ -1005,8 +975,6 @@
 										}
 									}
 								}
-								
-
 
 								$("#start_draw2").on('click', function () {
 
@@ -1089,8 +1057,6 @@
 									}
 
 									var data = {};
-									// data.data = [];
-									//var data_item = {};
 
 									data.id = parseInt(alter_enclosure_name);
 									if(enclosure_new_name == '') {
@@ -1159,13 +1125,13 @@
 										//演示线样式
 										demo_line: {
 											fill: 'none',
-											stroke: 'red',
+											stroke: 'blue',
 											strokeWidth: 1
 										},
 										//实际线样式
 										result_line: {
 											fill: 'none',
-											stroke: 'red',
+											stroke: 'blue',
 											strokeWidth: 4
 										}
 									};
@@ -1978,17 +1944,16 @@
 
 											if(PositionI == temporaryArrDatasLength - 1) {
 												//让线回到第一个	
-												temporatyPositionFor = []
+												temporatyPositionFor = [];
 												temporatyPositionFor.push(unitConversion(temporaryArrDatas[0].x));
 												temporatyPositionFor.push(unitConversion(temporaryArrDatas[0].y));
 												temporatyPosition.push(temporatyPositionFor);
 											}
 										}
 
-
 										svg.polyline(temporatyPosition, {
 											fill: 'none',
-											stroke: '#ff0000',
+											stroke: '#0000ff',
 											strokeWidth: 5
 										});
 										//完毕清空数据
@@ -2017,7 +1982,6 @@
 								});
 
 
-
 								function gritter_alert(title, text) {
 									$.gritter.add({
 										title: title,
@@ -2031,16 +1995,6 @@
 								function unitConversion(number) {
 									return Math.round(number * real_loc_to_pix * zoom);
 								}
-
-								//以下为时间日历插件
-
-								$('.date-timepicker').datetimepicker({
-									//ormat: 'MM/DD/YYYY h:mm:ss A',//use this option to display seconds
-									language: 'zh-CN',
-									format: 'yyyy-mm-dd hh:ii:ss',
-									autoclose: true,
-								});
-
 
 
 								/*人物标记位置*/
@@ -2072,7 +2026,6 @@
 								});
 
 
-
 								//(用户)人位置函数
 								function hz_people_goto(x, y, people) {
 									people = people || '1918E00103AA'; // 设置默认参数
@@ -2090,8 +2043,6 @@
                     return Math.round(number / real_loc_to_pix / zoom);
                 }
 
-                $(function () {
-                });
             </script>
             
             <div id="svg_map_base" class="each_map_layer">
@@ -2167,44 +2118,38 @@
     </div>
   </div>
   <!-- /.main-content -->
-  <!--<a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
-				<i class="ace-icon fa fa-angle-double-up icon-only bigger-110"></i>
-			</a>-->
 </div>
-<!-- /.main-container --><!-- basic scripts --><script type="text/javascript">
-	if('ontouchstart' in document.documentElement) document.write("<script src='../static/ace/components/_mod/jquery.mobile.custom/jquery.mobile.custom.js'>" + "<" + "/script>");
-	</script>
+<!-- /.main-container -->
+
+<script type="text/javascript">
+	if('ontouchstart' in document.documentElement) document.write("<script src='/static/ace/components/_mod/jquery.mobile.custom/jquery.mobile.custom.js'>" + "<" + "/script>");
+</script>
 <script src="../static/ace/components/bootstrap/dist/js/bootstrap.js"></script>
-<!--时间控制插件-->
-<script src="../static/ace/components/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.min.js"></script>
-<script src="../static/components/jquery.gritter/js/jquery.gritter.js"></script>
-<!-- ace scripts -->
-<script src="../static/ace/assets/js/src/elements.scroller.js"></script>
-<script src="../static/ace/assets/js/src/elements.colorpicker.js"></script>
-<script src="../static/ace/assets/js/src/elements.fileinput.js"></script>
-<script src="../static/ace/assets/js/src/elements.typeahead.js"></script>
-<script src="../static/ace/assets/js/src/elements.wysiwyg.js"></script>
-<script src="../static/ace/assets/js/src/elements.spinner.js"></script>
-<script src="../static/ace/assets/js/src/elements.treeview.js"></script>
-<script src="../static/ace/assets/js/src/elements.wizard.js"></script>
-<script src="../static/ace/assets/js/src/elements.aside.js"></script>
-<script src="../static/ace/assets/js/src/ace.js"></script>
-<script src="../static/ace/assets/js/src/ace.basics.js"></script>
-<script src="../static/ace/assets/js/src/ace.scrolltop.js"></script>
-<script src="../static/ace/assets/js/src/ace.ajax-content.js"></script>
-<script src="../static/ace/assets/js/src/ace.touch-drag.js"></script>
-<script src="../static/ace/assets/js/src/ace.sidebar.js"></script>
-<script src="../static/ace/assets/js/src/ace.sidebar-scroll-1.js"></script>
-<script src="../static/ace/assets/js/src/ace.submenu-hover.js"></script>
-<script src="../static/ace/assets/js/src/ace.widget-box.js"></script>
-<script src="../static/ace/assets/js/src/ace.settings.js"></script>
-<script src="../static/ace/assets/js/src/ace.settings-rtl.js"></script>
-<script src="../static/ace/assets/js/src/ace.settings-skin.js"></script>
-<script src="../static/ace/assets/js/src/ace.widget-on-reload.js"></script>
-<script src="../static/ace/assets/js/src/ace.searchbox-autocomplete.js"></script>
-<!-- inline scripts related to this page --><!--page scripts -->
-<script src="../static/ace/components/jquery-validation/dist/jquery.validate.js"></script>
-<script>
-	</script>
+<script src="/static/ace/components/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.min.js"></script>
+<script src="/static/components/jquery.gritter/js/jquery.gritter.js"></script>
+<script src="/static/ace/assets/js/src/elements.scroller.js"></script>
+<script src="/static/ace/assets/js/src/elements.colorpicker.js"></script>
+<script src="/static/ace/assets/js/src/elements.fileinput.js"></script>
+<script src="/static/ace/assets/js/src/elements.typeahead.js"></script>
+<script src="/static/ace/assets/js/src/elements.wysiwyg.js"></script>
+<script src="/static/ace/assets/js/src/elements.spinner.js"></script>
+<script src="/static/ace/assets/js/src/elements.treeview.js"></script>
+<script src="/static/ace/assets/js/src/elements.wizard.js"></script>
+<script src="/static/ace/assets/js/src/elements.aside.js"></script>
+<script src="/static/ace/assets/js/src/ace.js"></script>
+<script src="/static/ace/assets/js/src/ace.basics.js"></script>
+<script src="/static/ace/assets/js/src/ace.scrolltop.js"></script>
+<script src="/static/ace/assets/js/src/ace.ajax-content.js"></script>
+<script src="/static/ace/assets/js/src/ace.touch-drag.js"></script>
+<script src="/static/ace/assets/js/src/ace.sidebar.js"></script>
+<script src="/static/ace/assets/js/src/ace.sidebar-scroll-1.js"></script>
+<script src="/static/ace/assets/js/src/ace.submenu-hover.js"></script>
+<script src="/static/ace/assets/js/src/ace.widget-box.js"></script>
+<script src="/static/ace/assets/js/src/ace.settings.js"></script>
+<script src="/static/ace/assets/js/src/ace.settings-rtl.js"></script>
+<script src="/static/ace/assets/js/src/ace.settings-skin.js"></script>
+<script src="/static/ace/assets/js/src/ace.widget-on-reload.js"></script>
+<script src="/static/ace/assets/js/src/ace.searchbox-autocomplete.js"></script>
+<script src="/static/ace/components/jquery-validation/dist/jquery.validate.js"></script>
 </body>
 </html>

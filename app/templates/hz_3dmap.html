@@ -199,7 +199,7 @@
             if (pt2 != null) {
                 //地图坐标转换屏幕坐标
                 var pt3 = map.coordMapToScreen(pt2.x, pt2.y, pt2.z);
-                oPrompt.innerHTML = '<p>当前楼层(groupId)：groupId=' + gid + '</p><p>楼层高度(height)：height=' + pt1.z + '</p>' + '<p>原始屏幕坐标(point)：x=' + pt1.x + ', y=' + pt1.y + '</p>' + '<p>转换后的地理坐标(mapCoord)：x=' + parseInt(pt2.x) + ', y=' + parseInt(pt2.y) + '</p>' + '<p>转换后的屏幕坐标(point)：x=' + parseInt(pt3.x) + ', y=' + parseInt(pt3.y) + '</p>';
+                oPrompt.innerHTML = '<p>当前楼层(groupId)：groupId=' + gid + '</p><p>楼层高度(height)：height=' + pt1.z + '</p>' + '<p>原始屏幕坐标(point)：x=' + pt1.x + ', y=' + pt1.y + '</p>' + '<p>转换后的地理坐标(mapCoord)：x=' + (pt2.x) + ', y=' + (pt2.y) + '</p>' + '<p>转换后的屏幕坐标(point)：x=' + parseInt(pt3.x) + ', y=' + parseInt(pt3.y) + '</p>';
             } else {
                 oPrompt.innerHTML = '<p>当前楼层(groupId)：groupId=' + gid + '</p><p>楼层高度(height)：height=' + pt1.z + '</p>' + '<p>原始屏幕坐标(point)：x=' + pt1.x + ', y=' + pt1.y + '</p>' + '<p>转换后的地理坐标(mapCoord)：超出计算返回</p>' + '<p>转换后的屏幕坐标(point)：无效</p>';
             }
