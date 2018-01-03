@@ -445,6 +445,7 @@ class PeopleStat:
             errorCode       msg
             ---------       --------------------------------------------------------
             0               ok
+            100             缺少输入参数
 
             data:{          数据内容
                 total:      符合条件的记录条数
@@ -458,10 +459,14 @@ class PeopleStat:
                     curPeopleNum:   盘点时人数
                     expectNum:      期望人数
                     datetime:       盘点时间
+                    no:             记录序号
                 }]
             }
         }
         """
+        if param is None:
+            return {'errorCode': 100, 'msg': u'缺少输入参数！'}
+
         hzq = HzRoomStatInfo.query.join(HzRoomStatCfg, HzRoomStatCfg.id == HzRoomStatInfo.room_id)
 
         if 'statNo' in param and param['statNo'] != '':
@@ -500,14 +505,15 @@ class PeopleStat:
         offset = (page - 1) * rows
         hzq = hzq.add_columns(HzRoomStatCfg.name, HzRoomStatCfg.no, HzRoomStatCfg.create_at, HzRoomStatCfg.expect_num)
         records = hzq.limit(rows).offset(offset).all()
-
+        i = offset + 1
         rs = []
         for info in records:
             rs.append({'id': info[0].id, 'statNo': info[0].no, 'roomName': info[1], 'roomId': info[0].room_id,
                        'roomNo': info[2], 'curPeopleNum': info[0].people_num,
                        'roomCreateAt': datetime.datetime.strftime(info[3], '%Y-%m-%d %H:%M:%S'),
                        'datetime': datetime.datetime.strftime(info[0].datetime, '%Y-%m-%d %H:%M:%S'),
-                       'expectNum': info[4]})
+                       'expectNum': info[4], 'no': i})
+            i += 1
         return {'errorCode': 0, 'msg': 'ok', 'data': {'total': total, 'rows': rs}}
 
     @staticmethod

@@ -3,11 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>接口测试</title>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script>
+
+
+    <link rel="stylesheet" href="/static/css/remodal-default-theme.css">
+    <link rel="stylesheet" href="/static/css/remodal.css">
+    <script src="/static/js/remodal.min.js"></script>
+
     <link rel="shortcut icon" href="/static/img/favicon.ico" />
     <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
+
 </head>
-<script src="/static/js/jquery.min.js"></script>
-<script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script>
 
 <script>
     'use strict';
@@ -353,6 +360,26 @@
 <div style="padding: 10px"></div>
 
 <div id="receive"></div>
+
+
+
+
+
+
+
+<div class="remodal" data-remodal-id="modal" data-remodal-options="hashTracking: false, closeOnOutsideClick: false">
+    <button data-remodal-action="close" class="remodal-close"></button>
+    <h1>Remodal</h1>
+    <p>
+        Responsive, lightweight, fast, synchronized with CSS animations, fully customizable modal window plugin with declarative configuration and hash tracking.
+    </p>
+    <br>
+    <button data-remodal-action="cancel" class="remodal-cancel">Cancel</button>
+    <button data-remodal-action="confirm" class="remodal-confirm">OK</button>
+</div>
+
+<a data-remodal-target="modal" href="#">Call the modal with data-remodal-id="modal"</a>
+
 
 </body>
 </html>

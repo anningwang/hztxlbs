@@ -353,8 +353,13 @@ def hz_3d_map():
 
 
 @app.route('/hz_ps_zone')
-def hz_new_function():
+def hz_ps_zone():
     return render_template('hz_ps_zone.html')
+
+
+@app.route('/hz_ps_result', methods=['POST', 'GET'])
+def hz_ps_result():
+    return render_template('hz_ps_result.html')
 
 
 @app.route('/lbs/get_history_location', methods=['POST'])

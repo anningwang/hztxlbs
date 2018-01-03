@@ -21,6 +21,7 @@ $(function(){
 		'<li class=""><a href="#" class="dropdown-toggle"><i class="menu-icon fa fa-caret-right"></i><span class="menu-text">人员盘点</span><b class="arrow fa fa-angle-down"></b></a><b class="arrow"></b>' +
 		'<ul class="submenu">' +
 		'<li class=""><a href="/hz_ps_zone"><i class="menu-icon fa fa-caret-right"></i>盘点区域</a><b class="arrow"></b></li>' +
+		'<li class=""><a href="/hz_ps_result"><i class="menu-icon fa fa-caret-right"></i>盘点结果</a><b class="arrow"></b></li>' +
 		'</ul></li>' +
 
 		'</ul></li>' +

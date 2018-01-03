@@ -342,10 +342,11 @@ def background_thread():
         if len(pos_to_client) > 0:
             socketio.emit('hz_position', pos_to_client, namespace=HZ_NAMESPACE)
 
-            with app.app_context():
-                rail_info = hz_lbs_elect_rail(pos_to_client)    # 判断是否进入/退出 电子围栏
-                if len(rail_info) != 0:
-                    socketio.emit('hz_electronic_tail', rail_info, namespace=HZ_NAMESPACE)
+        data = hz_get_pos()
+        with app.app_context():
+            rail_info = hz_lbs_elect_rail(data)    # 判断是否进入/退出 电子围栏
+            if len(rail_info) != 0:
+                socketio.emit('hz_electronic_tail', rail_info, namespace=HZ_NAMESPACE)
 
         for client in hz_client_id:
             if hz_client_id[client]['navigating'] == 1:

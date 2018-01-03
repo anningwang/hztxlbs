@@ -274,7 +274,6 @@
 
 
 							$(function () {
-
 								/**
 								 * 全局初始化变量
 								 * 	zoomCallBack 	缩放需要执行的临时函数
@@ -470,8 +469,11 @@
 								}
 								addMapMoveEvent();
 
+								/**
+								 * 显示盘点结果
+								 */
 								function showPsResult(data) {
-									console.log(data);
+									console.log('showPsResult', data);
 								}
 
 								// svg地图 控制面板
@@ -1508,6 +1510,7 @@
 				</div>
 			</div>
 			<!-- /.page-content -->
+
 		</div>
 	</div>
 	<!-- /.main-content -->
