@@ -100,12 +100,13 @@
                 }
 
                 var psData = data.data.rows;
+                var total = data.data.total;
 
                 if (data.data.rows.length == 0){
                     alert('该检索范围没有数据');
                     return;
                 }else{
-                    psHtml = '<h4 class="pink"><i class="ace-icon fa fa-hand-o-right icon-animated-hand-pointer blue"></i><a href="" role="button" class="green" data-toggle="modal"> 盘点结果内容 </a></h4>' +
+                    psHtml = '<h4 class="pink"><i class="ace-icon fa fa-hand-o-right icon-animated-hand-pointer blue"></i><a href="" role="button" class="green" data-toggle="modal"> 盘点结果内容（总条数：'+ total  +'） </a></h4>' +
                             '<div class="hr hr-18 dotted hr-double"></div><div class="col-xs-12"><!-- PAGE CONTENT BEGINS -->' +
                             '<table id="simple-table" class="table  table-bordered table-hover">' +
                             '<thead><tr><th class="detail-col"></th><th>记录ID</th><th>盘点编号</th><th>盘点区域名称</th><th>盘点时间</th><th>盘点人数</th><th>期望人数</th></tr></thead><tbody>';

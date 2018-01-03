@@ -162,7 +162,7 @@ class PeopleStat:
             ------------    -----------------------------
             0               'ok'
 
-            statInfo:{      盘点信息
+            statInfo:[{      盘点信息
                 id                  记录ID
                 statNo              盘点编号
                 roomName            盘点区域名称
@@ -172,7 +172,7 @@ class PeopleStat:
                 curPeopleNum        盘点时人数
                 expectNum           期望人数
                 datetime            盘点时间
-            }
+            }]
         }
         """
         self.get_data()

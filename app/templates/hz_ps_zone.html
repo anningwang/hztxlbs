@@ -465,7 +465,6 @@
 									hzY = currentY;
 									$document.off('mousemove', mapMoveMousemoveFn);
 									$document.off('mouseup', mapMoveMouseupFn);
-
 								}
 								addMapMoveEvent();
 
@@ -474,6 +473,26 @@
 								 */
 								function showPsResult(data) {
 									console.log('showPsResult', data);
+									if (data.errorCode !== 0) return;
+									var psRec = data['statInfo'];
+									if (psRec.length == 0) return;
+									var text = '编号['+ psRec[0]['statNo'] +'] 盘点时间[' + psRec[0]['datetime'] + ']<br>';
+
+									for(var i=0; i< psRec.length; i++) {
+										if (psRec[i]['curPeopleNum'] > 0) {
+											text += '区域[' + psRec[i]['roomName'] + ']  人数[' + psRec[i]['curPeopleNum'] + ']  期望人数[' + psRec[i]['expectNum'] + ']<br>'
+										}
+									}
+									text += '其他区域，盘点人数为：0';
+
+									$.gritter.add({
+										title: '盘点结果',
+										text: text,
+										class_name: 'gritter-info',
+										image: '/static/img/redImageMarker.png',
+										sticky: true,
+										time: ''
+									});
 								}
 
 								// svg地图 控制面板
@@ -491,7 +510,8 @@
 										}
 										return;
 									} else if (btn.attr('id') === 'btnPsExec'){
-										psExec({showMsg: true, callback: showPsResult })
+										psExec({showMsg: false, callback: showPsResult })
+										return;
 									}
 
 									if(btn.hasClass('active')) {

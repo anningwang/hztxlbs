@@ -1,7 +1,7 @@
 
 # coding=utf-8
 from hzglobal import *
-from app.models import HzElecTail, db
+from app.models import HzElecTail, db, HzElecTailCfg, HzEtPoints
 import datetime
 
 
@@ -102,6 +102,8 @@ def hz_lbs_elect_rail(userlist):
 
     ret = []
 
+    er_dict = get_er_data()
+
     for usr in userlist:
         i = 0
         for rail in HZ_RAIL_LIST:
@@ -129,11 +131,11 @@ def hz_lbs_elect_rail(userlist):
                     db.session.commit()
             i += 1
 
-        for rail in g_hz['et_cfg']:
+        for rail in er_dict:
             name = rail
             rec = HzElecTail.query.filter_by(user_id=usr['userId']).filter_by(rail_no=name)\
                 .order_by(HzElecTail.timestamp.desc()).first()
-            if pnpoly(g_hz['et_cfg'][name], usr['x'], usr['y']):    # in room
+            if pnpoly(er_dict[name]['points'], usr['x'], usr['y']):    # in room
                 if rec is None or rec.status == 0:  # 用户原来不在 围栏内
                     enter = 1
                     new_r = HzElecTail(build_id=HZ_BUILDING_ID, floor_no=HZ_FLOOR_NO, user_id=usr['userId'],
@@ -154,3 +156,20 @@ def hz_lbs_elect_rail(userlist):
                     db.session.add(new_r)
                     db.session.commit()
     return ret
+
+
+def get_er_data():
+    """
+    从数据库获取电子围栏配置
+    """
+    er_dict = {}
+    ers = HzElecTailCfg.query.all()
+    for er in ers:
+        item = {'id': er.id, 'no': er.rail_no, 'name': er.name}
+        pts = HzEtPoints.query.filter_by(et_id=er.id).all()
+        points = []
+        for pt in pts:
+            points.append({'x': pt.x, 'y': pt.y})
+        item['points'] = points
+        er_dict[er.name] = item
+    return er_dict

@@ -9,7 +9,6 @@ TEST_UID = "1918E00103AA"           # 测试用标签UID
 TEST_UID_2 = "1918E00103A9"         # 测试用标签UID
 HZ_UID = [TEST_UID, TEST_UID_2]     # 用户标签id 表
 
-g_hz = {'et_cfg': {}}               # 全局变量， 电子围栏配置
 HZ_ACCESS_TOKEN = 'you_never_guess@!#$~%'
 
 
@@ -46,24 +45,3 @@ def gen_code_seconds(tag, date=None):
     data_str = datetime.datetime.strftime(date, '%Y%m%d-%H%M%S')
     code_str = '%s-%s' % (tag, data_str)
     return code_str
-
-
-def g_save_et_cfg(name, pts):
-    if 'et_cfg' not in g_hz:
-        g_hz['et_cfg'] = {}
-    g_hz['et_cfg'][name] = pts
-
-
-def g_del_et_cfg(name):
-    if 'et_cfg' in g_hz and name in g_hz['et_cfg']:
-        del g_hz[name]
-
-
-def g_upd_et_cfg(cfgs):
-    if 'et_cfg' not in g_hz:
-        g_hz['et_cfg'] = {}
-    g_hz['et_cfg'] = cfgs
-
-
-def g_print_et_cfg():
-    print g_hz

@@ -16,7 +16,7 @@ from dijkstra import min_dist2, get_nearest_vertex, hz_vertex
 from lbs import TEST_UID, CUR_MAP_SCALE, HZ_MAP_GEO_WIDTH, HZ_MAP_GEO_HEIGHT
 import json
 from hzlbs.elecrail import get_elecrail
-from hzlbs.hzglobal import HZ_BUILDING_ID, g_upd_et_cfg
+from hzlbs.hzglobal import HZ_BUILDING_ID
 from hzlbs.peoplestat import ps
 
 
@@ -656,7 +656,6 @@ def electronic_rail_cfg_modify():
         return jsonify({'errorCode': 101, 'msg': u'输入参数错误！'})
 
     db.session.commit()
-    hz_update_et_cfg()
     return jsonify({'errorCode': 0, 'msg': u'更新成功！'})
 
 
@@ -716,24 +715,7 @@ def electronic_rail_cfg_del(ids):
     num += HzElecTailCfg.query.filter(HzElecTailCfg.id.in_(ids)).delete(synchronize_session=False)
 
     db.session.commit()
-    hz_update_et_cfg()
     return jsonify({'errorCode': 0, 'msg': u'[%d]个围栏，[%d]个顶点信息被删除。' % (num, vt)})
-
-
-def hz_update_et_cfg():
-    from hzlbs.hzglobal import g_print_et_cfg
-
-    new_cfg = {}
-    cfgs = HzElecTailCfg.query.all()
-    for cf in cfgs:
-        ets = HzEtPoints.query.filter_by(et_id=cf.id).all()
-        points = []
-        for pt in ets:
-            points.append({'x': pt.x, 'y': pt.y})
-        new_cfg[cf.name] = points
-    g_upd_et_cfg(new_cfg)
-
-    g_print_et_cfg()
 
 
 @app.route('/api/hz_lbs/WebLocate/locateResults', methods=['POST'])

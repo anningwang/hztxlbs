@@ -107,6 +107,8 @@
                     return;
                 }
 
+                var total = data.data.total;
+
                 var electronicFenceData = data.data.rows;
                 var electronicFenceDataLength = electronicFenceData.length;
 
@@ -114,7 +116,7 @@
                     alert('该检索范围没有数据');
                     return;
                 }else{
-                    electronicFenceContent = '<h4 class="pink"><i class="ace-icon fa fa-hand-o-right icon-animated-hand-pointer blue"></i><a href="" role="button" class="green" data-toggle="modal"> 警告信息内容 </a></h4>' +
+                    electronicFenceContent = '<h4 class="pink"><i class="ace-icon fa fa-hand-o-right icon-animated-hand-pointer blue"></i><a href="" role="button" class="green" data-toggle="modal"> 警告信息内容（总条数：'+ total  +'） </a></h4>' +
                             '<div class="hr hr-18 dotted hr-double"></div><div class="col-xs-12"><!-- PAGE CONTENT BEGINS -->' +
                             '<table id="simple-table" class="table  table-bordered table-hover">' +
                             '<thead><tr><th class="detail-col"></th><th>用户ID</th><th>建筑物ID</th><th>警报时间</th><th>楼层</th><th>记录ID</th><th>房间</th><th>警告内容</th></tr></thead><tbody>';
