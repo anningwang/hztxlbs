@@ -183,7 +183,7 @@ class PeopleStat:
         for z in self.zone:
             num = 0
             for usr in uid_coord:
-                if pnpoly(self.zone[z]['points'], uid_coord[usr][0], usr[1]):  # in room
+                if pnpoly(self.zone[z]['points'], uid_coord[usr][0], uid_coord[usr][1]):  # in room
                     num += 1
             param = {'roomId': self.zone[z]['id'], 'peopleNum': num, 'datetime': tm, 'no': no}
             psi = HzRoomStatInfo(param)

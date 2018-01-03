@@ -337,14 +337,14 @@ def hz_electronic_rail():
     return render_template('hz_electronic_rail.html')
 
 
-@app.route('/hz_page1')
-def hz_page1():
-    return render_template('hz_page1.html')
+@app.route('/hz_er_alarm')
+def hz_er_alarm():
+    return render_template('hz_er_alarm.html')
 
 
-@app.route('/hz_page2')
-def hz_page2():
-    return render_template('hz_page2.html')
+@app.route('/hz_coord_get')
+def hz_coord_get():
+    return render_template('hz_coord_get.html')
 
 
 @app.route('/hz_3d_map')
@@ -352,9 +352,9 @@ def hz_3d_map():
     return render_template('hz_3dmap.html')
 
 
-@app.route('/hz_new_function')
+@app.route('/hz_ps_zone')
 def hz_new_function():
-    return render_template('hz_new.html')
+    return render_template('hz_ps_zone.html')
 
 
 @app.route('/lbs/get_history_location', methods=['POST'])
@@ -505,6 +505,8 @@ def get_electronic_rail_info():
                 room        围栏名称
                 status      告警状态， 1 进入围栏，0 退出围栏
                 datetime    时间格式（北京时间）： yyyy-mm-dd HH-MM-SS
+                userId      用户标识
+                no          记录序号
             }]
         }
     }
@@ -552,12 +554,15 @@ def get_electronic_rail_info():
         page = 1
     offset = (page - 1) * rows
     records = hzq.limit(rows).offset(offset).all()
+    i = offset + 1
     rs = []
     for rec in records:
         rs.append({'id': rec.id, 'buildingId': rec.build_id, 'floorNo': rec.floor_no,
                    'x': rec.x, 'y': rec.y, 'status': rec.status,
                    'room': rec.rail_no,
-                   'datetime': datetime.datetime.strftime(rec.timestamp, '%Y-%m-%d %H:%M:%S')})
+                   'datetime': datetime.datetime.strftime(rec.timestamp, '%Y-%m-%d %H:%M:%S'),
+                   'userId': rec.user_id, 'no': i})
+        i += 1
     return jsonify({'errorCode': 0, 'msg': 'ok', 'data': {'total': total, 'rows': rs}})
 
 

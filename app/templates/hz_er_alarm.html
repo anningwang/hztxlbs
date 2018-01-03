@@ -64,13 +64,7 @@
 
             function electronicFenceAlertInfo(){
                 var electronicFenceContent;     // 页面输出内容
-
                 var userId = $("#electronic-fence-alert-user").val();
-
-                if(userId == 0){
-                    alert('请选择查询用户');
-                    return;
-                }
                 var datetimeFrom = $("#electronic-fence-alert-start-time").val();
                 var datetimeTo = $("#electronic-fence-alert-end-time").val();
 
@@ -123,7 +117,7 @@
                     electronicFenceContent = '<h4 class="pink"><i class="ace-icon fa fa-hand-o-right icon-animated-hand-pointer blue"></i><a href="" role="button" class="green" data-toggle="modal"> 警告信息内容 </a></h4>' +
                             '<div class="hr hr-18 dotted hr-double"></div><div class="col-xs-12"><!-- PAGE CONTENT BEGINS -->' +
                             '<table id="simple-table" class="table  table-bordered table-hover">' +
-                            '<thead><tr><th>建筑物ID</th><th>警报时间</th><th>楼层</th><th>记录ID</th><th>房间</th><th>警告内容</th></tr></thead><tbody>';
+                            '<thead><tr><th class="detail-col"></th><th>用户ID</th><th>建筑物ID</th><th>警报时间</th><th>楼层</th><th>记录ID</th><th>房间</th><th>警告内容</th></tr></thead><tbody>';
                 }
 
                 for(var i = 0; i<electronicFenceDataLength; i++){
@@ -133,10 +127,11 @@
 
                     if(etDetails.status == 1){
                         state = '进入';
-                    }else if(etDetails.status == 0){
+                    } else if(etDetails.status == 0){
                         state = '离开';
                     }
-                    electronicFenceContent += '<tr><td>'+etDetails['buildingId']+'</td><td>'+etDetails.datetime+'</td><td>'+etDetails.floorNo+'</td><td>'+etDetails.id+'</td><td>'+etDetails.room+'</td><td>'+state+'</td></tr>';
+                    electronicFenceContent += '<tr><td>'+etDetails['no']+'</td><td>'+etDetails.userId+'</td><td>'+etDetails['buildingId']+'</td><td>'
+                            +etDetails.datetime+'</td><td>'+etDetails.floorNo+'</td><td>'+etDetails.id+'</td><td>'+etDetails.room+'</td><td>'+state+'</td></tr>';
                 }
 
                 electronicFenceContent +='</tbody></table><div class="hr hr-18 dotted hr-double"></div>';
@@ -155,7 +150,7 @@
 
 </head>
 
-<body class="no-skin">
+<body class="no-skin" style="min-width: 1200px;">
 <!-- #section:basics/navbar.layout -->
 <div id="navbar" class="navbar navbar-default ace-save-state" style="min-width:190px;">
     <div class="navbar-container ace-save-state" id="navbar-container">
@@ -242,7 +237,7 @@
                                     </div>
                                     <div class="col-sm-8">
                                         <select id="electronic-fence-alert-user" >
-                                            <option value="0">请选择用户</option>
+                                            <option value="all">所有用户</option>
                                             <option value="1918E00103AA">1918E00103AA</option>
                                             <option value="1918E00103A9">1918E00103A9</option>
                                         </select>
@@ -285,6 +280,9 @@
                                             <option value="datetime" selected="selected">时间</option>
                                             <option value="userId">id</option>
                                         </select>
+                                    </div>
+                                    <div class="col-xs-4">
+                                        <label for="electronic-fence-alert-oper" class="control-label no-padding-right pull-right" style="display: none">与</label>
                                     </div>
                                     <div class="col-sm-4">
                                         <select id="electronic-fence-alert-oper" >

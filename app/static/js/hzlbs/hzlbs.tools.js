@@ -40,7 +40,7 @@ var roomNameCoord = [
 // 显示房间名称
 function showRoomName(svg) {
     svg.clear();
-    
+
     for(var i = 0; i < roomNameCoord.length; i++) {
         var str = 'translate(' + coordMapToScreen(roomNameCoord[i].x) + ',' + coordMapToScreen(roomNameCoord[i].y) + ')';
         var g1 = svg.group({
@@ -135,3 +135,38 @@ Init.prototype.stopFn_param_3 = function(param1,param2,param3){
         param2.apply(param1,[param3]);
     }
 };
+
+
+/**
+ * 立即盘点
+ * @param opts      object  { showMsg: boolean, 是否显示提示框
+ *                             callback: function, 回调函数
+ *                             }
+ */
+function psExec(opts) {
+    var url = '/lbs/people_stat_do';
+    var txData = {};
+
+    $.ajax({
+        url: url,
+        async: true,        // 异步请求
+        type: 'POST',
+        contentType: "application/json;charset=UTF-8",
+        data: JSON.stringify(txData)    // 发送json数据到服务器
+    }).done(function(data) {
+        console.log('接口调用成功');
+        console.log('receive:', data);
+        if (opts.showMsg) {
+            alert(data.msg);
+        }
+
+        if (opts.callback && data.errorCode == 0) {
+            opts.callback(data);
+        }
+
+    }).fail(function() {
+        console.log('接口调用失败');
+    });
+}
+
+

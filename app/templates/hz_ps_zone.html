@@ -28,7 +28,7 @@
 	<link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
 </head>
 
-<body class="no-skin">
+<body class="no-skin" style="min-width: 1200px;">
 <!-- #section:basics/navbar.layout -->
 <div id="navbar" class="navbar navbar-default ace-save-state" style="min-width:190px;">
 	<div class="navbar-container ace-save-state" id="navbar-container">
@@ -109,6 +109,7 @@
 								<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneDel">删除</button>
 								<button type="button" class="btn btn-primary" id="btnPsZoneShow">显示</button>
 								<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneAddDefault">增加默认</button>
+								<button type="button" class="btn btn-primary" id="btnPsExec">立即盘点</button>
 							</div>
 
 							<div class="map_panel_content col-xs-12" style="background:#FFF; border:1px solid #CCC;">
@@ -469,6 +470,10 @@
 								}
 								addMapMoveEvent();
 
+								function showPsResult(data) {
+									console.log(data);
+								}
+
 								// svg地图 控制面板
 								$("#map_panel_button").find('button').on('click', function () {
 									var btn = $(this);
@@ -483,6 +488,8 @@
 											showPsZone();
 										}
 										return;
+									} else if (btn.attr('id') === 'btnPsExec'){
+										psExec({showMsg: true, callback: showPsResult })
 									}
 
 									if(btn.hasClass('active')) {
@@ -1454,35 +1461,6 @@
 									}
 								}
 
-								var electronic_fence_namespace = '/HeZhong';
-								var electronic_fence_socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + electronic_fence_namespace);
-
-								electronic_fence_socket.on('hz_electronic_tail', function (msg) {
-									console.log('电子围栏：', msg);
-									var electronic_fence_socket_state;
-
-									if(msg[0].status == 1) {
-										electronic_fence_socket_state = '进入';
-									}
-									else if(msg[0].status == 0) {
-										electronic_fence_socket_state = '离开';
-									}
-									//alert('用户ID:'+msg[0].userId+electronic_fence_socket_state+'了房间'+msg[0].name);
-									gritter_alert('电子围栏警报', '用户ID:' + msg[0].userId + electronic_fence_socket_state + '了房间' + msg[0].name);
-									console.log('$.gritter', $.gritter);
-								});
-
-
-								function gritter_alert(title, text) {
-									$.gritter.add({
-										title: title,
-										text: text,
-										class_name: 'gritter-warning'
-									});
-									return false;
-								}
-
-
 								var namespace = '/HeZhong';
 								// Connect to the Socket.IO server.
 								// The connection URL has the following format:
@@ -1490,7 +1468,6 @@
 								var connStr = location.protocol + '//' + document.domain + ':' + location.port + namespace;
 								console.log(connStr);
 								var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
-
 
 								socket.on('hz_position', function (msg) {
 									var json = eval(msg); // 数组
