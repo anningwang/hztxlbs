@@ -1,57 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-<meta charset="utf-8" />
-<title>和仲位置服务平台</title>
-<meta name="description" content="" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-<link rel="stylesheet" href="/static/ace/assets/css/bootstrap.css" />
-<link rel="stylesheet" href="/static/ace/components/font-awesome/css/font-awesome.css" />
-<link rel="stylesheet" href="/static/components/jquery.gritter/css/jquery.gritter.css" />
-<link rel="stylesheet" href="/static/ace/assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
-<link rel="stylesheet" href="/static/ace/assets/css/ace-skins.css" />
-<link rel="stylesheet" href="/static/ace/assets/css/ace-rtl.css" />
-<link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css">
-<link rel="stylesheet" href="/static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" />
-<script src="/static/ace/assets/js/ace-extra.js"></script>
-<link rel="shortcut icon" href="/static/img/favicon.ico" />
-<link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<meta charset="utf-8" />
+	<title>和仲位置服务平台</title>
+	<meta name="description" content="" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+	<link rel="stylesheet" href="/static/ace/assets/css/bootstrap.css" />
+	<link rel="stylesheet" href="/static/ace/components/font-awesome/css/font-awesome.css" />
+	<link rel="stylesheet" href="/static/components/jquery.gritter/css/jquery.gritter.css" />
+	<link rel="stylesheet" href="/static/ace/assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
+	<link rel="stylesheet" href="/static/ace/assets/css/ace-skins.css" />
+	<link rel="stylesheet" href="/static/ace/assets/css/ace-rtl.css" />
+	<link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css">
+	<link rel="stylesheet" href="/static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" />
+	<script src="/static/ace/assets/js/ace-extra.js"></script>
+	<script src="/static/js/jquery.min.js"></script>
+	<script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script>
+	<script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script>
+	<script src="/static/js/jquery.mousewheel.js"></script>
+
+	<script src="/static/js/hzlbs/hzlbs.tools.js"></script>
+	<link rel="stylesheet" href="/static/css/hzmap.css" />
+	<script src="/static/js/hztx/common_nav.js"></script>
+
+	<link rel="shortcut icon" href="/static/img/favicon.ico" />
+	<link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
 </head>
 
-<body class="no-skin" style=" min-width:1900px;">
+<body class="no-skin">
 <!-- #section:basics/navbar.layout -->
-<div id="navbar" class="navbar navbar-default          ace-save-state" style=" min-width:190px;">
-  <div class="navbar-container ace-save-state" id="navbar-container">
-    <!-- #section:basics/sidebar.mobile.toggle -->
-    <button type="button" class="navbar-toggle menu-toggler pull-left" id="menu-toggler" data-target="#sidebar"> <span class="sr-only">Toggle sidebar</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
-    <!-- /section:basics/sidebar.mobile.toggle -->
-    <div class="navbar-header pull-left">
-      <!-- #section:basics/navbar.layout.brand -->
-      <a href="#" class="navbar-brand" style="padding-top:0; padding-bottom:0;"> <img src="../static/img/logo.jpg" /> </a>
-      <!-- /section:basics/navbar.layout.brand -->
-      <!-- #section:basics/navbar.toggle -->
-      <!-- /section:basics/navbar.toggle -->
-    </div>
-    <!-- #section:basics/navbar.dropdown -->
-    <div class="navbar-buttons navbar-header pull-right" role="navigation">
-      <ul class="nav ace-nav">
-        <!-- #section:basics/navbar.user_menu -->
-        <li class="light-blue dropdown-modal"> <a data-toggle="dropdown" href="#" class="dropdown-toggle"> <img class="nav-user-photo" src="../static/ace/assets/avatars/user.jpg" alt="Jason's Photo" /> <span class="user-info"> <small>欢迎登入,</small> 欧先生 </span> <i class="ace-icon fa fa-caret-down"></i> </a>
-          <ul class="user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
-            <li> <a href="#"> <i class="ace-icon fa fa-cog"></i> Settings</a> </li>
-            <li> <a href="profile.html"> <i class="ace-icon fa fa-user"></i> Profile</a> </li>
-            <li class="divider"></li>
-            <li> <a href="#"> <i class="ace-icon fa fa-power-off"></i> Logout</a> </li>
-          </ul>
-        </li>
-        <!-- /section:basics/navbar.user_menu -->
-      </ul>
-    </div>
-    <!-- /section:basics/navbar.dropdown -->
-  </div>
-  <!-- /.navbar-container -->
+<div id="navbar" class="navbar navbar-default ace-save-state" style="min-width:190px;">
+	<div class="navbar-container ace-save-state" id="navbar-container">
+		<!-- #section:basics/sidebar.mobile.toggle -->
+		<button type="button" class="navbar-toggle menu-toggler pull-left" id="menu-toggler" data-target="#sidebar"> <span class="sr-only">Toggle sidebar</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
+		<!-- /section:basics/sidebar.mobile.toggle -->
+		<div class="navbar-header pull-left">
+			<a href="http://www.hezhongsz.com" class="navbar-brand" style="padding-top:0; padding-bottom:0;" target="_blank"> <img src="/static/img/logo.jpg" /> </a>
+		</div>
+		<!-- #section:basics/navbar.dropdown -->
+		<div class="navbar-buttons navbar-header pull-right" role="navigation">
+			<ul class="nav ace-nav">
+				<!-- #section:basics/navbar.user_menu -->
+				<li class="light-blue dropdown-modal"> <a data-toggle="dropdown" href="#" class="dropdown-toggle"> <img class="nav-user-photo" src="../static/ace/assets/avatars/user.jpg" alt="Jason's Photo" /> <span class="user-info"> <small>欢迎登入,</small> 欧先生 </span> <i class="ace-icon fa fa-caret-down"></i> </a>
+					<ul class="user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
+						<li> <a href="#"> <i class="ace-icon fa fa-cog"></i> Settings</a> </li>
+						<li> <a href="#"> <i class="ace-icon fa fa-user"></i> Profile</a> </li>
+						<li class="divider"></li>
+						<li> <a href="#"> <i class="ace-icon fa fa-power-off"></i> Logout</a> </li>
+					</ul>
+				</li>
+				<!-- /section:basics/navbar.user_menu -->
+			</ul>
+		</div>
+		<!-- /section:basics/navbar.dropdown -->
+	</div>
+	<!-- /.navbar-container -->
 </div>
+
 <!-- /section:basics/navbar.layout -->
 <div class="main-container ace-save-state" style="" id="main-container">
 	<script type="text/javascript">
@@ -68,197 +74,167 @@
 			}
 			catch(e) {}
 		</script>
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script>
-    <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script>
-    <script src="../static/js/jquery.mousewheel.js"></script>
+
     <div class="sidebar-shortcuts" id="sidebar-shortcuts">
-      <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
+		<div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
         <button class="btn btn-success"> <i class="ace-icon fa fa-signal"></i> </button>
         <button class="btn btn-info"> <i class="ace-icon fa fa-pencil"></i> </button>
         <!-- #section:basics/sidebar.layout.shortcuts -->
         <button class="btn btn-warning"> <i class="ace-icon fa fa-users"></i> </button>
         <button class="btn btn-danger"> <i class="ace-icon fa fa-cogs"></i> </button>
         <!-- /section:basics/sidebar.layout.shortcuts -->
-      </div>
-      <div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini"> <span class="btn btn-success"></span> <span class="btn btn-info"></span> <span class="btn btn-warning"></span> <span class="btn btn-danger"></span> </div>
+		</div>
+		<div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini"> <span class="btn btn-success"></span> <span class="btn btn-info"></span> <span class="btn btn-warning"></span> <span class="btn btn-danger"></span> </div>
     </div>
     <!-- /.sidebar-shortcuts -->
-    <!--导航JS-->
-    <script src="../static/js/hztx/common_nav.js"></script>
-    <ul class="nav nav-list" id="hz_nav">
-    </ul>
-    <!-- /.nav-list -->
+
+    <ul class="nav nav-list" id="hz_nav"></ul>
+
     <!-- #section:basics/sidebar.layout.minimize -->
     <div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse"> <i id="sidebar-toggle-icon" class="ace-icon fa fa-angle-double-left ace-save-state" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i> </div>
     <!-- /section:basics/sidebar.layout.minimize -->
-  </div>
-  <!-- /section:basics/sidebar -->
-  <div class="main-content">
-    <div class="main-content-inner">
-      <!-- #section:basics/content.breadcrumbs -->
-      <!-- /section:basics/content.breadcrumbs -->
-      <div class="page-content" style="padding-bottom:0px;">
-        <div class="row">
-          <div id="myCanvas">
-            <div class="" id="map_controller_panel" style="position:absolute; top:60px; left:80px; z-index:1000; width:370px;">
-              <div class="btn-group btn-group-xs col-xs-12" id="map_panel_button" style="background:#FFF; border:1px solid #CCC;">
-                <button type="button" class="btn btn-primary" id="setEnclosure" hz_target="#EnclosureConcent">设置盘点</button>
-                <button type="button" class="btn btn-primary" id="setEnclosure" hz_target="#EnclosureConcent1">修改盘点</button>
-                <button type="button" class="btn btn-primary" id="setEnclosure" hz_target="#EnclosureConcent3">删除盘点</button>
-                <button type="button" class="btn btn-primary" id="setEnclosure2" hz_target="#EnclosureConcent2">查询盘点</button>
-                <button type="button" class="btn btn-primary" id="setEnclosure" hz_target="#EnclosureConcent4">默认盘点</button>
-              </div>
-              <div class="map_panel_content col-xs-12" style="background:#FFF; border:1px solid #CCC;">
-                <div class="col-xs-12" style="display:none; " id="EnclosureConcent">
-                  <div class="row" style="padding-right:10px; padding-top:20px;">
-                    <form role="form" class="form-horizontal" id="form-validate">
-                      <div class="alert alert-info">新增人员盘点 <br />
-                      </div>
-                      <div class="form-group">
-                        <label for="inventory_name" class="col-sm-3 control-label no-padding-right">盘点名称:</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="inventory_name" name="name" placeholder="" />
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label for="inventory_peopleNum" class="col-sm-3 control-label no-padding-right">盘点区域期望人数:</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="inventory_peopleNum" name="peopleNum" placeholder="" />
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <label for="enclosure_spot_method" class="col-sm-3 control-label no-padding-right">绘制方式:</label>
-                        <div class="col-sm-9">
-                          <div class="col-xs-6">
-                            <select class="form-control" id="enclosure_spot_method">
-                              <option value="square">方形绘图</option>
-                              <option value="polyline">折线绘图</option>
-                            </select>
-                          </div>
-                          <div class="col-xs-6">
-                            <button type="button" id="start_draw" class="btn btn-xs btn-danger"> <span id="start_draw_span">开始绘制</span> <i class="ace-icon fa fa-arrow-right icon-on-right"></i> </button>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <div class="col-xs-6 col-xs-push-6">
-                          <input type="submit" class="btn btn-success btn-xs" id="set_enclosure_submit" value="提交" />
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-                <div class="col-xs-12" style="display:none; " id="EnclosureConcent1">
-                  <div class="row" style="padding-right:10px; padding-top:20px;">
-                    <form role="form" class="form-horizontal" id="form-validate2">
-                      <div class="alert alert-info">修改盘点 <br />
-                      </div>
-                      <div class="form-group">
-                        <label for="alter_enclosure_name" class="col-sm-3 control-label no-padding-right">修改的盘点:</label>
-                        <div class="col-sm-9">
-                          <select class="form-control" id="alter_enclosure_name" name="name">
-                            <option value="floor3">3楼</option>
-                          </select>
-                        </div>
-                      </div>
-                      
-                      
-                      <div class="form-group">
-                        <label for="enclosure_new_name" class="col-sm-3 control-label no-padding-right">新盘点名称:</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="enclosure_new_name" name="name" placeholder="不填为不修改!" />
-                        </div>
-                      </div>
-                      
-                      
-                      <div class="form-group">
-                        <label for="enclosure_new_name" class="col-sm-3 control-label no-padding-right">新盘点人数:</label>
-                        <div class="col-sm-9">
-                          <input type="text" id="enclosure_new_expectNum" name="name" placeholder="不填为不修改!" />
-                        </div>
-                      </div>
-                      
-                      
-                      <div class="form-group">
-                        <label for="enclosure_spot_method2" class="col-sm-3 control-label no-padding-right">绘制范围:</label>
-                        <div class="col-sm-9">
-                          <div class="col-xs-6">
-                            <select class="form-control" id="enclosure_spot_method2">
-                              <option value="square">方形绘图</option>
-                              <option value="polyline">折线绘图</option>
-                            </select>
-                          </div>
-                          <div class="col-xs-6">
-                            <button type="button" id="start_draw2" class="btn btn-xs btn-danger"> <span id="start_draw_span">开始绘制</span> <i class="ace-icon fa fa-arrow-right icon-on-right"></i> </button>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <div class="col-xs-6 col-xs-push-6">
-                          <input type="submit" class="btn btn-success btn-xs" id="set_enclosure_submit2" value="提交" />
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-                <div class="col-xs-12" style="display:none;" id="EnclosureConcent3">
-                  <div class="row" style="padding-right:10px; height:200px; padding-bottom:20px;">
-                    <form role="form" class="form-horizontal" id="form-validate3">
-                      <div class="alert alert-info">删除盘点 <br />
-                      </div>
-                      
-                      <div class="form-group" id="enclosure_item">
-                        
-                        
-                        
-                      </div>
-                      <div class="form-group">
-                        <div class="col-xs-6 col-xs-push-6">
-                          <button type="button" class="btn btn-success btn-xs" id="enclosure_item_button" >
-                          删除
-                          </button>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-                <div class="col-xs-12" style="display:none;" id="EnclosureConcent2">
-                  <div class="row" style="padding-right:10px; height:200px;">
-                    <form role="form" class="form-horizontal" id="form-validate">
-                      <div class="alert alert-info">查询盘点 <br />
-                      </div>
-                      <div class="form-group">
-                        <label for="electronic-fence-address" class="col-sm-6 control-label no-padding-right">盘点查询:</label>
-                        <div class="col-sm-6">
-                          <select id="electronic-fence-address">
-                            <option value="0">请选择地址</option>
-                            <option value="Floor3">和仲通讯</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div class="form-group">
-                        <div class="col-xs-6 col-xs-push-6">
-                          <button type="button" class="btn btn-success btn-xs" id="electronic-fence-query-button" >
-                          查询
-                          </button>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-                <div class="col-xs-12" style="display:none; " id="EnclosureConcent4">
-                  <div class="row" style="padding-right:10px; padding-top:20px; padding-bottom:20px;">
-                    <div class="alert alert-info">默认盘点 <br />
-                      </div>
-                      
-                      <button id="default_inventory" class="col-lg-12 btn btn-info">默认盘点</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div id="gritter-notice-wrapper" style="position:absolute; right:0; z-index:1001;"></div>
-            <script>
+	</div><!-- /section:basics/sidebar -->
+	<div class="main-content">
+		<div class="main-content-inner">
+			<!-- #section:basics/content.breadcrumbs -->
+			<!-- /section:basics/content.breadcrumbs -->
+			<div class="page-content" style="padding-bottom:0;">
+				<div class="row">
+					<div id="myCanvas">
+						<div class="" id="map_controller_panel" style="position:absolute; top:10px; left:80px; z-index:1000; width:470px;">
+							<div class="btn-group btn-group-xs col-xs-12" id="map_panel_button" style="background:#FFF; border:1px solid #CCC;">
+								<button type="button" class="btn btn-primary disabled"><i class="ace-icon fa fa-tag align-top bigger-125"></i>盘点区域</button>
+								<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneAdd">新增</button>
+								<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneChange">修改</button>
+								<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneDel">删除</button>
+								<button type="button" class="btn btn-primary" id="btnPsZoneShow">显示</button>
+								<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneAddDefault">增加默认</button>
+							</div>
+
+							<div class="map_panel_content col-xs-12" style="background:#FFF; border:1px solid #CCC;">
+
+								<!-- 新增盘点区域 -->
+								<div class="col-xs-12" style="display:none; " id="panelPsZoneAdd">
+									<div class="row" style="padding-right:10px; padding-top:3px;">
+										<form role="form" class="form-horizontal" id="form-validate">
+											<div class="alert alert-info">新增盘点区域 <br />
+											</div>
+											<div class="form-group">
+												<label for="inventory_name" class="col-sm-3 control-label no-padding-right">盘点名称:</label>
+												<div class="col-sm-9">
+													<input type="text" id="inventory_name" name="name" placeholder="" />
+												</div>
+											</div>
+											<div class="form-group">
+												<label for="inventory_peopleNum" class="col-sm-3 control-label no-padding-right">期望人数:</label>
+												<div class="col-sm-9">
+													<input type="text" id="inventory_peopleNum" name="peopleNum" placeholder="" />
+												</div>
+											</div>
+											<div class="form-group">
+												<label for="enclosure_spot_method" class="col-sm-3 control-label no-padding-right">绘制方式:</label>
+												<div class="col-sm-9">
+													<div class="col-xs-6">
+														<select class="form-control" id="enclosure_spot_method">
+															<option value="square">方形绘图</option>
+															<option value="polyline">折线绘图</option>
+														</select>
+													</div>
+													<div class="col-xs-6">
+														<button type="button" id="btnDrawAddPsZone" class="btn btn-xs btn-danger"> <span>开始绘制</span> <i class="ace-icon fa fa-arrow-right icon-on-right"></i> </button>
+													</div>
+												</div>
+											</div>
+											<div class="form-group">
+												<div class="col-xs-6 col-xs-push-6">
+													<input type="submit" class="btn btn-success btn-xs" id="set_enclosure_submit" value="提交" />
+												</div>
+											</div>
+										</form>
+									</div>
+								</div>
+
+
+								<!-- 修改盘点区域 -->
+								<div class="col-xs-12" style="display:none;" id="panelPsZoneChange">
+									<div class="row" style="padding-right:10px; padding-top:3px;">
+										<form role="form" class="form-horizontal" id="form-validate2">
+											<div class="alert alert-info">修改盘点区域<br />
+											</div>
+											<div class="form-group">
+												<label for="alter_enclosure_name" class="col-sm-3 control-label no-padding-right">修改的区域:</label>
+												<div class="col-sm-9">
+													<select class="form-control" id="alter_enclosure_name" name="name"></select>
+												</div>
+											</div>
+
+											<div class="form-group">
+												<label for="enclosure_new_name" class="col-sm-3 control-label no-padding-right">区域名称:</label>
+												<div class="col-sm-9">
+													<input type="text" id="enclosure_new_name" name="name" placeholder="不填为不修改!" />
+												</div>
+											</div>
+
+											<div class="form-group">
+												<label for="enclosure_new_name" class="col-sm-3 control-label no-padding-right">期望人数:</label>
+												<div class="col-sm-9">
+													<input type="text" id="enclosure_new_expectNum" name="name" placeholder="不填为不修改!" />
+												</div>
+											</div>
+
+
+											<div class="form-group">
+												<label for="enclosure_spot_method2" class="col-sm-3 control-label no-padding-right">绘制方式:</label>
+												<div class="col-sm-9">
+													<div class="col-xs-6">
+														<select class="form-control" id="enclosure_spot_method2">
+															<option value="square">方形绘图</option>
+															<option value="polyline">折线绘图</option>
+														</select>
+													</div>
+													<div class="col-xs-6">
+														<button type="button" id="btnDrawChangePsZone" class="btn btn-xs btn-danger"> <span>开始绘制</span> <i class="ace-icon fa fa-arrow-right icon-on-right"></i> </button>
+													</div>
+												</div>
+											</div>
+											<div class="form-group">
+												<div class="col-xs-6 col-xs-push-6">
+													<input type="submit" class="btn btn-success btn-xs" id="set_enclosure_submit2" value="提交" />
+												</div>
+											</div>
+										</form>
+									</div>
+								</div>
+
+								<!-- 删除盘点区域 -->
+								<div class="col-xs-12" style="display:none;" id="panelPsZoneDel">
+									<div class="row" style="padding-right:10px; height:200px; padding-top:3px;">
+										<form role="form" class="form-horizontal" id="form-validate3">
+											<div class="alert alert-info">删除盘点区域 <br />
+											</div>
+
+											<div class="form-group" id="enclosure_item">
+
+											</div>
+											<div class="form-group">
+												<div class="col-xs-6 col-xs-push-6">
+													<button type="button" class="btn btn-success btn-xs" id="enclosure_item_button">删除</button>
+												</div>
+											</div>
+										</form>
+									</div>
+								</div>
+
+								<div class="col-xs-12" style="display:none;" id="panelPsZoneAddDefault">
+									<div class="row" style="padding-right:10px; padding-top:3px; padding-bottom:20px;">
+										<div class="alert alert-info">增加默认盘点区域 <br /></div>
+										<button id="btnAddPsZoneDefault" class="col-lg-12 btn btn-info">增加</button>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="gritter-notice-wrapper" style="position:absolute; right:0; z-index:1001;"></div>
+						<script>
 							'use strict';
 							var hzX = 0, hzY = 0; // 坐标系原点
 							var margin = 0; //外边距
@@ -288,7 +264,6 @@
 								if(typeof hz_zoom !== 'undefined') { /// 存在值
 									zoom = hz_zoom;
 								}
-
 								///alert(storage['hz_is_navigating'] + "  " + Boolean(storage['hz_is_navigating']));
 								hz_is_navigating = Boolean(storage['hz_is_navigating']);
 							}
@@ -297,435 +272,138 @@
 							}
 
 
-							function transformDemo(svg) {
-								var x_meeting_room = 2067;
-								var y_meeting_room = 3563;
-
-								svg.describe('Example Skew - Show effects of skewX and skewY');
-								var str3 = 'translate(' + parseInt(x_meeting_room * real_loc_to_pix * zoom) + ',' + parseInt(y_meeting_room * real_loc_to_pix * zoom) + ')';
-								var g1 = svg.group({
-									transform: str3
-								});
-								svg.text(g1, 0, 0, '会议室', {
-									fontSize: 20,
-									fontFamily: 'Verdana',
-									fill: 'blue'
-								});
-
-								var vice_general_office_x = 2067;
-								var vice_general_office_Y = 8981;
-								var str3 = 'translate(' + parseInt(vice_general_office_x * real_loc_to_pix * zoom) + ',' + parseInt(vice_general_office_Y * real_loc_to_pix * zoom) + ')';
-								var g1 = svg.group({
-									transform: str3
-								});
-								svg.text(g1, 0, 0, '副总办公室', {
-									fontSize: 20,
-									fontFamily: 'Verdana',
-									fill: 'blue'
-								});
-
-								var president_office_x = 2067;
-								var president_office_y = 15609;
-								var str3 = 'translate(' + parseInt(president_office_x * real_loc_to_pix * zoom) + ',' + parseInt(president_office_y * real_loc_to_pix * zoom) + ')';
-								var g1 = svg.group({
-									transform: str3
-								});
-								svg.text(g1, 0, 0, '总裁室', {
-									fontSize: 20,
-									fontFamily: 'Verdana',
-									fill: 'blue'
-								});
-
-								var warehouse1_x = 7947;
-								var warehouse1_y = 15609;
-								var str3 = 'translate(' + parseInt(warehouse1_x * real_loc_to_pix * zoom) + ',' + parseInt(warehouse1_y * real_loc_to_pix * zoom) + ')';
-								var g1 = svg.group({
-									transform: str3
-								});
-								svg.text(g1, 0, 0, '仓库1', {
-									fontSize: 20,
-									fontFamily: 'Verdana',
-									fill: 'blue'
-								});
-
-								var warehouse2_x = 12046;
-								var warehouse2_y = 15609;
-								var str3 = 'translate(' + parseInt(warehouse2_x * real_loc_to_pix * zoom) + ',' + parseInt(warehouse2_y * real_loc_to_pix * zoom) + ')';
-								var g1 = svg.group({
-									transform: str3
-								});
-								svg.text(g1, 0, 0, '仓库2', {
-									fontSize: 20,
-									fontFamily: 'Verdana',
-									fill: 'blue'
-								})
-
-								var log_conference_room_x = 31148;
-								var log_conference_room_y = 14433;
-								var str3 = 'translate(' + parseInt(log_conference_room_x * real_loc_to_pix * zoom) + ',' + parseInt(log_conference_room_y * real_loc_to_pix * zoom) + ')';
-								var g1 = svg.group({
-									transform: str3
-								});
-								svg.text(g1, 0, 0, '大会议室', {
-									fontSize: 20,
-									fontFamily: 'Verdana',
-									fill: 'blue'
-								})
-
-								var wisdom_medical_treatment_x = 34569;
-								var wisdom_medical_treatment_y = 9587;
-								var str3 = 'translate(' + parseInt(wisdom_medical_treatment_x * real_loc_to_pix * zoom) + ',' + parseInt(wisdom_medical_treatment_y * real_loc_to_pix * zoom) + ')';
-								var g1 = svg.group({
-									transform: str3
-								});
-								svg.text(g1, 0, 0, '智慧医疗', {
-									fontSize: 16,
-									fontFamily: 'Verdana',
-									fill: 'blue'
-								})
-
-								var wisdom_park_x = 34309;
-								var wisdom_park_y = 6486;
-								var str3 = 'translate(' + parseInt(wisdom_park_x * real_loc_to_pix * zoom) + ',' + parseInt(wisdom_park_y * real_loc_to_pix * zoom) + ')';
-								var g1 = svg.group({
-									transform: str3
-								});
-								svg.text(g1, 0, 0, '智慧园区', {
-									fontSize: 16,
-									fontFamily: 'Verdana',
-									fill: 'blue'
-								})
-
-								var gym_x = 33678;
-								var gym_y = 3101;
-								var str3 = 'translate(' + parseInt(gym_x * real_loc_to_pix * zoom) + ',' + parseInt(gym_y * real_loc_to_pix * zoom) + ')';
-								var g1 = svg.group({
-									transform: str3
-								});
-								svg.text(g1, 0, 0, '健身房', {
-									fontSize: 16,
-									fontFamily: 'Verdana',
-									fill: 'blue'
-								});
-
-
-								var intelligent_security_x = 31000;
-								var intelligent_security_y = 3101;
-								var str3 = 'translate(' + parseInt(intelligent_security_x * real_loc_to_pix * zoom) + ',' + parseInt(intelligent_security_y * real_loc_to_pix * zoom) + ')';
-								var g1 = svg.group({
-									transform: str3
-								});
-								svg.text(g1, 0, 0, '智慧安防', {
-									fontSize: 16,
-									fontFamily: 'Verdana',
-									fill: 'blue'
-								});
-
-								var intelligent_fire_protection_x = 28403;
-								var intelligent_fire_protection_y = 3101;
-								var str3 = 'translate(' + parseInt(intelligent_fire_protection_x * real_loc_to_pix * zoom) + ',' + parseInt(intelligent_fire_protection_y * real_loc_to_pix * zoom) + ')';
-								var g1 = svg.group({
-									transform: str3
-								});
-								svg.text(g1, 0, 0, '智慧消防', {
-									fontSize: 16,
-									fontFamily: 'Verdana',
-									fill: 'blue'
-								});
-
-								var beidou_xihe_x = 25588;
-								var beidou_xihe_y = 3101;
-								var str3 = 'translate(' + parseInt(beidou_xihe_x * real_loc_to_pix * zoom) + ',' + parseInt(beidou_xihe_y * real_loc_to_pix * zoom) + ')';
-								var g1 = svg.group({
-									transform: str3
-								});
-								svg.text(g1, 0, 0, '北斗羲和', {
-									fontSize: 16,
-									fontFamily: 'Verdana',
-									fill: 'blue'
-								});
-
-
-								var computer_room_x = 19244;
-								var computer_room_y = 4775;
-								var str3 = 'translate(' + parseInt(computer_room_x * real_loc_to_pix * zoom) + ',' + parseInt(computer_room_y * real_loc_to_pix * zoom) + ')';
-								var g1 = svg.group({
-									transform: str3
-								});
-								svg.text(g1, 0, 0, '机房', {
-									fontSize: 20,
-									fontFamily: 'Verdana',
-									fill: 'blue'
-								});
-
-								var reception_x = 19244;
-								var reception_y = 7456;
-								var str3 = 'translate(' + parseInt(reception_x * real_loc_to_pix * zoom) + ',' + parseInt(reception_y * real_loc_to_pix * zoom) + ')';
-								var g1 = svg.group({
-									transform: str3
-								});
-								svg.text(g1, 0, 0, '前台', {
-									fontSize: 20,
-									fontFamily: 'Verdana',
-									fill: 'blue'
-								});
-							}
-
-
-
-
 							$(function () {
 
-								//全局初始化变量
+								/**
+								 * 全局初始化变量
+								 * 	zoomCallBack 	缩放需要执行的临时函数
+								 * 	ps_zone_data  		盘点区域临时数据
+								 */
+								var	zoomCallBack = [], ps_zone_data;
 
-
-
-								/*
-									param cloneMap  克隆的基础地图
-									      zoomFnAfter   缩放需要执行的函数
-										  zoom_temporary_fn 缩放需要执行的临时函数
-										  enclosure_temporary  电子围栏临时函数
-									 
-								*/
-
-
-								var  
-									zoomFnAfter = [],
-									zoom_temporary_fn = [],
-									enclosure_temporary;
-									 
-									 
-								
-								
-								
-								//初始化对象
-								function init(){
-									//存运行函数的
-									this.stopFn = [];
-								}
-								/*
-									添加格式
-									1. (函数)
-									2. (对象,函数)
-									3. (函数,参数)
-									4. (对象,函数,参数)    (obj,fn,[param1,param2])
-									
-								*/
-								init.prototype.add = function(){
-									
-									var args = [].slice.call(arguments);
-									this.stopFn.push(args);
-								};
-								init.prototype.empty = function(){
-									this.stopFn = [];
-								};
-								init.prototype.run = function(){
-									
-									var stopFnLength = this.stopFn.length;
-									var current_item = null;
-									if(stopFnLength <= 0){
-										return false;
-									}
-
-									while(current_item = this.stopFn.pop()){
-										this.distribution(current_item);
-									}
-								};
-								init.prototype.distribution = function(param){
-									var param_length = param.length;
-									switch (param_length){
-										case 0:
-											param();
-											break;
-										case 1:
-											param[0]();
-											break;
-										case 2:
-											this.stopFn_param_2(param[0],param[1]);
-											break;
-										case 3:	
-											this.stopFn_param_3(param[0],param[1],param[2]);
-											break;
-									}
-								};
-								init.prototype.stopFn_param_2 = function(param1,param2){
-									console.log('param1',param2);
-									if(typeof param1 === 'function'){
-										if(param2 instanceof Array)
-										{
-											param1.apply(window,param2);
-											console.log('this12312312',window);
-										}else{
-											param1.apply(window,[param2]);
-										}
-										
-									}else{
-										param2.apply(param1);
-									}
-								};
-								
-								init.prototype.stopFn_param_3 = function(param1,param2,param3){
-										if(param3 instanceof Array)
-										{
-											param2.apply(param1,param3);
-										}else{
-											param2.apply(param1,[param3]);
-										}
-								};
-								
-								
-								/*	初始化函数结束 */
-
-								
-								/*全局初始化对象*/
-								var global_init = new init();
-
-
-								//以下变量可用可不用
-
+								var global_init = new Init();
 								var $svg_map_base = $('#svg_map_base');
 								var $svg_event = $('#svg_event');
 								var $document = $(document);
+								var hzCanvas = $('#myCanvas');
 
-
-								//缩放要调用的函数
+								// 缩放要调用的函数
 								function people_move_zoom() {
 									var hz_user_xy_length = hz_user_xy.length;
 									for(var i = 0; i < hz_user_xy_length; i++) {
-										//zoom:地图缩放级别  
-										//   hz_people_goto 把人放到对应位置函数
-										hz_people_goto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
-											hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
+										hzPeopleGoto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
+												hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
 									}
 								}
 
-								zoomFnAfter.push(people_move_zoom);
-
-								//电子围栏查询缩放附加函数				
-								function enclosure_temporary_fn() {
-									draw_enclosure(enclosure_temporary);
+								// 盘点区域查询缩放附加函数
+								function draw_ps_zone_fn() {
+									drawPsZone(ps_zone_data);
 								}
 
-								//地图标识
+								// 地图标识
 								var $svg_sign = $('#svg_sign');
 								$svg_sign.svg();
-								var svg_sign_svg = $svg_sign.svg('get');
-								transformDemo(svg_sign_svg);
+								var svgRoom = $svg_sign.svg('get');
+								showRoomName(svgRoom);
 
-								//地图缩放
-								//地图缩放函数
-								//鼠标滚轮缩放svg图
-								//localStorage.clear();
+								// 地图缩放
+								// 鼠标滚轮缩放svg图
+								$svg_event.ready(function () {
+									//获取svg图对象
+									var mapSign = $svg_map_base;
 
-								$svg_event.ready(
-									function () {
-										//获取svg图对象
-										var mapSign = $svg_map_base;
-										//设置缩放速度   比例缩放
-										var zoomSpeed = 0.05;
+									// 移动地图到 画布 的中央
+									hzX = (hzCanvas.width() - $svg_map_base.width()) / 2;
+									hzY = (hzCanvas.height() - $svg_map_base.height()) / 2;
+									$svg_map_base.css({
+										left: hzX + 'px',
+										top: hzY + 'px'
+									});
+									
+									//设置缩放速度   比例缩放
+									var zoomSpeed = 0.05;
 
-										// using the event helper
-										$svg_event.on('mousewheel', addMousewheelEvent);
+									// using the event helper
+									$svg_event.on('mousewheel', addMousewheelEvent);
 
-										function addMousewheelEvent(event, delta, deltaX, deltaY) {
-											//svg图的最小 最大  X和Y
-											var mapMinX, mapMaxX, mapMinY, mapMaxY;
-											var mapOffset = mapSign.offset();
-											var mapOuterWidth = mapSign.outerWidth();
-											var mapOuterHeight = mapSign.outerHeight();
+									function addMousewheelEvent(event, delta) {	// , deltaX, deltaY
+										//svg图的最小 最大  X和Y
+										var mapMinX, mapMaxX, mapMinY, mapMaxY;
+										var mapOffset = mapSign.offset();
+										var mapOuterWidth = mapSign.outerWidth();
+										var mapOuterHeight = mapSign.outerHeight();
 
-											mapMinX = mapOffset.left;
-											mapMaxX = mapOffset.left + mapOuterWidth;
-											mapMinY = mapOffset.top;
-											mapMaxY = mapOffset.top + mapOuterHeight;
+										mapMinX = mapOffset.left;
+										mapMaxX = mapOffset.left + mapOuterWidth;
+										mapMinY = mapOffset.top;
+										mapMaxY = mapOffset.top + mapOuterHeight;
 
-											if(event.pageX > mapMinX && event.pageX < mapMaxX && event.pageY > mapMinY && event.pageY < mapMaxY) {
+										if(event.pageX > mapMinX && event.pageX < mapMaxX && event.pageY > mapMinY && event.pageY < mapMaxY) {
+											// 取消默认事件
+											event.preventDefault();
+											
+											// 计算速度
+											var mapHeight, mapWidth, mapTopBorder, mapLeftBorder, mapTop, mapLeft, speedTop, speedLeft;
+											mapHeight = mapSign.height();
+											mapWidth = mapSign.width();
 
-												/*取消默认事件*/
-												event.preventDefault();
-												/*计算速度*/
+											mapTopBorder = parseInt(mapSign.css('border-top-width'));
+											mapLeftBorder = parseInt(mapSign.css('border-left-width'));
 
-												var mapHeight, mapWidth, mapTopBorder, mapLeftBorder, mapTop, mapLeft, speedTop, speedLeft;
-												/*#map 的基本参数*/
-												mapHeight = mapSign.height();
-												mapWidth = mapSign.width();
-
-												mapTopBorder = parseInt(mapSign.css('border-top-width'));
-												mapLeftBorder = parseInt(mapSign.css('border-left-width'));
-
-												mapTop = parseInt(mapSign.css('top'));
-												mapLeft = parseInt(mapSign.css('left'));
-
-
-												// 计算缩放速度  单独的top  或  left
-
-												if(delta == 1) {
-													speedTop = parseInt(zoomSpeed * mapHeight);
-													console.log('speedTop', speedTop);
-													speedLeft = parseInt(zoomSpeed * mapWidth);
-												}
-												else {
-													speedTop = -parseInt(zoomSpeed * mapHeight);
-													speedLeft = -parseInt(zoomSpeed * mapWidth);
-												}
+											mapTop = parseInt(mapSign.css('top'));
+											mapLeft = parseInt(mapSign.css('left'));
 
 
-												// 更改后的高
-												var resultHeight = mapHeight + (speedTop * 2);
-												var resultWidth = mapWidth + (speedLeft * 2);
+											// 计算缩放速度  单独的top  或  left
+
+											if(delta == 1) {
+												speedTop = parseInt(zoomSpeed * mapHeight);
+												console.log('speedTop', speedTop);
+												speedLeft = parseInt(zoomSpeed * mapWidth);
+											} else {
+												speedTop = -parseInt(zoomSpeed * mapHeight);
+												speedLeft = -parseInt(zoomSpeed * mapWidth);
+											}
 
 
-												/*鼠标在图内距离*/
-												var currentMouseTop = event.pageY - mapMinY - mapTopBorder;
-												var currentMouseLeft = event.pageX - mapMinX - mapLeftBorder;
-												/*缩放后再图内的距离*/
-												var mouseTop = Math.round(currentMouseTop - (currentMouseTop / mapHeight * resultHeight));
-												var mouseLeft = Math.round(currentMouseLeft - (currentMouseLeft / mapWidth * resultWidth));
-
-												/*计算svg偏离距离*/
-												/*svg图的left*/
-
-												hzY = mapTop + mouseTop;
-												hzX = mapLeft + mouseLeft;
-
-												/*保存缩放比例*/
-												zoom = resultWidth / map_w;
-												storage['hz_zoom'] = zoom;
-
-												console.log('margin', margin, 'resultHeight', resultHeight, 'resultWidth', resultWidth);
-												zoomFn(resultHeight, resultWidth);
-
-												$svg_map_base.css({
-													left: hzX + 'px',
-													top: hzY + 'px'
-												});
-
-												var zoomFnAfter_length = zoomFnAfter.length;
-												if(zoomFnAfter_length > 0) {
-
-													for(var zoomFnAfter_for = 0; zoomFnAfter_for < zoomFnAfter_length; zoomFnAfter_for++) {
-														zoomFnAfter[zoomFnAfter_for]();
-													}
-												}
+											// 更改后的高
+											var resultHeight = mapHeight + (speedTop * 2);
+											var resultWidth = mapWidth + (speedLeft * 2);
 
 
-												var zoom_temporary_fn_length = zoom_temporary_fn.length;
-												if(zoom_temporary_fn_length > 0) {
-													for(var zoom_temporary_fn_for = 0; zoom_temporary_fn_for < zoom_temporary_fn_length; zoom_temporary_fn_for++) {
-														zoom_temporary_fn[zoom_temporary_fn_for]();
-													}
-												}
+											// 鼠标在图内距离
+											var currentMouseTop = event.pageY - mapMinY - mapTopBorder;
+											var currentMouseLeft = event.pageX - mapMinX - mapLeftBorder;
+											// 缩放后再图内的距离
+											var mouseTop = Math.round(currentMouseTop - (currentMouseTop / mapHeight * resultHeight));
+											var mouseLeft = Math.round(currentMouseLeft - (currentMouseLeft / mapWidth * resultWidth));
 
-												//hz_map_zoom(margin, margin, resultHeight , resultWidth);
-												//hz_change_item_in_map();
+											// 计算svg偏离位置
+											hzY = mapTop + mouseTop;
+											hzX = mapLeft + mouseLeft;
 
-												/*计算图片相对父元素位置*/
+											// 保存缩放比例
+											zoom = resultWidth / map_w;
+											storage['hz_zoom'] = zoom;
+
+											console.log('margin', margin, 'resultHeight', resultHeight, 'resultWidth', resultWidth);
+											zoomFn(resultHeight, resultWidth);
+
+											$svg_map_base.css({
+												left: hzX + 'px',
+												top: hzY + 'px'
+											});
+
+											people_move_zoom();
+
+											for(var j = 0; j < zoomCallBack.length; j++) {
+												zoomCallBack[j]();
 											}
 										}
 									}
-								);
-
-
+								});
+								
 								// 缩放函数
 								zoomFn(map_h * zoom, map_w * zoom);
 
@@ -736,9 +414,19 @@
 										width: width + 'px'
 									}, 'fast', 'swing');
 									$each_map_layer.stop(false, true);
-									//地图标识;
-									svg_sign_svg.clear();
-									transformDemo(svg_sign_svg);
+
+									// 缩放 div 中 svg 的 宽和高
+									$each_map_layer.each(function () {
+										var divSvg = $(this).find('svg');
+										if(divSvg) {
+											divSvg.width($(this).width() + 10);
+											divSvg.height($(this).height() + 10);
+										}
+									});
+
+									// 地图标识;
+									svgRoom.clear();
+									showRoomName(svgRoom);
 								}
 
 
@@ -749,10 +437,13 @@
 								function addMapMoveEvent() {
 									$svg_event.on('mousedown', mapMoveMousedownFn);
 								}
-								//事件函数
+								// 事件函数
 								function mapMoveMousedownFn(e) {
 									mapMoveMousedownX = e.pageX;
 									mapMoveMousedownY = e.pageY;
+
+									currentX = parseInt(hzX);
+									currentY = parseInt(hzY);
 
 									$document.on('mousemove', mapMoveMousemoveFn);
 									$document.on('mouseup', mapMoveMouseupFn);
@@ -760,7 +451,6 @@
 								}
 
 								function mapMoveMousemoveFn(e) {
-									var svg_map_base_offset = $svg_map_base.offset();
 									currentX = e.pageX - mapMoveMousedownX + parseInt(hzX);
 									currentY = e.pageY - mapMoveMousedownY + parseInt(hzY);
 
@@ -777,80 +467,28 @@
 									$document.off('mouseup', mapMoveMouseupFn);
 
 								}
-
-								function removeMapMoveEvent() {
-									$svg_event.off('mousedown', mapMoveMousedownFn);
-								}
-
-
 								addMapMoveEvent();
 
+								// svg地图 控制面板
+								$("#map_panel_button").find('button').on('click', function () {
+									var btn = $(this);
 
-								/*
-							param $this obg   要检查的对象   
-							      data  arr  [0]位X坐标   [1]为Y坐标
-						*/
-								function test_range($this, data) {
-
-									var mapMinX, mapMaxX, mapMinY, mapMaxY;
-									var mapOffset = $this.offset();
-									var mapOuterWidth = $this.outerWidth();
-									var mapOuterHeight = $this.outerHeight();
-
-									mapMinX = mapOffset.left;
-									mapMaxX = mapOffset.left + mapOuterWidth;
-									mapMinY = mapOffset.top;
-									mapMaxY = mapOffset.top + mapOuterHeight;
-
-									if(data[0] > mapMinX && data[0] < mapMaxX && data[1] > mapMinY && data[1] < mapMaxY) {
-										return true;
+									// added by wxg 2018-01-02
+									if (btn.attr('id') === 'btnPsZoneShow'){
+										if(btn.text() === '隐藏') {	// 隐藏 盘点区域
+											btn.text('显示');
+											clearPsZone();
+										} else {	// 显示 盘点区域
+											btn.text('隐藏');
+											showPsZone();
+										}
+										return;
 									}
-									return false;
-								}
 
-
-								function start_draw() {
-									var $map = $('#map');
-									var $svg_path = $('#svg_path');
-									var $svg_path_offset = $svg_path.offset();
-									$svg_path.svg();
-									var $svg = $svg_path.svg('get');
-									// 画图位置数据
-									var drawLineData = [];
-									// 相对于svg图数据
-
-									$svg_path.on('click', function (e) {
-										var pageX = e.pageX;
-										var pageY = e.pageY;
-
-										if(!test_range($map, [pageX, pageY])) return false;
-
-										var map_path_line = [];
-										map_path_line[0] = e.pageX - $svg_path_offset.left - parseInt($svg_path.css('border-left-width'));
-										map_path_line[1] = e.pageY - $svg_path_offset.top - parseInt($svg_path.css('border-top-width'));
-										drawLineData.push(map_path_line);
-										drawLine($svg, drawLineData);
-									})
-								}
-
-								function drawLine(svg_obj, LineData) {
-									svg_obj.polyline(LineData, {
-										fill: 'none',
-										stroke: 'blue',
-										strokeWidth: 4
-									});
-								}
-
-
-								//svg地图 控制面板
-								$("#map_panel_button button").on('click', function () {
-									var $this = $(this);
-
-									if($this.hasClass('active')) {
-										map_button_slide_up($this);
-									}
-									else {
-										map_button_slide_down($this)
+									if(btn.hasClass('active')) {
+										map_button_slide_up(btn);
+									} else {
+										map_button_slide_down(btn)
 									}
 								});
 
@@ -858,7 +496,7 @@
 								function map_button_slide_down($this) {
 									$this.addClass('active');
 									$this.siblings().removeClass('active');
-									var $target = $($this.attr('hz_target'));
+									var $target = $($this.attr('data-hz-target'));
 									$target.siblings().slideUp('100', function () {
 										$target.slideDown();
 									})
@@ -866,48 +504,41 @@
 
 								function map_button_slide_up($this) {
 									$this.removeClass('active');
-									var $target = $($this.attr('hz_target'));
+									var $target = $($this.attr('data-hz-target'));
 									$target.slideUp();
 								}
 
-								function enclosure_set_clear_fn(){
-									$("#start_draw").find('span').text('开始绘制');
-									$('#enclosure_spot_method').removeAttr('disabled');
-								}
 
+								var psZoneAdd = new HzDrawTools();
 
-								var enclosure1 = new enclosure();
-
-								function text_change($this){
+								function changeTextPsZoneAdd($this){
 									var $span = $this.find('span');
 									var buttonText = $span.text();
-									var $method_select = $('#enclosure_spot_method');
-									if($('#enclosure_spot_method').val() === 'polyline') {
-
+									var shape = $('#enclosure_spot_method');
+									if(shape.val() === 'polyline') {
 										if(buttonText === '清空绘制') {
 											$span.text('开始绘制');
-											$method_select.removeAttr('disabled');
-										}
-										else {
+											shape.removeAttr('disabled');
+										} else {
 											$span.text('清空绘制');
-											$method_select.attr('disabled', 'disabled');
+											shape.attr('disabled', 'disabled');
 										}
 									}
+
 									// 方形绘图
-									if($('#enclosure_spot_method').val() === 'square') {
+									if(shape.val() === 'square') {
 										if(buttonText === '清空绘制') {
 											$span.text('开始绘制');
-											$method_select.removeAttr('disabled');
-										}
-										else {
+											shape.removeAttr('disabled');
+										} else {
 											$span.text('清空绘制');
-											$method_select.attr('disabled', 'disabled');
+											shape.attr('disabled', 'disabled');
 										}
 									}
 								}
-								
 
-								$("#start_draw").on('click', function () {
+
+								$("#btnDrawAddPsZone").on('click', function () {
 
 									var $this = $(this);
 									var $span = $this.find('span');
@@ -917,38 +548,36 @@
 
 										if(buttonText === '清空绘制') {
 											global_init.run();
-										}
-										else {
+										} else {
 											$span.text('清空绘制');
-											
+
 											global_init.run();
-											global_init.add(enclosure1,enclosure1.remove_event);
-											global_init.add(text_change,$this);
-											 
+											global_init.add(psZoneAdd,psZoneAdd.remove_event);
+											global_init.add(changeTextPsZoneAdd,$this);
+
 											$method_select.attr('disabled', 'disabled');
-											enclosure1.polyline();
+											psZoneAdd.polyline();
 										}
 									}
 									// 方形绘图
 									if($method_select.val() === 'square') {
 										if(buttonText === '清空绘制') {
 											global_init.run();
-										}
-										else {
+										} else {
 											$span.text('清空绘制');
 											global_init.run();
-											global_init.add(enclosure1,enclosure1.remove_square);
-											global_init.add(text_change,$this); 
+											global_init.add(psZoneAdd,psZoneAdd.remove_square);
+											global_init.add(changeTextPsZoneAdd,$this);
 
 											$method_select.attr('disabled', 'disabled');
-											enclosure1.square();
+											psZoneAdd.square();
 										}
 									}
 								});
 
-								var enclosure2 = new enclosure();
+								var psZoneChange = new HzDrawTools();
 
-								function text_change2($this){
+								function changeTextPsZoneChange($this){
 									var $span = $this.find('span');
 									var buttonText = $span.text();
 									var $method_select = $('#enclosure_spot_method2');
@@ -957,8 +586,7 @@
 										if(buttonText === '清空绘制') {
 											$span.text('开始绘制');
 											$method_select.removeAttr('disabled');
-										}
-										else {
+										} else {
 											$span.text('清空绘制');
 											$method_select.attr('disabled', 'disabled');
 										}
@@ -968,15 +596,14 @@
 										if(buttonText === '清空绘制') {
 											$span.text('开始绘制');
 											$method_select.removeAttr('disabled');
-										}
-										else {
+										} else {
 											$span.text('清空绘制');
 											$method_select.attr('disabled', 'disabled');
 										}
 									}
 								}
 
-								$("#start_draw2").on('click', function () {
+								$("#btnDrawChangePsZone").on('click', function () {
 
 									var $this = $(this);
 									var $span = $this.find('span');
@@ -985,207 +612,163 @@
 									if($method_select.val() === 'polyline') {
 										if(buttonText === '清空绘制') {
 											global_init.run();
-										}
-										else {
+										} else {
 											$span.text('清空绘制');
-											
 											global_init.run();
-											global_init.add(enclosure2,enclosure2.remove_event);
-											global_init.add(text_change2,$this);
+											global_init.add(psZoneChange,psZoneChange.remove_event);
+											global_init.add(changeTextPsZoneChange,$this);
 
 											$method_select.attr('disabled', 'disabled');
-											enclosure2.polyline();
+											psZoneChange.polyline();
 										}
 									}
 									//方形绘图
 									if($method_select.val() === 'square') {
 										if(buttonText === '清空绘制') {
 											global_init.run();
-										}
-										else {
+										} else {
 											$span.text('清空绘制');
-											
-											 global_init.run();
-											global_init.add(enclosure2,enclosure2.remove_square);
-											global_init.add(text_change2,$this); 
-
+											global_init.run();
+											global_init.add(psZoneChange,psZoneChange.remove_square);
+											global_init.add(changeTextPsZoneChange,$this);
 											$method_select.attr('disabled', 'disabled');
-											enclosure2.square();
+											psZoneChange.square();
 										}
 									}
 								});
-								
-								
-								$('#default_inventory').click(function(){
+
+
+								$('#btnAddPsZoneDefault').click(function(){
 									var result = ajaxJsonRequest('/lbs/people_stat_cfg_add_default', {});
 									alert(result.msg);
 								});
-								
-								
+
+								// 修改盘点区域
 								$('#set_enclosure_submit2').on('click', function () {
-									var alter_enclosure_name = $('#alter_enclosure_name').val();
+									var oName = $('#alter_enclosure_name');
+									var psZoneId = oName.val();
 									var enclosure_new_expectNum = $('#enclosure_new_expectNum').val();
-									var alter_enclosure_text = $("#alter_enclosure_name").find("option:selected").text();
-									var enclosure_new_name = $('#enclosure_new_name').val();
+									var psZoneOldName = oName.find("option:selected").text();
+									var psZoneNewName = $('#enclosure_new_name').val();
 
-									var enclosure2_points = enclosure2.points;
+									var psZoneChange_points = psZoneChange.points;
 
-									console.log('enclosure2_points', enclosure2_points);
-									if(alter_enclosure_name == 'undefined') {
-										alert('该围栏不能修改!');
+									console.log('psZoneChange_points', psZoneChange_points);
+									if(psZoneId == 'undefined') {
+										alert('该盘点区域不能修改!');
 										return false;
 									}
 
-									if(alter_enclosure_name == 0) {
-										alert('请选择围栏!');
+									if(psZoneId == 0) {
+										alert('请选择盘点区域!');
 										return false;
 									}
-									if(enclosure2.points[0] == undefined || enclosure2.points[0] != enclosure2.points[enclosure2.points.length - 1]) {
+									if(psZoneChange.points.length > 0 && psZoneChange.points[0] != psZoneChange.points[psZoneChange.points.length - 1]) {
 										alert('您没有画图');
 										return false;
 									}
 
-									var rusultPoints = [];
+									var pointsToServer = [];
 
-									var points_length = enclosure2_points.length - 1;
+									var points_length = psZoneChange_points.length - 1;
 									for(var i = 0; i < points_length; i++) {
-										var temporaryArr = {};
-										temporaryArr.x = mmConversion(enclosure2.points[i][0]);
-										temporaryArr.y = mmConversion(enclosure2.points[i][1]);
-										rusultPoints.push(temporaryArr);
-										temporaryArr = null;
+										var pt = {
+											x: coordScreenToMap(psZoneChange.points[i][0]),
+											y: coordScreenToMap(psZoneChange.points[i][1])
+										};
+										pointsToServer.push(pt);
 									}
 
-									var data = {};
+									var data = {
+										id: parseInt(psZoneId)
+									};
 
-									data.id = parseInt(alter_enclosure_name);
-									if(enclosure_new_name == '') {
-										data.name = alter_enclosure_text;
+									if(psZoneNewName == '') {
+										data.name = psZoneOldName;
+									} else {
+										data.name = psZoneNewName;
 									}
-									else {
-										data.name = enclosure_new_name;
-									}
-									
+
 									if(enclosure_new_expectNum != ''){
 										data.expectNum = enclosure_new_expectNum;
 									}
-									
-									data.points = rusultPoints;
 
-									console.log('datadta22222222222222222', data);
+									if (pointsToServer.length > 0)
+										data.points = pointsToServer;
+
+									console.log('set_enclosure_submit2, send data=', data);
 									var result = ajaxJsonRequest('/lbs/people_stat_cfg_chg', {data:[data]});
 
 									if(result.errorCode === 0) {
 										query_electronic();
-										$('#start_draw2').click();
+										$('#btnDrawChangePsZone').click();
+										showPsZone();
 									}
 									alert(result.msg);
-
 									return false;
 								});
-								
 
 								// param object obj jquery对象
-								function enclosure() {
-
-									//坐标资料格式 [[1,2],[3,4]]
+								function HzDrawTools() {
+									// 坐标资料格式 [[x,y], ...]]
 									this.points = [];
-									//操作事件的对象(jquery)
+									// 操作事件的对象(jquery)
 									this.$event = $('#enclosureEvent');
-									//临时线函数
-									this.$svg_temporary_line = $('#enclosureEvent');
+									// 临时线函数
+									this.$svg_temporary_line = this.$event;
 
-									//画板对象(jquery)
-									this.$board = $('#svg_path');
+									// 画板对象(jquery)
+									this.$board = $('#svg-people-stat-zone-draft');
 									this.$board.svg();
 									this.$board_svg = this.$board.svg('get');
-									//地图对象
+									// 地图对象
 									this.$map = $('#svg_image');
 
-									//鼠标移动坐标
+									// 鼠标移动坐标
 									this.mousemove_points = [];
-									//直角是否启动判断键值
+									// 直角是否启动判断键值
 									this.right_angle_key = 17;
-									//demo坐标位置
+									// demo坐标位置
 									this.dotted_line = [];
-									//热点成立  其他不成立判断
-									this.is_spot = false;
 
-
-									//是否是斜线判断
+									// 是否是斜线判断
 									this.is_coordinate_offset = false;
-									//需要的html对象
+									// 需要的html对象
 									this.htmlObj = {
-										//画线开始图标
+										// 画线开始图标
 										line_start: '#line_start',
-										line_switch: '#start_draw'
+										line_switch: '#btnDrawAddPsZone'
 									};
-									/*线样式*/
+									// 线样式
 									this.line_style = {
-										//演示线样式
-										demo_line: {
-											fill: 'none',
-											stroke: 'blue',
-											strokeWidth: 1
-										},
-										//实际线样式
-										result_line: {
-											fill: 'none',
-											stroke: 'blue',
-											strokeWidth: 4
-										}
+										// 画线过程样式
+										demo_line: {fill: 'none', stroke: 'blue', strokeWidth: 1},
+										// 实际线样式
+										result_line: {fill: 'none', stroke: 'blue', strokeWidth: 4}
 									};
-									/*热点大小*/
+									// 热点大小
 									this.hotspot_size = {
 										width: 20,
 										height: 20
 									};
-									/*移动需要画的虚线*/
+									// 移动需要画的虚线
 									this.spot_move_line = [];
-									/*热点 线坐标*/
+									// 热点坐标
 									this.hotspot_new_position = [];
-									/*扫尾*/
-									//里面只存函数扫尾函数
-									this.map_up_cache = [];
-									//本函数有问题需解决  暂时用笨办法
-									this.map_up_implement = function () {
-										var map_up_cache_length = this.map_up_cache.length;
-										for(var i = 0; i < map_up_cache_length; i++) {
-											console.log(this.map_up_cache[i]);
-											this.map_up_cache[i]();
-										}
-										this.map_up_cache = [];
-									};
 
 
-									this.__set = function (name, value) {
-										this[name] = value;
-									};
+									/**
+									 * 移除事件绑定
+									 * param
+									 * is_board_clear				是否清除画板，默认为true，清除画板
+									 * is_enclosureEvent_display	是否不接收事件，默认true，不接收
+									 */
+									this.remove_event = function (is_board_clear, is_enclosureEvent_display) {
+										// 默认清除画板
+										is_board_clear = (is_board_clear !== false);
+										is_enclosureEvent_display = (is_enclosureEvent_display !== false);
 
-
-									this.again_map = function () {
-										this.remove_event();
-										this.polyline();
-
-									};
-
-
-									this.remove_polyline = function () {
-										this.remove_hotspot();
-										this.remove_event();
-									};
-
-									//移除事件绑定    
-									/*
-							param boolear is_result 是否生成结果
-							*/
-									this.remove_event = function (is_board_clear, is_enclosureEvent_dispaly) {
-
-										//默认清除画板
-										is_board_clear = (is_board_clear === false) ? false : true;
-										is_board_clear = (is_enclosureEvent_dispaly === false) ? false : true;
-
-										if(is_board_clear) $('#enclosureEvent').css('display', 'none');
+										if(is_enclosureEvent_display) $('#enclosureEvent').css('display', 'none');
 										var $window = $(window);
 										$window.off('keydown', this.right_angle_package);
 										$window.off('keyup', this.keyup_fn);
@@ -1194,12 +777,12 @@
 
 										$(this.htmlObj.line_start).off('click', this.line_end);
 
-										//清楚事件线
+										// 清除临时线
 										this.svgPolyline([], {}, this.$svg_temporary_line);
-										//是否清楚画板线
+										// 是否清除画板
 										if(is_board_clear) {
 											this.svgPolyline([], {}, this.$board);
-											$('#svg_map_base > .enclosure_spot').remove();
+											$('#svg_map_base').find('.enclosure_spot').remove();
 										}
 
 
@@ -1227,13 +810,11 @@
 
 										_window.on('keyup', {
 											_this: _this
-										}, this.keyup_fn)
-
+										}, this.keyup_fn);
 
 										this.$event.on('click', {
 											_this: _this
 										}, this.line_click_package);
-
 
 										this.$event.on('mousemove', {
 											_this: _this
@@ -1242,13 +823,11 @@
 										$(this.htmlObj.line_start).on('click', {
 											_this: _this
 										}, this.line_end);
-
 									};
 
 									this.line_click_package = function (e) {
 										e.data._this.line_click(e);
 									};
-
 
 									//划线函数
 									this.line_click = function (e) {
@@ -1274,29 +853,25 @@
 												//
 												this.points.push(this.dotted_line[1]);
 											}
-										}
-										else {
+										} else {
 											this.points.push(map_path_line);
 										}
 
-
-										map_path_line = [];
 										var points_length = this.points.length;
 
 										if(points_length > 1) this.create_hotspot($('#svg_map_base'), this.points[points_length - 1], points_length - 1);
 										this.svgPolyline(this.points, this.line_style.result_line, this.$board);
 										console.log('square_mouse_up', this.points);
 									};
-									//按键抬起函数
+									// 按键抬起函数
 									this.keyup_fn = function (e) {
-
 										if(e.which === e.data._this.right_angle_key && e.data._this.mousemove_points.length > 1) {
 											e.data._this.is_coordinate_offset = false;
 											e.data._this.svgPolyline(e.data._this.mousemove_points, e.data._this.line_style.demo_line);
 										}
 									};
 
-									//直线函数包
+									// 直线函数包
 									this.right_angle_package = function (e) {
 										if(e.data._this.mousemove_points.length > 1 && e.which === e.data._this.right_angle_key) {
 											//是否直线函数判断  鼠标移动也直线函数
@@ -1331,18 +906,17 @@
 										];
 										if(this.is_coordinate_offset) {
 											this.right_angle(this.mousemove_points[1]);
-										}
-										else {
+										} else {
 											this.svgPolyline(this.mousemove_points, this.line_style.demo_line);
 										}
 									};
-									//围栏结束
+									// 围栏结束
 									this.line_end = function (e) {
-										/*_this 本函数的对象*/
+										// _this 本函数的对象
 										var _this = e.data._this;
 										var points_length = _this.points.length;
 
-										//this 判定该函数的对象 
+										// this 判定该函数的对象
 										$(this).css({
 											top: 0,
 											left: 0,
@@ -1357,11 +931,8 @@
 
 										_this.svgPolyline(_this.points, _this.line_style.result_line, _this.$board);
 										_this.remove_event(false, false);
-
-										//结束绘制
-										//$(_this.htmlObj.line_switch).find('span').text('清空绘制');
 									};
-									//方框
+									// 方框
 									this.square = function () {
 										//打开事件绑定div
 										$('#enclosureEvent').css('display', 'block');
@@ -1376,15 +947,15 @@
 										return false;
 									};
 									this.square_mouse_down = function (e) {
-										//第一个点
-										var spot0 = [];
+										// 第一个点
+										var pt = [];
 										var $map = this.$map;
-										var mapObjOffset = $map.offset();
+										var mapOffset = $map.offset();
 										this.points = [];
 
-										spot0[0] = e.pageX - mapObjOffset.left - parseInt($map.css('border-left-width'));
-										spot0[1] = e.pageY - mapObjOffset.top - parseInt($map.css('border-top-width'));
-										this.points[0] = spot0;
+										pt[0] = e.pageX - mapOffset.left - parseInt($map.css('border-left-width'));
+										pt[1] = e.pageY - mapOffset.top - parseInt($map.css('border-top-width'));
+										this.points[0] = pt;
 										var $window = $(window);
 										$window.on('mousemove', {
 											_this: this
@@ -1400,8 +971,8 @@
 									};
 									this.square_mouse_move = function (e) {
 										var spot1 = [],
-											spot2 = [],
-											spot3 = [];
+												spot2 = [],
+												spot3 = [];
 										var $map = this.$map;
 										var mapObjOffset = $map.offset();
 										/*移动原点*/
@@ -1438,33 +1009,30 @@
 										var points_length = this.points.length;
 										if(points_length < 2) {
 											this.points = [];
-										}
-										else {
+										} else {
 											for(var i = 1; i < points_length; i++) {
 												if(i < (points_length - 1)) {
 													this.create_hotspot($('#svg_map_base'), this.points[i], i);
-												}
-												else {
+												} else {
 													this.create_hotspot($('#svg_map_base'), this.points[i], i, true);
 												}
 											}
 										}
-										console.log('square_mouse_up', this.points);
+										console.log('square_mouse_up', this.points, 'e=', e);
 									};
 
-
-									/*创建热点*/
-									/*
-							param $parent 父div jquery 对象
-							position 坐标   left top 值
-							idnex 索引  地位在points 中的位置
-							is_end_spot boolear 是否是尾点
-							
-							*/
+									/**
+									 * 创建热点
+									 *
+									 * $parent 				父div jquery 对象
+									 * position 			坐标   left top 值
+									 * index 				索引  坐标在points 中的位置
+									 * is_end_spot boolean 	是否是尾点
+									 */
 									this.create_hotspot = function ($parent, position, index, is_end_spot) {
 										//创建对象的类
 										var hotspot_class = 'enclosure_spot';
-										var is_end_spot = is_end_spot || false;
+										is_end_spot = is_end_spot || false;
 
 										var hotspot_left = position[0] - Math.round((this.hotspot_size.width) / 2);
 										var hotspot_top = position[1] - Math.round((this.hotspot_size.height) / 2);
@@ -1473,7 +1041,7 @@
 										$create_hotspot.addClass(hotspot_class);
 
 										$create_hotspot.attr('index', index);
-										//创建尾点标记
+										// 创建尾点标记
 										if(is_end_spot) $create_hotspot.attr('is_end_spot', 1);
 
 										$create_hotspot.css({
@@ -1492,18 +1060,15 @@
 										var _this = e.data._this;
 										_this.hotspot_mouse_down(e, this);
 										return false;
-									}
+									};
 									this.hotspot_mouse_down = function (e, obj) {
-
 										//事件
 										var $this = $(obj);
-
 										var current_spot_index = parseInt($this.attr('index'));
 
 										/*实线数量*/
 										var points_size = this.points.length;
-										console.log('hotspot_mouse_down')
-
+										console.log('hotspot_mouse_down');
 
 										$(window).on('mousemove', {
 											_this: this,
@@ -1526,7 +1091,7 @@
 
 									};
 									this.hotspot_mouse_move = function (e) {
-										console.log('hotspot_mouse_move')
+										console.log('hotspot_mouse_move');
 
 										//$obj 当前点下的元素
 										var $obj = e.data.$obj;
@@ -1547,29 +1112,23 @@
 										if($obj.attr('is_end_spot') != 1) { /*不是尾点的情况*/
 											if(points_size > 1) {
 												//大于一个点  才需要划线
-
 												this.spot_move_line[0] = this.points[current_spot_index - 1];
 												this.spot_move_line[1] = map_path_line1;
 												this.hotspot_new_position = map_path_line1;
 												if(current_spot_index < (points_size - 1) && points_size > 2) this.spot_move_line[2] = this.points[current_spot_index + 1];
 												this.svgPolyline(this.spot_move_line, this.line_style.demo_line, this.$svg_temporary_line);
-											}
-											else {
+											} else {
 												this.hotspot_new_position = map_path_line1;
 											}
-										}
-										else {
-
+										} else {
 											if(points_size > 1) {
 												//大于一个点  才需要划线
-
 												this.spot_move_line[0] = this.points[1];
 												this.spot_move_line[1] = map_path_line1;
 												this.hotspot_new_position = map_path_line1;
 												if(points_size > 2) this.spot_move_line[2] = this.points[current_spot_index - 1];
 												this.svgPolyline(this.spot_move_line, this.line_style.demo_line, this.$svg_temporary_line);
-											}
-											else {
+											} else {
 												this.hotspot_new_position = map_path_line1;
 											}
 										}
@@ -1580,11 +1139,9 @@
 										_this.hotspot_mouse_up(e);
 									};
 									this.hotspot_mouse_up = function (e) {
-										console.log('hotspot_mouse_up')
+										console.log('hotspot_mouse_up');
 										var $obj = e.data.$obj;
 										var current_spot_index = e.data.current_spot_index;
-										var points_size = e.data.points_size;
-
 										this.svgPolyline([], {}, this.$svg_temporary_line);
 
 										/*不是尾点的情况*/
@@ -1610,7 +1167,7 @@
 									};
 
 									this.remove_hotspot = function () {
-										$('#svg_map_base > .enclosure_spot').remove();
+										$('#svg_map_base').find('.enclosure_spot').remove();
 									};
 
 									this.remove_square = function () {
@@ -1620,11 +1177,14 @@
 										this.remove_hotspot();
 									};
 
-									//曲线函数
+									/**
+									 * 画曲线函数
+									 * is_clear			是否清除原画板，默认 true
+									 */
 									this.svgPolyline = function (points, param, obj, is_clear) {
 										var settings = param || this.line_style.result_line;
 										obj = obj || this.$svg_temporary_line;
-										is_clear = (is_clear === false) ? false : true;
+										is_clear = (is_clear !== false);
 										obj.svg();
 										var $svg = obj.svg('get');
 										if(is_clear) $svg.clear();
@@ -1632,20 +1192,17 @@
 									}
 								}
 
-
-
 								(function (factory) {
 									if(typeof define === "function" && define.amd) {
-										define(["jquery", "../jquery.validate"], factory);
+										define(["jquery", ""], factory);
 									}
 									else {
 										factory(jQuery);
 									}
 								}(function ($) {
-
 									/*
 									 * Translated default messages for the jQuery validation plugin.
-									 * Locale: ZH (Chinese, 中文 (Zhōngwén), 汉语, 漢語)
+									 * Locale: ZH (Chinese, 中文, 汉语, 漢語)
 									 */
 									$.extend($.validator.messages, {
 										required: "这是必填字段",
@@ -1656,17 +1213,16 @@
 										dateISO: "请输入有效的日期 (YYYY-MM-DD)",
 										number: "请输入有效的数字",
 										digits: "只能输入数字",
-										creditcard: "请输入有效的信用卡号码",
+										creditCard: "请输入有效的信用卡号码",
 										equalTo: "你的输入不相同",
 										extension: "请输入有效的后缀",
-										maxlength: $.validator.format("最多可以输入 {0} 个字符"),
-										minlength: $.validator.format("最少要输入 {0} 个字符"),
-										rangelength: $.validator.format("请输入长度在 {0} 到 {1} 之间的字符串"),
+										maxLength: $.validator.format("最多可以输入 {0} 个字符"),
+										minLength: $.validator.format("最少要输入 {0} 个字符"),
+										rangeLength: $.validator.format("请输入长度在 {0} 到 {1} 之间的字符串"),
 										range: $.validator.format("请输入范围在 {0} 到 {1} 之间的数值"),
 										max: $.validator.format("请输入不大于 {0} 的数值"),
 										min: $.validator.format("请输入不小于 {0} 的数值")
 									});
-
 								}));
 
 
@@ -1677,31 +1233,25 @@
 									ignore: "",
 									rules: {
 										name: {
-											required: true,
-
+											required: true
 										},
 										peopleNum: {
 											digits: true
-
 										}
 									},
-
 
 									highlight: function (e) {
 										$(e).closest('.form-group').removeClass('has-info').addClass('has-error');
 									},
 
 									success: function (e) {
-
 										$(e).closest('.form-group').removeClass('has-error'); //.addClass('has-info');
 										$(e).remove();
-
 									},
 
 
 									submitHandler: function (form) {
-
-										if(enclosure1.points[0] == undefined || enclosure1.points[0] != enclosure1.points[enclosure1.points.length - 1]) {
+										if(psZoneAdd.points[0] == undefined || psZoneAdd.points[0] != psZoneAdd.points[psZoneAdd.points.length - 1]) {
 											alert('您没有画图');
 											return;
 										}
@@ -1709,8 +1259,7 @@
 										var $form = $(form);
 
 										var data = {
-											name: $form.find("#inventory_name").val(),
-
+											name: $form.find("#inventory_name").val()
 										};
 
 										var inventory_peopleNum = $form.find("#inventory_peopleNum").val();
@@ -1719,20 +1268,19 @@
 											data.peopleNum = parseInt(inventory_peopleNum);
 										}
 
-										var rusultPoints = [];
-										var points_length = enclosure1.points.length - 1;
+										var points = [];
+										var points_length = psZoneAdd.points.length - 1;
 										for(var i = 0; i < points_length; i++) {
-											var temporaryArr = {};
-											temporaryArr.x = mmConversion(enclosure1.points[i][0]);
-											temporaryArr.y = mmConversion(enclosure1.points[i][1]);
-											rusultPoints.push(temporaryArr);
-											temporaryArr = null;
+											var pt = {
+												x: coordScreenToMap(psZoneAdd.points[i][0]),
+												y: coordScreenToMap(psZoneAdd.points[i][1])
+											};
+											points.push(pt);
 										}
-										data.points = rusultPoints;
+										data.points = points;
 
-
-										$('#start_draw').click();
-										console.log('datadata', data);
+										$('#btnDrawAddPsZone').click();
+										console.log('submitHandler send data=', data);
 
 										var result = ajaxJsonRequest('/lbs/people_stat_cfg_add', {
 											data: [data]
@@ -1740,6 +1288,7 @@
 
 										if(result.errorCode === 0) {
 											query_electronic();
+											showPsZone();
 										}
 										alert(result.msg);
 
@@ -1748,218 +1297,160 @@
 								});
 
 
-
-
-								/**
-			 * 向服务器发送 Ajax 请求，查询相关数据, POST方式
-			 * @param url       请求 url
-			 * @param txData    请求 参数，具体参数含义，见对应接口说明                  
-			 
-			 数据格式
-			 
-			 url = '/lbs/get_history_location';  访问地址 
-            txData = {
-                "userId": ["1918E00103AA"],     // "userId": ["all"] for all users
-                "datetimeFrom": "2017-09-17 11:17:35",          // 按照时间段查询
-                "datetimeTo": "2017-09-23 11:17:35",
-                "compress": false       // 是否压缩，压缩的含义是，服务器会根据特定策略返回部分路径坐标。 保留参数
-            };
-			 */
-								function ajaxRequest(url, txData) {
-									//接受到的数据 
+								function ajaxJsonRequest(url, txData) {
 									var ajaxData = null;
 									$.ajax({
 										url: url,
 										async: false,
 										type: 'POST',
-										data: {
-											data: JSON.stringify(txData)
-										},
-										success: function (data) {
-											console.log('接口调用成功');
-											console.log('receive:', data);
-											ajaxData = data;
-										},
-
-										error: function (qXHR, textStatus, errorThrown) {
-											console.log('接口调用失败');
-											ajaxData = false;
-										}
+										contentType: "application/json;charset=UTF-8",
+										data: JSON.stringify(txData)   // 发送json数据到服务器
+									}).done(function (data) {
+										console.log('接口调用成功');
+										console.log('receive:', data);
+										ajaxData = data;
+									}).fail(function () {
+										console.log('接口调用失败');
+										ajaxData = false;
 									});
 									return ajaxData;
 								}
-								
-									function ajaxJsonRequest(url, txData) {
-										var ajaxData = null;
-										$.ajax({
-											url: url,
-											async: false,        // 异步请求
-											type: 'POST',
-											contentType: "application/json;charset=UTF-8",
-											data: JSON.stringify(txData) ,   // 发送json数据到服务器
-                                            success: function (data) {
-                                                console.log('接口调用成功');
-                                                console.log('receive:', data);
-                                                ajaxData = data;
-                                            },
-                                            error: function (qXHR, textStatus, errorThrown) {
-                                                console.log('接口调用失败');
-                                                ajaxData = false;
-                                            }
-										});
-										return ajaxData;
-									}
-								
+
 								function query_electronic(){
 									var id = id || null;
 									var url, txData;
 									var data; //后台传来的数据
-									
+
 									url = '/lbs/people_stat_cfg_get';
 									txData = {
 										rows:2000
 									};
 									data = ajaxJsonRequest(url, txData);
 
-								
-						  			var dataData = data.data.rows;
+
+									var dataData = data.data.rows;
 									var dataDataLength = dataData.length;
-									var selectHtml = '<option value="0">请选择围栏</option>';
+									var selectHtml = '<option value="0">请选择盘点区域</option>';
 									var checkboxHtml = '';
 									for (var i = 0; i<dataDataLength; i++){
 										selectHtml += '<option value="'+dataData[i].id+'">'+dataData[i].name+'</option>';
-										
+
 										if(dataData[i].id != undefined){
-										 
-										checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar'+i+'" autocomplete="off" value = "'+dataData[i].id+'" /><label class="lbl" for="ace-settings-navbar'+i+'">'+dataData[i].name+'</div></div>'}
+
+											checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar'+i+'" autocomplete="off" value = "'+dataData[i].id+'" /><label class="lbl" for="ace-settings-navbar'+i+'">'+dataData[i].name+'</div></div>'}
 									}
 									$('#alter_enclosure_name').html(selectHtml);
 									$('#enclosure_item').html(checkboxHtml);
 								}
-								
+
 								query_electronic();
 
 								$('#enclosure_item_button').on('click',function(){
 									var $enclosure_item = $('#enclosure_item');
 									var items = $enclosure_item.find(':checked');
-									
+
 									global_init.run();
-									
+
 									if(items == undefined){
-										alert('请选择要删除的围栏!');
+										alert('请选择要删除的盘点区域!');
 										return false;
 									}
 									var ids = [];
-									
+
 									items.each(function(){
 										ids.push($(this).val());
 									});
-									
-									
+
+
 									var url = '/lbs/hz_data_del';
 									var data = {
-									 who:'people_stat_cfg',
-									 ids:ids
-
+										who:'people_stat_cfg',
+										ids:ids
 									};
-									console.log('aaaaaaa',data);
+									console.log('enclosure_item_button send data:',data);
 									var result = ajaxJsonRequest(url,data);
 									alert(result.msg);
-								
-									if(result.errorCode  == 0)
+
+									if(result.errorCode == 0)
 									{
-										query_electronic()
+										query_electronic();
+										showPsZone();
 									}
 								});
 
 
 								$('#electronic-fence-query-button').click(function () {
-
 									global_init.run();
-
-									electronicFence();
+									showPsZone();
 								});
 
-								function electronicFence() {
-									var url, txData;
-									var data; //后台传来的数据
+								function showPsZone() {
+									if ($('#btnPsZoneShow').text() !== '隐藏') return;
 
-									var address = $('#electronic-fence-address').val();
-									if(address == 0) {
-										alert('请选择查询地址');
-										return;
-									}
-
-									url = '/lbs/people_stat_cfg_get';
-									txData = {
-										"floorNo": address,
-										rows: 20000
+									var url = '/lbs/people_stat_cfg_get';
+									var txData = {
+										"floorNo": 'Floor3',
+										rows: 100
 									};
 
-									data = ajaxJsonRequest(url, txData);
-									console.log('dadadadada',data);
-									enclosure_temporary = data;
-									draw_enclosure(data)
-
-									zoom_temporary_fn.push(enclosure_temporary_fn);
-									global_init.add(clear_cach);
+									var data = ajaxJsonRequest(url, txData);
+									console.log('showPsZone send data=',data);
+									ps_zone_data = data.data.rows;
+									drawPsZone(ps_zone_data);
+									zoomCallBack.push(draw_ps_zone_fn);
 								}
-								
-						 		function clear_cach (){
-									enclosure_temporary = [];
-									zoom_temporary_fn = [];
-									var draw_path = $('#svg_path');
+
+								function clearPsZone (){
+									ps_zone_data = [];
+									for(var i=0; i< zoomCallBack.length; i++){
+										if (zoomCallBack[i] === draw_ps_zone_fn){
+											zoomCallBack.splice(i, 1);
+											break;
+										}
+									}
+									var draw_path = $('#svg-people-stat-zone');
 									var svg = draw_path.svg('get');
 									svg.clear();
 								}
 
-								function draw_enclosure(data) {
-									var temporaryArr; //临时数据
 
-									var temporaryArrLength; //临时数据长度
-									temporaryArr = data.data.rows;
-									var draw_path = $('#svg_path');
-									var svg = draw_path.svg('get');
-									var svg_parent = draw_path.find('svg');
-									svg_parent.width(draw_path.width() + 10);
-									svg_parent.height(draw_path.height() + 10);
-									//svg.clear();	 
+								function drawPsZone(data) {
+									console.log('drawPsZone',data);
+									var erBoard = $('#svg-people-stat-zone');
+									erBoard.svg();
+									var svg = erBoard.svg('get');
 									svg.clear();
-									/*console.log('temporaryArr[0].points:',temporaryArr[0].points);
-				console.log('temporaryArr[0]:',temporaryArr[0]);*/
 
-									temporaryArrLength = temporaryArr.length;
-									for(var temporaryI = 0; temporaryI < temporaryArrLength; temporaryI++) {
-										var temporaryArrDatas = temporaryArr[temporaryI].points;
-										var temporaryArrDatasLength = temporaryArrDatas.length;
-										var temporatyPosition = [];
+									for(var k = 0; k < data.length; k++) {
+										var pts = data[k].points;
+										var pointsScreen = [];
+										var ptArr;
 
-										for(var PositionI = 0; PositionI < temporaryArrDatasLength; PositionI++) {
-											var temporatyPositionFor = []; //for里面的数组   临时用下 
-											temporatyPositionFor.push(unitConversion(temporaryArrDatas[PositionI].x));
-											temporatyPositionFor.push(unitConversion(temporaryArrDatas[PositionI].y));
-
-											temporatyPosition.push(temporatyPositionFor);
-											temporatyPositionFor = null;
-
-											if(PositionI == temporaryArrDatasLength - 1) {
-												//让线回到第一个	
-												temporatyPositionFor = [];
-												temporatyPositionFor.push(unitConversion(temporaryArrDatas[0].x));
-												temporatyPositionFor.push(unitConversion(temporaryArrDatas[0].y));
-												temporatyPosition.push(temporatyPositionFor);
-											}
+										for(var i = 0; i < pts.length; i++) {
+											ptArr = [];
+											ptArr.push(coordMapToScreen(pts[i].x));
+											ptArr.push(coordMapToScreen(pts[i].y));
+											pointsScreen.push(ptArr);
 										}
 
-										svg.polyline(temporatyPosition, {
-											fill: 'none',
-											stroke: '#0000ff',
+										// 再次增加第一个画线起点
+										ptArr = [];
+										ptArr.push(coordMapToScreen(pts[0].x));
+										ptArr.push(coordMapToScreen(pts[0].y));
+										pointsScreen.push(ptArr);
+
+										svg.polyline(pointsScreen, {
+											fill: 'DeepSkyBlue',
+											opacity: 0.6,
+											stroke: 'blue',
 											strokeWidth: 5
 										});
-										//完毕清空数据
-										temporaryArrDatas = null;
-										temporaryArrDatasLength = null;
-										temporatyPosition = null;
+
+										svg.text(coordMapToScreen(pts[0].x) + 10, coordMapToScreen(pts[0].y) + 20, data[k].name, {
+											fontSize: 14,
+											fontFamily: 'Verdana',
+											fill: 'RoyalBlue'
+										});
 									}
 								}
 
@@ -1991,13 +1482,7 @@
 									return false;
 								}
 
-								//单位转换
-								function unitConversion(number) {
-									return Math.round(number * real_loc_to_pix * zoom);
-								}
 
-
-								/*人物标记位置*/
 								var namespace = '/HeZhong';
 								// Connect to the Socket.IO server.
 								// The connection URL has the following format:
@@ -2010,114 +1495,45 @@
 								socket.on('hz_position', function (msg) {
 									var json = eval(msg); // 数组
 									console.log(json);
-									$.each(json, function (index, item) { //index json 索引   item  为本索引内容
+									$.each(json, function (index, item) {
 										hz_user_xy[index] = [item['userId'], json[index]['x'], json[index]['y']];
-										//把每个人存起来
 									});
 
 									console.log('hz_user_xy:', hz_user_xy);
 									for(var i = 0; i < json.length; i++) {
-
-										//zoom:地图缩放级别  
-										//   hz_people_goto 把人放到对应位置函数
-										hz_people_goto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
-											hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
+										hzPeopleGoto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
+												hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
 									}
 								});
 
-
-								//(用户)人位置函数
-								function hz_people_goto(x, y, people) {
-									people = people || '1918E00103AA'; // 设置默认参数
-									/// 24, 45是定位图标的 针尖 位置。显示图片时，是以图片左上角为参考坐标。故需要对坐标进行偏移。
-									$("#" + people).stop(true, true).animate({
-										left: (x - 24),
-										top: (y - 45)
-									});
-								}
 							})
-							</script>
-            <script>
-                /*像素转换物理单位*/
-                function mmConversion(number) {
-                    return Math.round(number / real_loc_to_pix / zoom);
-                }
+						</script>
 
-            </script>
-            
-            <div id="svg_map_base" class="each_map_layer">
-              <!--基础svg图-->
-              <img src="../static/img/floor3.svg" id="svg_image" class="each_map_layer">
-              <!--绘制路径-->
-              <div id="svg_path" class="each_map_layer"></div>
-              <!--房间等信息标识-->
-              <div id="svg_sign" class="each_map_layer"></div>
-              <!--用户标识区域-->
-              <div id="svg_user_sign" class="each_map_layer"> <img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA"> <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9"> </div>
-              <div id="svg_temporary_line" class="each_map_layer"></div>
-              <div id="enclosureEvent" class="each_map_layer" style="display:none;"> <img src="../static/img/drawing.png" id="line_start" title="围栏绘制起点" style="position:absolute; display:none;"> </div>
-              <div id="svg_event" class="each_map_layer"></div>
-            </div>
-          </div>
-          <style type="text/css">
-						.enclosure_spot{
-					
-							position:absolute;
-							background:url(../static/img/spot.png) no-repeat;
-							width:20px;
-							height:20px;
-							cursor: pointer;
-							z-index:10;
-						}
-		            	
-						#myCanvas{  
-							position: relative;
-							overflow: hidden;
-							border: 1px solid #b94a48;
-							min-width:1702px;
-							min-height:892px;
-							z-index:1;
-							background:url(../static/img/cross.gif);
-						}
-						/*所有事件在floor3父类上面   下面的子元素层级应该全部小于父元素层级*/
-						#svg_map_base {
-						 	position:absolute;
-		 					z-index:2;
-						}
-						#svg_image{
-							z-index:-100;
-						}
-						#svg_path{
-		 					z-index:-90;
-						}
-						#svg_sign{
-						 	z-index:-80;
-						}
-						#svg_user_sign{
-							z-index:-10;
-						}
-						
-						#svg_temporary_line{
-							z-index:-1;
-						}
-							
-						#svg_event{
-							z-index:1;
-						}
-						#enclosureEvent{
-							z-index:2;
-						}
-						
-						/*图基本设置*/
-						.map_base_data{height:890px;width: 1700px;}
-						.each_map_layer{ position:absolute; height:890px; width:1700px;}
-						</style>
-        </div>
-      </div>
-      <!-- /.page-content -->
-    </div>
-  </div>
-  <!-- /.main-content -->
+						<div id="svg_map_base" class="each_map_layer">  					<!--基础svg图-->
+							<img src="/static/img/floor3.svg" id="svg_image" class="each_map_layer">
+							<div id="svg_path" class="each_map_layer"></div>				<!--导航路径-->
+							<div id="svg-electronic-rail" class="each_map_layer"></div>		<!--电子围栏-->
+							<div id="svg-electronic-rail-draft" class="each_map_layer"></div>
+
+							<div id="svg-people-stat-zone" class="each_map_layer"></div>
+							<div id="svg-people-stat-zone-draft" class="each_map_layer"></div>
+
+							<div id="svg_sign" class="each_map_layer"></div>				<!--房间等信息标识-->
+
+							<!--用户标识区域-->
+							<div id="svg_user_sign" class="each_map_layer"> <img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA"> <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9"> </div>
+							<div id="svg_temporary_line" class="each_map_layer"></div>
+							<div id="enclosureEvent" class="each_map_layer" style="display:none;"> <img src="/static/img/drawing.png" id="line_start" title="围栏绘制起点" style="position:absolute; display:none;"> </div>
+							<div id="svg_event" class="each_map_layer"></div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+			<!-- /.page-content -->
+		</div>
+	</div>
+	<!-- /.main-content -->
 </div>
 <!-- /.main-container -->
 

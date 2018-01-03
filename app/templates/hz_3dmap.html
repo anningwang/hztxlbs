@@ -39,11 +39,16 @@
             height: 100%;
         }
 
-        #prompt
+        .promptMsg
         {
             position: absolute;
             left: 2%;
             bottom: 2%;
+            background-color: white;
+        }
+
+        #prompt {
+            margin: 5px 10px;
         }
     </style>
 
@@ -126,7 +131,9 @@
                         <div id="map-container"></div>
 
                         <!-- 坐标转换示例 -->
-                        <div id="prompt" >点击地图</div>
+                        <div class="promptMsg" >
+                            <div id="prompt" >点击地图</div>
+                        </div>
 
                     </div>
                 </div>

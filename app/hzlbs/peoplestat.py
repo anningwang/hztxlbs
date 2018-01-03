@@ -405,7 +405,7 @@ class PeopleStat:
                 zone.update(rec)
                 db.session.add(zone)
 
-                if 'points' in rec:
+                if 'points' in rec and rec['points'] is not None:
                     HzRoomStatPoints.query.filter_by(room_id=rec['id']).delete()
                     """ 增加围栏顶点配置 """
                     if len(rec['points']) < 3:

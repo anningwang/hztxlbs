@@ -634,7 +634,7 @@ def electronic_rail_cfg_modify():
                 et.update(rec)
                 db.session.add(et)
 
-                if 'points' in rec:
+                if 'points' in rec and rec['points'] is not None:
                     HzEtPoints.query.filter_by(et_id=rec['id']).delete()
                     """ 增加围栏顶点配置 """
                     if len(rec['points']) < 3:

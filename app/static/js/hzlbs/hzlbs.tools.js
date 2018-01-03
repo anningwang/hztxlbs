@@ -39,6 +39,8 @@ var roomNameCoord = [
 
 // 显示房间名称
 function showRoomName(svg) {
+    svg.clear();
+    
     for(var i = 0; i < roomNameCoord.length; i++) {
         var str = 'translate(' + coordMapToScreen(roomNameCoord[i].x) + ',' + coordMapToScreen(roomNameCoord[i].y) + ')';
         var g1 = svg.group({
@@ -86,10 +88,6 @@ Init.prototype.empty = function(){
 };
 
 Init.prototype.run = function(){
-    var stopFnLength = this.stopFn.length;
-    if(stopFnLength <= 0){
-        return false;
-    }
     var current_item;
     while(current_item = this.stopFn.pop()){
         this.distribution(current_item);
@@ -120,7 +118,7 @@ Init.prototype.stopFn_param_2 = function(param1,param2){
         if(param2 instanceof Array)
         {
             param1.apply(window,param2);
-            console.log('this12312312',window);
+            console.log('stopFn_param_2',window);
         }else{
             param1.apply(window,[param2]);
         }
