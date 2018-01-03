@@ -114,7 +114,7 @@
                 for(var i = 0; i< psData.length; i++){
                     var etDetails = psData[i];
                     psHtml += '<tr><td>'+etDetails['no']+'</td><td>'+etDetails.id+'</td><td>'+etDetails['statNo']+'</td><td>'+etDetails['roomName']+'</td><td>'
-                            +etDetails.datetime+'</td><td>'+etDetails['curPeopleNum']+'</td><td>'+etDetails['expectNum']+'</td></tr>';
+                            +etDetails.datetime+'</td><td>'+etDetails['curPeopleNum']+'</td><td>'+(etDetails['expectNum']<=0?'-':etDetails['expectNum'])+'</td></tr>';
                 }
 
                 psHtml +='</tbody></table><div class="hr hr-18 dotted hr-double"></div>';
