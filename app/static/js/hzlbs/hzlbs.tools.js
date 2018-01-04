@@ -169,4 +169,20 @@ function psExec(opts) {
     });
 }
 
-
+/**
+ * 告警提示信息
+ * @param title         标题
+ * @param text          内容
+ * @returns {boolean}
+ */
+function gritter_alert(title, text) {
+    $.gritter.add({
+        title: title,
+        text: text,
+        class_name: 'gritter-warning',
+        image: '/static/img/blueImageMarker.png',
+        sticky: true,
+        time: ''
+    });
+    return false;
+}

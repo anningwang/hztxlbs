@@ -102,8 +102,10 @@ def hz_lbs_elect_rail(userlist):
 
     ret = []
 
-    er_dict = get_er_data()
+    tm = datetime.datetime.today()
+    tm_str = datetime.datetime.strftime(tm, '%Y-%m-%d %H:%M:%S');
 
+    er_dict = get_er_data()
     for usr in userlist:
         i = 0
         for rail in HZ_RAIL_LIST:
@@ -115,7 +117,8 @@ def hz_lbs_elect_rail(userlist):
                     new_r = HzElecTail(build_id=HZ_BUILDING_ID, floor_no=HZ_FLOOR_NO, user_id=usr['userId'],
                                        x=usr['x'], y=usr['y'], timestamp=datetime.datetime.today(),
                                        status=enter, rail_no=HZ_RAIL_NO_LIST[i])
-                    ret.append({'name': HZ_RAIL_NO_LIST[i], 'status': enter, 'userId': usr['userId']})
+                    ret.append({'name': HZ_RAIL_NO_LIST[i], 'status': enter, 'userId': usr['userId'],
+                                'datetime': tm_str})
                     print ret
                     db.session.add(new_r)
                     db.session.commit()
@@ -125,7 +128,8 @@ def hz_lbs_elect_rail(userlist):
                     new_r = HzElecTail(build_id=HZ_BUILDING_ID, floor_no=HZ_FLOOR_NO, user_id=usr['userId'],
                                        x=usr['x'], y=usr['y'], timestamp=datetime.datetime.today(),
                                        status=leave, rail_no=HZ_RAIL_NO_LIST[i])
-                    ret.append({'name': HZ_RAIL_NO_LIST[i], 'status': leave, 'userId': usr['userId']})
+                    ret.append({'name': HZ_RAIL_NO_LIST[i], 'status': leave, 'userId': usr['userId'],
+                                'datetime': tm_str})
                     print ret
                     db.session.add(new_r)
                     db.session.commit()
@@ -141,7 +145,8 @@ def hz_lbs_elect_rail(userlist):
                     new_r = HzElecTail(build_id=HZ_BUILDING_ID, floor_no=HZ_FLOOR_NO, user_id=usr['userId'],
                                        x=usr['x'], y=usr['y'], timestamp=datetime.datetime.today(),
                                        status=enter, rail_no=name)
-                    ret.append({'name': name, 'status': enter, 'userId': usr['userId']})
+                    ret.append({'name': name, 'status': enter, 'userId': usr['userId'],
+                                'datetime': tm_str})
                     print ret
                     db.session.add(new_r)
                     db.session.commit()
@@ -151,7 +156,8 @@ def hz_lbs_elect_rail(userlist):
                     new_r = HzElecTail(build_id=HZ_BUILDING_ID, floor_no=HZ_FLOOR_NO, user_id=usr['userId'],
                                        x=usr['x'], y=usr['y'], timestamp=datetime.datetime.today(),
                                        status=leave, rail_no=name)
-                    ret.append({'name': name, 'status': leave, 'userId': usr['userId']})
+                    ret.append({'name': name, 'status': leave, 'userId': usr['userId'],
+                                'datetime': tm_str})
                     print ret
                     db.session.add(new_r)
                     db.session.commit()

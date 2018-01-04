@@ -1383,40 +1383,8 @@
 									}
 								}
 
-								var electronic_fence_namespace = '/HeZhong';
-								var electronic_fence_socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + electronic_fence_namespace);
 
-								electronic_fence_socket.on('hz_electronic_tail', function (msg) {
-									console.log('电子围栏：', msg);
-									var electronic_fence_socket_state;
-
-									if(msg[0].status == 1) {
-										electronic_fence_socket_state = '进入';
-									}
-									else if(msg[0].status == 0) {
-										electronic_fence_socket_state = '离开';
-									}
-									//alert('用户ID:'+msg[0].userId+electronic_fence_socket_state+'了房间'+msg[0].name);
-
-									gritter_alert('电子围栏警报', '用户ID:' + msg[0].userId + '【'+ electronic_fence_socket_state + '】了房间【' + msg[0].name + '】');
-									console.log('$.gritter', $.gritter);
-								});
-
-								function gritter_alert(title, text) {
-									$.gritter.add({
-										title: title,
-										text: text,
-										class_name: 'gritter-warning',
-										image: '/static/img/blueImageMarker.png',
-										sticky: true,
-										time: ''
-									});
-									return false;
-								}
-
-								/*人物标记位置*/
 								var namespace = '/HeZhong';
-
 								// Connect to the Socket.IO server.
 								// The connection URL has the following format:
 								//     http[s]://<domain>:<port>[/<namespace>]
@@ -1424,6 +1392,7 @@
 								console.log(connStr);
 								var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
 
+								// 标签实时位置
 								socket.on('hz_position', function (msg) {
 									var json = eval(msg); // 数组
 									console.log(json);
@@ -1435,6 +1404,16 @@
 									for(var i = 0; i < json.length; i++) {
 										hzPeopleGoto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
 												hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
+									}
+								});
+
+								// 电子围栏信息
+								socket.on('hz_electronic_tail', function (msg) {
+									console.log('电子围栏：', msg);
+									for (var i=0; i< msg.length; i++){
+										var state = (msg[i].status == 1) ? '进入': '离开';
+										gritter_alert('电子围栏警报', '用户ID【' + msg[i].userId + '】 '+
+												msg[i].datetime +' 【'+ state + '】了房间【' + msg[i].name + '】');
 									}
 								});
 
