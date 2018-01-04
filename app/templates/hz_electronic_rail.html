@@ -1276,7 +1276,7 @@
 									for (var i = 0; i < et.length; i++){
 										selectHtml += '<option value="'+et[i].id+'">'+et[i].name+'</option>';
 										if(et[i].id != undefined){
-											checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar'+i+'" autocomplete="off" value = "'+et[i].id+'" /><label class="lbl" for="ace-settings-navbar'+i+'">'+et[i].name+'</div></div>'}
+											checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar-'+i+'" autocomplete="off" value = "'+et[i].id+'" /><label class="lbl" for="ace-settings-navbar-'+i+'">'+et[i].name+'</div></div>'}
 									}
 									$('#erOldName').html(selectHtml);
 									$('#er_item').html(checkboxHtml);
@@ -1398,7 +1398,7 @@
 									}
 									//alert('用户ID:'+msg[0].userId+electronic_fence_socket_state+'了房间'+msg[0].name);
 
-									gritter_alert('电子围栏警报', '用户ID:' + msg[0].userId + electronic_fence_socket_state + '了房间' + msg[0].name);
+									gritter_alert('电子围栏警报', '用户ID:' + msg[0].userId + '【'+ electronic_fence_socket_state + '】了房间【' + msg[0].name + '】');
 									console.log('$.gritter', $.gritter);
 								});
 
@@ -1437,6 +1437,9 @@
 												hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
 									}
 								});
+
+								// 默认显示电子围栏
+								$('#btnQueryEr').click();
 							})
 						</script>
 

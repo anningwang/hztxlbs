@@ -42,7 +42,7 @@
 		<div class="navbar-buttons navbar-header pull-right" role="navigation">
 			<ul class="nav ace-nav">
 				<!-- #section:basics/navbar.user_menu -->
-				<li class="light-blue dropdown-modal"> <a data-toggle="dropdown" href="#" class="dropdown-toggle"> <img class="nav-user-photo" src="../static/ace/assets/avatars/user.jpg" alt="Jason's Photo" /> <span class="user-info"> <small>欢迎登入,</small> 欧先生 </span> <i class="ace-icon fa fa-caret-down"></i> </a>
+				<li class="light-blue dropdown-modal"> <a data-toggle="dropdown" href="#" class="dropdown-toggle"> <img class="nav-user-photo" src="/static/ace/assets/avatars/user.jpg" alt="Jason's Photo" /> <span class="user-info"> <small>欢迎登入,</small> 欧先生 </span> <i class="ace-icon fa fa-caret-down"></i> </a>
 					<ul class="user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
 						<li> <a href="#"> <i class="ace-icon fa fa-cog"></i> Settings</a> </li>
 						<li> <a href="#"> <i class="ace-icon fa fa-user"></i> Profile</a> </li>
@@ -127,9 +127,9 @@
 												</div>
 											</div>
 											<div class="form-group">
-												<label for="inventory_peopleNum" class="col-sm-3 control-label no-padding-right">期望人数:</label>
+												<label for="psZonePeopleExpect" class="col-sm-3 control-label no-padding-right">期望人数:</label>
 												<div class="col-sm-9">
-													<input type="text" id="inventory_peopleNum" name="peopleNum" placeholder="" />
+													<input type="text" id="psZonePeopleExpect" name="peopleNum" placeholder="" />
 												</div>
 											</div>
 											<div class="form-group">
@@ -200,7 +200,7 @@
 											</div>
 											<div class="form-group">
 												<div class="col-xs-6 col-xs-push-6">
-													<input type="submit" class="btn btn-success btn-xs" id="set_enclosure_submit2" value="提交" />
+													<input type="submit" class="btn btn-success btn-xs" id="btnChangePsZone" value="提交" />
 												</div>
 											</div>
 										</form>
@@ -510,7 +510,7 @@
 										}
 										return;
 									} else if (btn.attr('id') === 'btnPsExec'){
-										psExec({showMsg: false, callback: showPsResult })
+										psExec({showMsg: false, callback: showPsResult });
 										return;
 									}
 
@@ -566,9 +566,7 @@
 									}
 								}
 
-
 								$("#btnDrawAddPsZone").on('click', function () {
-
 									var $this = $(this);
 									var $span = $this.find('span');
 									var buttonText = $span.text();
@@ -579,11 +577,9 @@
 											global_init.run();
 										} else {
 											$span.text('清空绘制');
-
 											global_init.run();
 											global_init.add(psZoneAdd,psZoneAdd.remove_event);
 											global_init.add(changeTextPsZoneAdd,$this);
-
 											$method_select.attr('disabled', 'disabled');
 											psZoneAdd.polyline();
 										}
@@ -597,7 +593,6 @@
 											global_init.run();
 											global_init.add(psZoneAdd,psZoneAdd.remove_square);
 											global_init.add(changeTextPsZoneAdd,$this);
-
 											$method_select.attr('disabled', 'disabled');
 											psZoneAdd.square();
 										}
@@ -611,7 +606,6 @@
 									var buttonText = $span.text();
 									var $method_select = $('#enclosure_spot_method2');
 									if($method_select.val() === 'polyline') {
-
 										if(buttonText === '清空绘制') {
 											$span.text('开始绘制');
 											$method_select.removeAttr('disabled');
@@ -620,7 +614,8 @@
 											$method_select.attr('disabled', 'disabled');
 										}
 									}
-									//方形绘图
+
+									// 方形绘图
 									if($method_select.val() === 'square') {
 										if(buttonText === '清空绘制') {
 											$span.text('开始绘制');
@@ -633,7 +628,6 @@
 								}
 
 								$("#btnDrawChangePsZone").on('click', function () {
-
 									var $this = $(this);
 									var $span = $this.find('span');
 									var buttonText = $span.text();
@@ -646,12 +640,11 @@
 											global_init.run();
 											global_init.add(psZoneChange,psZoneChange.remove_event);
 											global_init.add(changeTextPsZoneChange,$this);
-
 											$method_select.attr('disabled', 'disabled');
 											psZoneChange.polyline();
 										}
 									}
-									//方形绘图
+									// 方形绘图
 									if($method_select.val() === 'square') {
 										if(buttonText === '清空绘制') {
 											global_init.run();
@@ -670,10 +663,11 @@
 								$('#btnAddPsZoneDefault').click(function(){
 									var result = ajaxJsonRequest('/lbs/people_stat_cfg_add_default', {});
 									alert(result.msg);
+									showPsZone();
 								});
 
 								// 修改盘点区域
-								$('#set_enclosure_submit2').on('click', function () {
+								$('#btnChangePsZone').on('click', function () {
 									var oName = $('#alter_enclosure_name');
 									var psZoneId = oName.val();
 									var enclosure_new_expectNum = $('#enclosure_new_expectNum').val();
@@ -725,7 +719,7 @@
 									if (pointsToServer.length > 0)
 										data.points = pointsToServer;
 
-									console.log('set_enclosure_submit2, send data=', data);
+									console.log('btnChangePsZone, send data=', data);
 									var result = ajaxJsonRequest('/lbs/people_stat_cfg_chg', {data:[data]});
 
 									if(result.errorCode === 0) {
@@ -821,16 +815,16 @@
 											display: 'none'
 										});
 									};
-									//围栏绘制功能入口
+									// 围栏绘制功能入口
 									this.polyline = function () {
 										var _this = this;
 										var _window = $(window);
 
-										/*格式化数据*/
+										// 格式化数据
 
 										this.points = [];
 										this.is_coordinate_offset = false;
-										//打开事件绑定div
+										// 打开事件绑定div
 										$('#enclosureEvent').css('display', 'block');
 
 										_window.on('keydown', {
@@ -858,7 +852,7 @@
 										e.data._this.line_click(e);
 									};
 
-									//划线函数
+									// 划线函数
 									this.line_click = function (e) {
 										var mapObjOffset = this.$map.offset();
 										var map_path_line = [];
@@ -876,7 +870,7 @@
 												display: 'block'
 											})
 										}
-										//画直角线的情况  且不是第一个数据
+										// 画直角线的情况  且不是第一个数据
 										if(this.is_coordinate_offset && this.points.length !== 0) {
 											if(this.dotted_line.length = 2) {
 												//
@@ -919,13 +913,13 @@
 										}
 										this.svgPolyline(this.dotted_line, this.line_style.demo_line);
 									};
-									//鼠标移动划线函数包
+									// 鼠标移动划线函数包
 									this.mousemove_line_package = function (e) {
 										if(e.data._this.points.length > 0) {
 											e.data._this.mousemove_line(e);
 										}
 									};
-									//鼠标移动划线函数
+									// 鼠标移动划线函数
 									this.mousemove_line = function (e) {
 										var mapObjOffset = this.$map.offset();
 										this.mousemove_points[0] = this.points[this.points.length - 1];
@@ -954,7 +948,7 @@
 
 										if(points_length > 1) {
 											_this.points.push(_this.points[0]);
-											//画热点
+											// 画热点
 											_this.create_hotspot($('#svg_map_base'), _this.points[points_length], _this.points.length - 1, true);
 										}
 
@@ -963,7 +957,7 @@
 									};
 									// 方框
 									this.square = function () {
-										//打开事件绑定div
+										// 打开事件绑定div
 										$('#enclosureEvent').css('display', 'block');
 
 										this.$event.on('mousedown', {
@@ -1004,7 +998,7 @@
 												spot3 = [];
 										var $map = this.$map;
 										var mapObjOffset = $map.offset();
-										/*移动原点*/
+										// 移动原点
 
 										spot2[0] = e.pageX - mapObjOffset.left - parseInt($map.css('border-left-width'));
 										spot2[1] = e.pageY - mapObjOffset.top - parseInt($map.css('border-top-width'));
@@ -1091,11 +1085,11 @@
 										return false;
 									};
 									this.hotspot_mouse_down = function (e, obj) {
-										//事件
+										// 事件
 										var $this = $(obj);
 										var current_spot_index = parseInt($this.attr('index'));
 
-										/*实线数量*/
+										// 实线数量
 										var points_size = this.points.length;
 										console.log('hotspot_mouse_down');
 
@@ -1122,7 +1116,7 @@
 									this.hotspot_mouse_move = function (e) {
 										console.log('hotspot_mouse_move');
 
-										//$obj 当前点下的元素
+										// $obj 当前点下的元素
 										var $obj = e.data.$obj;
 										var current_spot_index = e.data.current_spot_index;
 										var points_size = e.data.points_size;
@@ -1137,10 +1131,10 @@
 											top: (map_path_line1[1] - Math.round((this.hotspot_size.height) / 2)) + 'px'
 										});
 
-										//线位置
-										if($obj.attr('is_end_spot') != 1) { /*不是尾点的情况*/
+										// 线位置
+										if($obj.attr('is_end_spot') != 1) { // 不是尾点的情况
 											if(points_size > 1) {
-												//大于一个点  才需要划线
+												// 大于一个点  才需要划线
 												this.spot_move_line[0] = this.points[current_spot_index - 1];
 												this.spot_move_line[1] = map_path_line1;
 												this.hotspot_new_position = map_path_line1;
@@ -1151,7 +1145,7 @@
 											}
 										} else {
 											if(points_size > 1) {
-												//大于一个点  才需要划线
+												// 大于一个点  才需要划线
 												this.spot_move_line[0] = this.points[1];
 												this.spot_move_line[1] = map_path_line1;
 												this.hotspot_new_position = map_path_line1;
@@ -1173,7 +1167,7 @@
 										var current_spot_index = e.data.current_spot_index;
 										this.svgPolyline([], {}, this.$svg_temporary_line);
 
-										/*不是尾点的情况*/
+										// 不是尾点的情况
 										if($obj.attr('is_end_spot') != 1) {
 											this.points[current_spot_index] = this.hotspot_new_position;
 										}
@@ -1286,15 +1280,13 @@
 										}
 
 										var $form = $(form);
-
 										var data = {
 											name: $form.find("#inventory_name").val()
 										};
 
-										var inventory_peopleNum = $form.find("#inventory_peopleNum").val();
-										if(inventory_peopleNum) {
-
-											data.peopleNum = parseInt(inventory_peopleNum);
+										var peopleNum = $form.find("#psZonePeopleExpect").val();
+										if(peopleNum) {
+											data.expectNum = parseInt(peopleNum);
 										}
 
 										var points = [];
@@ -1346,16 +1338,11 @@
 								}
 
 								function query_electronic(){
-									var id = id || null;
-									var url, txData;
-									var data; //后台传来的数据
-
-									url = '/lbs/people_stat_cfg_get';
-									txData = {
+									var url = '/lbs/people_stat_cfg_get';
+									var txData = {
 										rows:2000
 									};
-									data = ajaxJsonRequest(url, txData);
-
+									var data = ajaxJsonRequest(url, txData);
 
 									var dataData = data.data.rows;
 									var dataDataLength = dataData.length;
@@ -1363,10 +1350,8 @@
 									var checkboxHtml = '';
 									for (var i = 0; i<dataDataLength; i++){
 										selectHtml += '<option value="'+dataData[i].id+'">'+dataData[i].name+'</option>';
-
 										if(dataData[i].id != undefined){
-
-											checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar'+i+'" autocomplete="off" value = "'+dataData[i].id+'" /><label class="lbl" for="ace-settings-navbar'+i+'">'+dataData[i].name+'</div></div>'}
+											checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar-' + i + '" autocomplete="off" value="'+dataData[i].id+'" /><label class="lbl" for="ace-settings-navbar-'+i+'">'+dataData[i].name+'</div></div>'}
 									}
 									$('#alter_enclosure_name').html(selectHtml);
 									$('#enclosure_item').html(checkboxHtml);
@@ -1504,6 +1489,9 @@
 												hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
 									}
 								});
+
+								// 默认显示 盘点区域
+								$('#btnPsZoneShow').click();
 
 							})
 						</script>
