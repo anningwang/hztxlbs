@@ -45,6 +45,8 @@ class PeopleStat:
         """
         从数据库获取盘点配置
         """
+        self.zone = {}      # 清空数据
+
         pds = HzRoomStatCfg.query.all()
         for pd in pds:
             item = {'id': pd.id, 'no': pd.no}
