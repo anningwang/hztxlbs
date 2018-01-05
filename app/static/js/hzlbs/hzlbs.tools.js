@@ -88,11 +88,19 @@ function mapZoom(height, width) {
 // 移动标签位置到指定坐标 (x, y) 为屏幕坐标
 function hzPeopleGoto(x, y, people) {
     people = people || '1918E00103AA'; // 设置默认参数
+    var p = $('#'+people);
+
     // 24, 45是定位图标的 针尖 位置。显示图片时，是以图片左上角为参考坐标。故需要对坐标进行偏移。
-    $("#" + people).stop(true, true).animate({
-        left: (x - 24),
-        top: (y - 45)
-    });
+
+    if (p.css("display") == 'none') {
+        p.css({left: x-24, top: y-45});
+        p.toggle();
+    } else {
+        p.stop(true, true).animate({
+            left: (x - 24),
+            top: (y - 45)
+        });
+    }
 }
 
 // 初始化对象
