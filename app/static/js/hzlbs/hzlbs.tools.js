@@ -39,6 +39,15 @@ var roomNameCoord = [
 
 // 显示房间名称
 function showRoomName(svg) {
+    var roomLayer = $('#svg_sign');
+    roomLayer.svg();
+    var svgRoom = roomLayer.svg('get');
+
+    svg = svg || svgRoom;
+    if(!svg) {
+        console.log('showRoomName svg param is null, svg=', svg );
+        return false;
+    }
     svg.clear();
 
     for(var i = 0; i < roomNameCoord.length; i++) {
@@ -52,6 +61,27 @@ function showRoomName(svg) {
             fill: 'blue'
         });
     }
+}
+
+function mapZoom(height, width) {
+    var $each_map_layer = $('.each_map_layer');
+    $each_map_layer.animate({
+        height: height + 'px',
+        width: width + 'px'
+    }, 'fast', 'swing');
+    $each_map_layer.stop(false, true);
+    
+    // 缩放 div 中 svg 的 宽和高
+    $each_map_layer.each(function () {
+        var divSvg = $(this).find('svg');
+        if(divSvg) {
+            divSvg.width($(this).width() + 10);
+            divSvg.height($(this).height() + 10);
+        }
+    });
+    
+    // 地图标识;
+    showRoomName();
 }
 
 

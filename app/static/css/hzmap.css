@@ -31,6 +31,7 @@
 #svg-people-stat-zone-draft {	z-index:111;	}
 #svg-electronic-rail		{ 	z-index:120;	}
 #svg-electronic-rail-draft	{ 	z-index:121;	}
+#svg_path_history			{ 	z-index:125;	}
 #svg_path					{	z-index:130;	}
 #svg_sign					{	z-index:140;	}
 #svg_user_sign				{	z-index:150;	}

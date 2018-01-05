@@ -1,5 +1,6 @@
 'use strict';
 
+
 function CoordTransformer()
 {
     var _locOrigin;
@@ -34,11 +35,11 @@ function CoordTransformer()
 
     this.transform = function(loc)
     {
-        var offsetRatio = {'x':(loc.x-_locOrigin.x)/_locRange.x,'y':(loc.y-_locOrigin.y)/_locRange.y};
+        var offsetRatio = {'x':(loc.x - _locOrigin.x)/_locRange.x,'y':(loc.y - _locOrigin.y)/_locRange.y};
 
         var mapOffset = {'x':offsetRatio.x*_mapRange.x,'y':offsetRatio.y*_mapRange.y};
-        var mapCoord = {'x':_mapOrigin.x+_mapAxisX.x*mapOffset.x+_mapAxisY.x*mapOffset.y,
-            'y':_mapOrigin.y+_mapAxisX.y*mapOffset.x+_mapAxisY.y*mapOffset.y};
+        var mapCoord = {'x':_mapOrigin.x + _mapAxisX.x*mapOffset.x + _mapAxisY.x*mapOffset.y,
+            'y':_mapOrigin.y + _mapAxisX.y*mapOffset.x + _mapAxisY.y*mapOffset.y};
 
         return mapCoord;
     };
@@ -50,12 +51,14 @@ var _transformer = new CoordTransformer();
 var _locOrigin = {'x':0,'y':0};          // 定位坐标原点
 var _locRange = {'x':39023,'y':19854};   // 定位范围
 
-// 根据定位四个角点的地图坐标点
+// 根据定位四个角点的地图坐标点：
+// 原点坐标, X轴终点坐标, 原点对角点坐标, Y轴终点坐标
 var _mapParas = [];
-_mapParas[0]={'x':12531716.588,'y':3101762.0606};    // 定位原点地图坐标
-_mapParas[1]={'x':12531760.942,'y':3101762.0606};    // X轴终点地图坐标
-_mapParas[2]={'x':12531760.942,'y':3101784.7414};    // 定位原点对角点地图坐标
+_mapParas[0]={'x':12531716.588,'y':3101761.9051};    // 定位原点地图坐标
+_mapParas[1]={'x':12531761.921,'y':3101761.9051};    // X轴终点地图坐标
+_mapParas[2]={'x':12531761.921,'y':3101784.7414};    // 定位原点对角点地图坐标
 _mapParas[3]={'x':12531716.588,'y':3101784.7414};    // Y轴终点地图坐标
+
 
 // 转换器初始化
 _transformer.init(_locOrigin, _locRange, _mapParas);
@@ -69,7 +72,6 @@ _transformer.init(_locOrigin, _locRange, _mapParas);
 function hzTransformToFMap(coord) {
     return _transformer.transform(coord);
 }
-
 
 
 

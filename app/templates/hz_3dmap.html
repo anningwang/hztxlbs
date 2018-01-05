@@ -238,7 +238,9 @@
                             y: fm_coord.y
                         });
                     } else {
-                        var im = addMarker(fm_coord);
+                        var color = 'blue';
+                        if (msg[i].userId == '1918E00103AA') color = 'red';
+                        var im = addMarker(fm_coord, color);
                         if (im) {
                             hz_marker[msg[i].userId] = {marker: im};
                         }

@@ -6,7 +6,6 @@
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script>
 
-
     <link rel="stylesheet" href="/static/css/remodal-default-theme.css">
     <link rel="stylesheet" href="/static/css/remodal.css">
     <script src="/static/js/remodal.min.js"></script>
@@ -34,8 +33,8 @@
         }).done(function(data) {
             console.log('接口调用成功');
             console.log('receive:', data);
-            $('#receive').append($('<div/>').text('receive from server: <<<<<<<<<<').html());
-            $('#receive').append('<br>' + JSON.stringify(data));
+            $('#receive').append($('<div/>').text('receive from server: <<<<<<<<<<').html())
+                    .append('<br>' + JSON.stringify(data));
         }).fail(function() {
             console.log('接口调用失败');
         });
@@ -51,8 +50,8 @@
         }).done(function(data) {
             console.log('接口调用成功');
             console.log('receive:', data);
-            $('#receive').append($('<div/>').text('receive from server: <<<<<<<<<<').html());
-            $('#receive').append('<br>' + JSON.stringify(data));
+            $('#receive').append($('<div/>').text('receive from server: <<<<<<<<<<').html())
+                    .append('<br>' + JSON.stringify(data));
         }).fail(function() {
             console.log('接口调用失败');
         });
@@ -329,6 +328,7 @@
 </script>
 <body>
 
+<label for="userId">请选择要测试的接口</label>
 <select id="userId" onchange="selectApi(this.value)">
     <option value="choose">===请选择接口===</option>
     <option value="get_history_location">获取历史轨迹</option>
