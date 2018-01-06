@@ -235,1266 +235,6 @@
 							</div>
 						</div>
 						<div id="gritter-notice-wrapper" style="position:absolute; right:0; z-index:1001;"></div>
-						<script>
-							'use strict';
-							var hzX = 0, hzY = 0; // 坐标系原点
-							var margin = 0; //外边距
-							var real_loc_to_pix = 0.0891; //物理单位转像素单位 比例      比例转换计算公式x为传来的数据   x * real_loc_to_pix * zoom
-							var map_w = 3477; /// px
-							var map_h = 1769;
-							var zoom = 0.4889; /// 地图缩放级别
-							var hz_is_navigating = false; /// 是否曾经设置过导航，或正在导航中
-							var HZ_DESTINATION_MEETING_ROOM = 27; //办公室编号
-							var hz_destination = HZ_DESTINATION_MEETING_ROOM; /// 导航的目的地，默认 第一个 目的地
-							var hz_time_id = 0; //废弃
-							var hz_user_id = 0; //下面的索引   实际函数用0应该是未选择
-							var HZ_USER_IDS = ['1918E00103AA', '1918E00103A9'];
-							var hz_user_xy = []; //用户数据  每项为一个用户
-
-							var storage = window.localStorage;
-
-							if(storage) {
-								//storage.clear();
-								///alert("浏览支持localStorage");
-								var _userId = storage['hz_user_id'];
-								if(typeof _userId !== 'undefined') {
-									hz_user_id = _userId;
-								}
-								var hz_zoom = storage['hz_zoom'];
-								///alert(hz_zoom);
-								if(typeof hz_zoom !== 'undefined') { /// 存在值
-									zoom = hz_zoom;
-								}
-								///alert(storage['hz_is_navigating'] + "  " + Boolean(storage['hz_is_navigating']));
-								hz_is_navigating = Boolean(storage['hz_is_navigating']);
-							}
-							else {
-								///alert("浏览暂不支持localStorage");
-							}
-
-
-							$(function () {
-								/**
-								 * 全局初始化变量
-								 * 	zoomCallBack 	缩放需要执行的临时函数
-								 * 	ps_zone_data  		盘点区域临时数据
-								 */
-								var	zoomCallBack = [], ps_zone_data;
-
-								var global_init = new Init();
-								var $svg_map_base = $('#svg_map_base');
-								var $svg_event = $('#svg_event');
-								var $document = $(document);
-								var hzCanvas = $('#myCanvas');
-
-								// 缩放要调用的函数
-								function people_move_zoom() {
-									var hz_user_xy_length = hz_user_xy.length;
-									for(var i = 0; i < hz_user_xy_length; i++) {
-										hzPeopleGoto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
-												hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
-									}
-								}
-
-								// 盘点区域查询缩放附加函数
-								function draw_ps_zone_fn() {
-									drawPsZone(ps_zone_data);
-								}
-
-								// 地图标识
-								var $svg_sign = $('#svg_sign');
-								$svg_sign.svg();
-								var svgRoom = $svg_sign.svg('get');
-								showRoomName(svgRoom);
-
-								// 地图缩放
-								// 鼠标滚轮缩放svg图
-								$svg_event.ready(function () {
-									//获取svg图对象
-									var mapSign = $svg_map_base;
-
-									// 移动地图到 画布 的中央
-									hzX = (hzCanvas.width() - $svg_map_base.width()) / 2;
-									hzY = (hzCanvas.height() - $svg_map_base.height()) / 2;
-									$svg_map_base.css({
-										left: hzX + 'px',
-										top: hzY + 'px'
-									});
-									
-									//设置缩放速度   比例缩放
-									var zoomSpeed = 0.05;
-
-									// using the event helper
-									$svg_event.on('mousewheel', addMousewheelEvent);
-
-									function addMousewheelEvent(event, delta) {	// , deltaX, deltaY
-										//svg图的最小 最大  X和Y
-										var mapMinX, mapMaxX, mapMinY, mapMaxY;
-										var mapOffset = mapSign.offset();
-										var mapOuterWidth = mapSign.outerWidth();
-										var mapOuterHeight = mapSign.outerHeight();
-
-										mapMinX = mapOffset.left;
-										mapMaxX = mapOffset.left + mapOuterWidth;
-										mapMinY = mapOffset.top;
-										mapMaxY = mapOffset.top + mapOuterHeight;
-
-										if(event.pageX > mapMinX && event.pageX < mapMaxX && event.pageY > mapMinY && event.pageY < mapMaxY) {
-											// 取消默认事件
-											event.preventDefault();
-											
-											// 计算速度
-											var mapHeight, mapWidth, mapTopBorder, mapLeftBorder, mapTop, mapLeft, speedTop, speedLeft;
-											mapHeight = mapSign.height();
-											mapWidth = mapSign.width();
-
-											mapTopBorder = parseInt(mapSign.css('border-top-width'));
-											mapLeftBorder = parseInt(mapSign.css('border-left-width'));
-
-											mapTop = parseInt(mapSign.css('top'));
-											mapLeft = parseInt(mapSign.css('left'));
-
-
-											// 计算缩放速度  单独的top  或  left
-
-											if(delta == 1) {
-												speedTop = parseInt(zoomSpeed * mapHeight);
-												console.log('speedTop', speedTop);
-												speedLeft = parseInt(zoomSpeed * mapWidth);
-											} else {
-												speedTop = -parseInt(zoomSpeed * mapHeight);
-												speedLeft = -parseInt(zoomSpeed * mapWidth);
-											}
-
-
-											// 更改后的高
-											var resultHeight = mapHeight + (speedTop * 2);
-											var resultWidth = mapWidth + (speedLeft * 2);
-
-
-											// 鼠标在图内距离
-											var currentMouseTop = event.pageY - mapMinY - mapTopBorder;
-											var currentMouseLeft = event.pageX - mapMinX - mapLeftBorder;
-											// 缩放后再图内的距离
-											var mouseTop = Math.round(currentMouseTop - (currentMouseTop / mapHeight * resultHeight));
-											var mouseLeft = Math.round(currentMouseLeft - (currentMouseLeft / mapWidth * resultWidth));
-
-											// 计算svg偏离位置
-											hzY = mapTop + mouseTop;
-											hzX = mapLeft + mouseLeft;
-
-											// 保存缩放比例
-											zoom = resultWidth / map_w;
-											storage['hz_zoom'] = zoom;
-
-											console.log('margin', margin, 'resultHeight', resultHeight, 'resultWidth', resultWidth);
-											zoomFn(resultHeight, resultWidth);
-
-											$svg_map_base.css({
-												left: hzX + 'px',
-												top: hzY + 'px'
-											});
-
-											people_move_zoom();
-
-											for(var j = 0; j < zoomCallBack.length; j++) {
-												zoomCallBack[j]();
-											}
-										}
-									}
-								});
-								
-								// 缩放函数
-								zoomFn(map_h * zoom, map_w * zoom);
-
-								function zoomFn(height, width) {
-									var $each_map_layer = $('.each_map_layer');
-									$each_map_layer.animate({
-										height: height + 'px',
-										width: width + 'px'
-									}, 'fast', 'swing');
-									$each_map_layer.stop(false, true);
-
-									// 缩放 div 中 svg 的 宽和高
-									$each_map_layer.each(function () {
-										var divSvg = $(this).find('svg');
-										if(divSvg) {
-											divSvg.width($(this).width() + 10);
-											divSvg.height($(this).height() + 10);
-										}
-									});
-
-									// 地图标识;
-									svgRoom.clear();
-									showRoomName(svgRoom);
-								}
-
-
-								// 地图移动变量
-								var mapMoveMousedownX, mapMoveMousedownY;
-								var currentX, currentY;
-
-								function addMapMoveEvent() {
-									$svg_event.on('mousedown', mapMoveMousedownFn);
-								}
-								// 事件函数
-								function mapMoveMousedownFn(e) {
-									mapMoveMousedownX = e.pageX;
-									mapMoveMousedownY = e.pageY;
-
-									currentX = parseInt(hzX);
-									currentY = parseInt(hzY);
-
-									$document.on('mousemove', mapMoveMousemoveFn);
-									$document.on('mouseup', mapMoveMouseupFn);
-									return false;
-								}
-
-								function mapMoveMousemoveFn(e) {
-									currentX = e.pageX - mapMoveMousedownX + parseInt(hzX);
-									currentY = e.pageY - mapMoveMousedownY + parseInt(hzY);
-
-									$svg_map_base.css({
-										left: currentX + 'px',
-										top: currentY + 'px'
-									});
-								}
-
-								function mapMoveMouseupFn() {
-									hzX = currentX;
-									hzY = currentY;
-									$document.off('mousemove', mapMoveMousemoveFn);
-									$document.off('mouseup', mapMoveMouseupFn);
-								}
-								addMapMoveEvent();
-
-								/**
-								 * 显示盘点结果
-								 */
-								function showPsResult(data) {
-									console.log('showPsResult', data);
-									if (data.errorCode !== 0) return;
-									var psRec = data['statInfo'];
-									if (psRec.length == 0) return;
-									var text = '编号['+ psRec[0]['statNo'] +'] 盘点时间[' + psRec[0]['datetime'] + ']<br>';
-
-									for(var i=0; i< psRec.length; i++) {
-										if (psRec[i]['curPeopleNum'] > 0) {
-											text += '区域[' + psRec[i]['roomName'] + ']  人数[' + psRec[i]['curPeopleNum'] + ']  期望人数[' + psRec[i]['expectNum'] + ']<br>'
-										}
-									}
-									text += '其他区域，盘点人数为：0';
-
-									$.gritter.add({
-										title: '盘点结果',
-										text: text,
-										class_name: 'gritter-info',
-										image: '/static/img/redImageMarker.png',
-										sticky: true,
-										time: ''
-									});
-								}
-
-								// svg地图 控制面板
-								$("#map_panel_button").find('button').on('click', function () {
-									var btn = $(this);
-
-									// added by wxg 2018-01-02
-									if (btn.attr('id') === 'btnPsZoneShow'){
-										if(btn.text() === '隐藏') {	// 隐藏 盘点区域
-											btn.text('显示');
-											clearPsZone();
-										} else {	// 显示 盘点区域
-											btn.text('隐藏');
-											showPsZone();
-										}
-										return;
-									} else if (btn.attr('id') === 'btnPsExec'){
-										psExec({showMsg: false, callback: showPsResult });
-										return;
-									}
-
-									if(btn.hasClass('active')) {
-										map_button_slide_up(btn);
-									} else {
-										map_button_slide_down(btn)
-									}
-								});
-
-
-								function map_button_slide_down($this) {
-									$this.addClass('active');
-									$this.siblings().removeClass('active');
-									var $target = $($this.attr('data-hz-target'));
-									$target.siblings().slideUp('100', function () {
-										$target.slideDown();
-									})
-								}
-
-								function map_button_slide_up($this) {
-									$this.removeClass('active');
-									var $target = $($this.attr('data-hz-target'));
-									$target.slideUp();
-								}
-
-
-								var psZoneAdd = new HzDrawTools();
-
-								function changeTextPsZoneAdd($this){
-									var $span = $this.find('span');
-									var buttonText = $span.text();
-									var shape = $('#enclosure_spot_method');
-									if(shape.val() === 'polyline') {
-										if(buttonText === '清空绘制') {
-											$span.text('开始绘制');
-											shape.removeAttr('disabled');
-										} else {
-											$span.text('清空绘制');
-											shape.attr('disabled', 'disabled');
-										}
-									}
-
-									// 方形绘图
-									if(shape.val() === 'square') {
-										if(buttonText === '清空绘制') {
-											$span.text('开始绘制');
-											shape.removeAttr('disabled');
-										} else {
-											$span.text('清空绘制');
-											shape.attr('disabled', 'disabled');
-										}
-									}
-								}
-
-								$("#btnDrawAddPsZone").on('click', function () {
-									var $this = $(this);
-									var $span = $this.find('span');
-									var buttonText = $span.text();
-									var $method_select = $('#enclosure_spot_method');
-									if($method_select.val() === 'polyline') {
-
-										if(buttonText === '清空绘制') {
-											global_init.run();
-										} else {
-											$span.text('清空绘制');
-											global_init.run();
-											global_init.add(psZoneAdd,psZoneAdd.remove_event);
-											global_init.add(changeTextPsZoneAdd,$this);
-											$method_select.attr('disabled', 'disabled');
-											psZoneAdd.polyline();
-										}
-									}
-									// 方形绘图
-									if($method_select.val() === 'square') {
-										if(buttonText === '清空绘制') {
-											global_init.run();
-										} else {
-											$span.text('清空绘制');
-											global_init.run();
-											global_init.add(psZoneAdd,psZoneAdd.remove_square);
-											global_init.add(changeTextPsZoneAdd,$this);
-											$method_select.attr('disabled', 'disabled');
-											psZoneAdd.square();
-										}
-									}
-								});
-
-								var psZoneChange = new HzDrawTools();
-
-								function changeTextPsZoneChange($this){
-									var $span = $this.find('span');
-									var buttonText = $span.text();
-									var $method_select = $('#enclosure_spot_method2');
-									if($method_select.val() === 'polyline') {
-										if(buttonText === '清空绘制') {
-											$span.text('开始绘制');
-											$method_select.removeAttr('disabled');
-										} else {
-											$span.text('清空绘制');
-											$method_select.attr('disabled', 'disabled');
-										}
-									}
-
-									// 方形绘图
-									if($method_select.val() === 'square') {
-										if(buttonText === '清空绘制') {
-											$span.text('开始绘制');
-											$method_select.removeAttr('disabled');
-										} else {
-											$span.text('清空绘制');
-											$method_select.attr('disabled', 'disabled');
-										}
-									}
-								}
-
-								$("#btnDrawChangePsZone").on('click', function () {
-									var $this = $(this);
-									var $span = $this.find('span');
-									var buttonText = $span.text();
-									var $method_select = $('#enclosure_spot_method2');
-									if($method_select.val() === 'polyline') {
-										if(buttonText === '清空绘制') {
-											global_init.run();
-										} else {
-											$span.text('清空绘制');
-											global_init.run();
-											global_init.add(psZoneChange,psZoneChange.remove_event);
-											global_init.add(changeTextPsZoneChange,$this);
-											$method_select.attr('disabled', 'disabled');
-											psZoneChange.polyline();
-										}
-									}
-									// 方形绘图
-									if($method_select.val() === 'square') {
-										if(buttonText === '清空绘制') {
-											global_init.run();
-										} else {
-											$span.text('清空绘制');
-											global_init.run();
-											global_init.add(psZoneChange,psZoneChange.remove_square);
-											global_init.add(changeTextPsZoneChange,$this);
-											$method_select.attr('disabled', 'disabled');
-											psZoneChange.square();
-										}
-									}
-								});
-
-
-								$('#btnAddPsZoneDefault').click(function(){
-									var result = ajaxJsonRequest('/lbs/people_stat_cfg_add_default', {});
-									alert(result.msg);
-									showPsZone();
-								});
-
-								// 修改盘点区域
-								$('#btnChangePsZone').on('click', function () {
-									var oName = $('#alter_enclosure_name');
-									var psZoneId = oName.val();
-									var enclosure_new_expectNum = $('#enclosure_new_expectNum').val();
-									var psZoneOldName = oName.find("option:selected").text();
-									var psZoneNewName = $('#enclosure_new_name').val();
-
-									var psZoneChange_points = psZoneChange.points;
-
-									console.log('psZoneChange_points', psZoneChange_points);
-									if(psZoneId == 'undefined') {
-										alert('该盘点区域不能修改!');
-										return false;
-									}
-
-									if(psZoneId == 0) {
-										alert('请选择盘点区域!');
-										return false;
-									}
-									if(psZoneChange.points.length > 0 && psZoneChange.points[0] != psZoneChange.points[psZoneChange.points.length - 1]) {
-										alert('您没有画图');
-										return false;
-									}
-
-									var pointsToServer = [];
-
-									var points_length = psZoneChange_points.length - 1;
-									for(var i = 0; i < points_length; i++) {
-										var pt = {
-											x: coordScreenToMap(psZoneChange.points[i][0]),
-											y: coordScreenToMap(psZoneChange.points[i][1])
-										};
-										pointsToServer.push(pt);
-									}
-
-									var data = {
-										id: parseInt(psZoneId)
-									};
-
-									if(psZoneNewName == '') {
-										data.name = psZoneOldName;
-									} else {
-										data.name = psZoneNewName;
-									}
-
-									if(enclosure_new_expectNum != ''){
-										data.expectNum = enclosure_new_expectNum;
-									}
-
-									if (pointsToServer.length > 0)
-										data.points = pointsToServer;
-
-									console.log('btnChangePsZone, send data=', data);
-									var result = ajaxJsonRequest('/lbs/people_stat_cfg_chg', {data:[data]});
-
-									if(result.errorCode === 0) {
-										query_electronic();
-										$('#btnDrawChangePsZone').click();
-										showPsZone();
-									}
-									alert(result.msg);
-									return false;
-								});
-
-								// param object obj jquery对象
-								function HzDrawTools() {
-									// 坐标资料格式 [[x,y], ...]]
-									this.points = [];
-									// 操作事件的对象(jquery)
-									this.$event = $('#enclosureEvent');
-									// 临时线函数
-									this.$svg_temporary_line = this.$event;
-
-									// 画板对象(jquery)
-									this.$board = $('#svg-people-stat-zone-draft');
-									this.$board.svg();
-									this.$board_svg = this.$board.svg('get');
-									// 地图对象
-									this.$map = $('#svg_image');
-
-									// 鼠标移动坐标
-									this.mousemove_points = [];
-									// 直角是否启动判断键值
-									this.right_angle_key = 17;
-									// demo坐标位置
-									this.dotted_line = [];
-
-									// 是否是斜线判断
-									this.is_coordinate_offset = false;
-									// 需要的html对象
-									this.htmlObj = {
-										// 画线开始图标
-										line_start: '#line_start',
-										line_switch: '#btnDrawAddPsZone'
-									};
-									// 线样式
-									this.line_style = {
-										// 画线过程样式
-										demo_line: {fill: 'none', stroke: 'blue', strokeWidth: 1},
-										// 实际线样式
-										result_line: {fill: 'none', stroke: 'blue', strokeWidth: 4}
-									};
-									// 热点大小
-									this.hotspot_size = {
-										width: 20,
-										height: 20
-									};
-									// 移动需要画的虚线
-									this.spot_move_line = [];
-									// 热点坐标
-									this.hotspot_new_position = [];
-
-
-									/**
-									 * 移除事件绑定
-									 * param
-									 * is_board_clear				是否清除画板，默认为true，清除画板
-									 * is_enclosureEvent_display	是否不接收事件，默认true，不接收
-									 */
-									this.remove_event = function (is_board_clear, is_enclosureEvent_display) {
-										// 默认清除画板
-										is_board_clear = (is_board_clear !== false);
-										is_enclosureEvent_display = (is_enclosureEvent_display !== false);
-
-										if(is_enclosureEvent_display) $('#enclosureEvent').css('display', 'none');
-										var $window = $(window);
-										$window.off('keydown', this.right_angle_package);
-										$window.off('keyup', this.keyup_fn);
-										this.$event.off('click', this.line_click_package);
-										this.$event.off('mousemove', this.mousemove_line_package);
-
-										$(this.htmlObj.line_start).off('click', this.line_end);
-
-										// 清除临时线
-										this.svgPolyline([], {}, this.$svg_temporary_line);
-										// 是否清除画板
-										if(is_board_clear) {
-											this.svgPolyline([], {}, this.$board);
-											$('#svg_map_base').find('.enclosure_spot').remove();
-										}
-
-
-										$(this.htmlObj.line_start).css({
-											left: 0,
-											top: 0,
-											display: 'none'
-										});
-									};
-									// 围栏绘制功能入口
-									this.polyline = function () {
-										var _this = this;
-										var _window = $(window);
-
-										// 格式化数据
-
-										this.points = [];
-										this.is_coordinate_offset = false;
-										// 打开事件绑定div
-										$('#enclosureEvent').css('display', 'block');
-
-										_window.on('keydown', {
-											_this: _this
-										}, this.right_angle_package);
-
-										_window.on('keyup', {
-											_this: _this
-										}, this.keyup_fn);
-
-										this.$event.on('click', {
-											_this: _this
-										}, this.line_click_package);
-
-										this.$event.on('mousemove', {
-											_this: _this
-										}, this.mousemove_line_package);
-
-										$(this.htmlObj.line_start).on('click', {
-											_this: _this
-										}, this.line_end);
-									};
-
-									this.line_click_package = function (e) {
-										e.data._this.line_click(e);
-									};
-
-									// 划线函数
-									this.line_click = function (e) {
-										var mapObjOffset = this.$map.offset();
-										var map_path_line = [];
-										map_path_line[0] = e.pageX - mapObjOffset.left - parseInt(this.$map.css('border-left-width'));
-										map_path_line[1] = e.pageY - mapObjOffset.top - parseInt(this.$map.css('border-top-width'));
-
-										if(this.points.length === 0) {
-											var $line_start = $(this.htmlObj.line_start);
-											var line_start_width = $line_start.outerWidth() / 2;
-											var line_start_height = $line_start.outerWidth() / 2;
-
-											$line_start.css({
-												left: map_path_line[0] - line_start_width + 'px',
-												top: map_path_line[1] - line_start_height + 'px',
-												display: 'block'
-											})
-										}
-										// 画直角线的情况  且不是第一个数据
-										if(this.is_coordinate_offset && this.points.length !== 0) {
-											if(this.dotted_line.length = 2) {
-												//
-												this.points.push(this.dotted_line[1]);
-											}
-										} else {
-											this.points.push(map_path_line);
-										}
-
-										var points_length = this.points.length;
-
-										if(points_length > 1) this.create_hotspot($('#svg_map_base'), this.points[points_length - 1], points_length - 1);
-										this.svgPolyline(this.points, this.line_style.result_line, this.$board);
-										console.log('square_mouse_up', this.points);
-									};
-									// 按键抬起函数
-									this.keyup_fn = function (e) {
-										if(e.which === e.data._this.right_angle_key && e.data._this.mousemove_points.length > 1) {
-											e.data._this.is_coordinate_offset = false;
-											e.data._this.svgPolyline(e.data._this.mousemove_points, e.data._this.line_style.demo_line);
-										}
-									};
-
-									// 直线函数包
-									this.right_angle_package = function (e) {
-										if(e.data._this.mousemove_points.length > 1 && e.which === e.data._this.right_angle_key) {
-											//是否直线函数判断  鼠标移动也直线函数
-											e.data._this.is_coordinate_offset = true;
-											e.data._this.right_angle(e.data._this.mousemove_points[1]);
-										}
-									};
-									//直线函数
-									this.right_angle = function (new_points) {
-										this.dotted_line[0] = this.points[this.points.length - 1];
-										if(Math.abs(this.dotted_line[0][0] - new_points[0]) >= Math.abs(this.dotted_line[0][1] - new_points[1])) {
-											this.dotted_line[1] = [new_points[0], this.dotted_line[0][1]];
-										}
-										else {
-											this.dotted_line[1] = [this.dotted_line[0][0], new_points[1]];
-										}
-										this.svgPolyline(this.dotted_line, this.line_style.demo_line);
-									};
-									// 鼠标移动划线函数包
-									this.mousemove_line_package = function (e) {
-										if(e.data._this.points.length > 0) {
-											e.data._this.mousemove_line(e);
-										}
-									};
-									// 鼠标移动划线函数
-									this.mousemove_line = function (e) {
-										var mapObjOffset = this.$map.offset();
-										this.mousemove_points[0] = this.points[this.points.length - 1];
-										this.mousemove_points[1] = [
-											e.pageX - mapObjOffset.left - parseInt(this.$map.css('border-left-width')),
-											e.pageY - mapObjOffset.top - parseInt(this.$map.css('border-top-width'))
-										];
-										if(this.is_coordinate_offset) {
-											this.right_angle(this.mousemove_points[1]);
-										} else {
-											this.svgPolyline(this.mousemove_points, this.line_style.demo_line);
-										}
-									};
-									// 围栏结束
-									this.line_end = function (e) {
-										// _this 本函数的对象
-										var _this = e.data._this;
-										var points_length = _this.points.length;
-
-										// this 判定该函数的对象
-										$(this).css({
-											top: 0,
-											left: 0,
-											display: 'none'
-										});
-
-										if(points_length > 1) {
-											_this.points.push(_this.points[0]);
-											// 画热点
-											_this.create_hotspot($('#svg_map_base'), _this.points[points_length], _this.points.length - 1, true);
-										}
-
-										_this.svgPolyline(_this.points, _this.line_style.result_line, _this.$board);
-										_this.remove_event(false, false);
-									};
-									// 方框
-									this.square = function () {
-										// 打开事件绑定div
-										$('#enclosureEvent').css('display', 'block');
-
-										this.$event.on('mousedown', {
-											_this: this
-										}, this.square_mouse_down_package);
-									};
-									this.square_mouse_down_package = function (e) {
-										var _this = e.data._this;
-										_this.square_mouse_down(e);
-										return false;
-									};
-									this.square_mouse_down = function (e) {
-										// 第一个点
-										var pt = [];
-										var $map = this.$map;
-										var mapOffset = $map.offset();
-										this.points = [];
-
-										pt[0] = e.pageX - mapOffset.left - parseInt($map.css('border-left-width'));
-										pt[1] = e.pageY - mapOffset.top - parseInt($map.css('border-top-width'));
-										this.points[0] = pt;
-										var $window = $(window);
-										$window.on('mousemove', {
-											_this: this
-										}, this.square_mouse_move_package);
-										$window.on('mouseup', {
-											_this: this
-										}, this.square_mouse_up_package);
-									};
-
-									this.square_mouse_move_package = function (e) {
-										var _this = e.data._this;
-										_this.square_mouse_move(e);
-									};
-									this.square_mouse_move = function (e) {
-										var spot1 = [],
-												spot2 = [],
-												spot3 = [];
-										var $map = this.$map;
-										var mapObjOffset = $map.offset();
-										// 移动原点
-
-										spot2[0] = e.pageX - mapObjOffset.left - parseInt($map.css('border-left-width'));
-										spot2[1] = e.pageY - mapObjOffset.top - parseInt($map.css('border-top-width'));
-
-										spot1[0] = spot2[0];
-										spot1[1] = this.points[0][1];
-
-										spot3[0] = this.points[0][0];
-										spot3[1] = spot2[1];
-
-										this.points[1] = spot1;
-										this.points[2] = spot2;
-										this.points[3] = spot3;
-										this.points[4] = this.points[0];
-
-										this.svgPolyline(this.points, this.line_style.demo_line, this.$svg_temporary_line);
-									};
-
-									this.square_mouse_up_package = function (e) {
-										var _this = e.data._this;
-										_this.square_mouse_up(e);
-									};
-
-									this.square_mouse_up = function (e) {
-										this.svgPolyline([], {}, this.$svg_temporary_line);
-										this.remove_hotspot();
-										this.svgPolyline(this.points, this.line_style.result_line, this.$board);
-										var $window = $(window);
-										$window.off('mousemove', this.square_mouse_move_package);
-										$window.off('mouseup', this.square_mouse_up_package);
-										var points_length = this.points.length;
-										if(points_length < 2) {
-											this.points = [];
-										} else {
-											for(var i = 1; i < points_length; i++) {
-												if(i < (points_length - 1)) {
-													this.create_hotspot($('#svg_map_base'), this.points[i], i);
-												} else {
-													this.create_hotspot($('#svg_map_base'), this.points[i], i, true);
-												}
-											}
-										}
-										console.log('square_mouse_up', this.points, 'e=', e);
-									};
-
-									/**
-									 * 创建热点
-									 *
-									 * $parent 				父div jquery 对象
-									 * position 			坐标   left top 值
-									 * index 				索引  坐标在points 中的位置
-									 * is_end_spot boolean 	是否是尾点
-									 */
-									this.create_hotspot = function ($parent, position, index, is_end_spot) {
-										//创建对象的类
-										var hotspot_class = 'enclosure_spot';
-										is_end_spot = is_end_spot || false;
-
-										var hotspot_left = position[0] - Math.round((this.hotspot_size.width) / 2);
-										var hotspot_top = position[1] - Math.round((this.hotspot_size.height) / 2);
-
-										var $create_hotspot = $("<div></div>");
-										$create_hotspot.addClass(hotspot_class);
-
-										$create_hotspot.attr('index', index);
-										// 创建尾点标记
-										if(is_end_spot) $create_hotspot.attr('is_end_spot', 1);
-
-										$create_hotspot.css({
-											left: hotspot_left + 'px',
-											top: hotspot_top + 'px'
-										});
-
-										$create_hotspot.on('mousedown', {
-											_this: this
-										}, this.hotspot_mouse_down_package);
-
-										$parent.append($create_hotspot);
-									};
-
-									this.hotspot_mouse_down_package = function (e) {
-										var _this = e.data._this;
-										_this.hotspot_mouse_down(e, this);
-										return false;
-									};
-									this.hotspot_mouse_down = function (e, obj) {
-										// 事件
-										var $this = $(obj);
-										var current_spot_index = parseInt($this.attr('index'));
-
-										// 实线数量
-										var points_size = this.points.length;
-										console.log('hotspot_mouse_down');
-
-										$(window).on('mousemove', {
-											_this: this,
-											$obj: $this,
-											current_spot_index: current_spot_index,
-											points_size: points_size
-										}, this.hotspot_mouse_move_package);
-
-										$(window).on('mouseup', {
-											_this: this,
-											$obj: $this,
-											current_spot_index: current_spot_index,
-											points_size: points_size
-										}, this.hotspot_mouse_up_package);
-									};
-
-									this.hotspot_mouse_move_package = function (e) {
-										var _this = e.data._this;
-										_this.hotspot_mouse_move(e);
-
-									};
-									this.hotspot_mouse_move = function (e) {
-										console.log('hotspot_mouse_move');
-
-										// $obj 当前点下的元素
-										var $obj = e.data.$obj;
-										var current_spot_index = e.data.current_spot_index;
-										var points_size = e.data.points_size;
-										var mapObjOffset = this.$map.offset();
-
-										var map_path_line1 = [];
-										map_path_line1[0] = e.pageX - mapObjOffset.left - parseInt(this.$map.css('border-left-width'));
-										map_path_line1[1] = e.pageY - mapObjOffset.top - parseInt(this.$map.css('border-top-width'));
-
-										$obj.css({
-											left: (map_path_line1[0] - Math.round((this.hotspot_size.width) / 2)) + 'px',
-											top: (map_path_line1[1] - Math.round((this.hotspot_size.height) / 2)) + 'px'
-										});
-
-										// 线位置
-										if($obj.attr('is_end_spot') != 1) { // 不是尾点的情况
-											if(points_size > 1) {
-												// 大于一个点  才需要划线
-												this.spot_move_line[0] = this.points[current_spot_index - 1];
-												this.spot_move_line[1] = map_path_line1;
-												this.hotspot_new_position = map_path_line1;
-												if(current_spot_index < (points_size - 1) && points_size > 2) this.spot_move_line[2] = this.points[current_spot_index + 1];
-												this.svgPolyline(this.spot_move_line, this.line_style.demo_line, this.$svg_temporary_line);
-											} else {
-												this.hotspot_new_position = map_path_line1;
-											}
-										} else {
-											if(points_size > 1) {
-												// 大于一个点  才需要划线
-												this.spot_move_line[0] = this.points[1];
-												this.spot_move_line[1] = map_path_line1;
-												this.hotspot_new_position = map_path_line1;
-												if(points_size > 2) this.spot_move_line[2] = this.points[current_spot_index - 1];
-												this.svgPolyline(this.spot_move_line, this.line_style.demo_line, this.$svg_temporary_line);
-											} else {
-												this.hotspot_new_position = map_path_line1;
-											}
-										}
-									};
-
-									this.hotspot_mouse_up_package = function (e) {
-										var _this = e.data._this;
-										_this.hotspot_mouse_up(e);
-									};
-									this.hotspot_mouse_up = function (e) {
-										console.log('hotspot_mouse_up');
-										var $obj = e.data.$obj;
-										var current_spot_index = e.data.current_spot_index;
-										this.svgPolyline([], {}, this.$svg_temporary_line);
-
-										// 不是尾点的情况
-										if($obj.attr('is_end_spot') != 1) {
-											this.points[current_spot_index] = this.hotspot_new_position;
-										}
-										else {
-											this.points[current_spot_index] = this.hotspot_new_position;
-											this.points[0] = this.hotspot_new_position;
-										}
-
-										console.log('this.spot_move_line[1]', this.spot_move_line[1]);
-										$(window).off('mousemove', this.hotspot_mouse_move_package);
-
-										this.svgPolyline(this.points, this.line_style.result_line, this.$board);
-
-										console.log('spot_mouse_up', this.points);
-
-										this.hotspot_new_position = [];
-										this.spot_move_line = [];
-
-										$(window).off('mouseup', this.hotspot_mouse_up_package);
-									};
-
-									this.remove_hotspot = function () {
-										$('#svg_map_base').find('.enclosure_spot').remove();
-									};
-
-									this.remove_square = function () {
-										$('#enclosureEvent').css('display', 'none');
-										this.$event.off('mousedown', this.square_mouse_down_package);
-										this.$board_svg.clear();
-										this.remove_hotspot();
-									};
-
-									/**
-									 * 画曲线函数
-									 * is_clear			是否清除原画板，默认 true
-									 */
-									this.svgPolyline = function (points, param, obj, is_clear) {
-										var settings = param || this.line_style.result_line;
-										obj = obj || this.$svg_temporary_line;
-										is_clear = (is_clear !== false);
-										obj.svg();
-										var $svg = obj.svg('get');
-										if(is_clear) $svg.clear();
-										if(points.length !== 0) $svg.polyline(points, settings);
-									}
-								}
-
-								(function (factory) {
-									if(typeof define === "function" && define.amd) {
-										define(["jquery", ""], factory);
-									}
-									else {
-										factory(jQuery);
-									}
-								}(function ($) {
-									/*
-									 * Translated default messages for the jQuery validation plugin.
-									 * Locale: ZH (Chinese, 中文, 汉语, 漢語)
-									 */
-									$.extend($.validator.messages, {
-										required: "这是必填字段",
-										remote: "请修正此字段",
-										email: "请输入有效的电子邮件地址",
-										url: "请输入有效的网址",
-										date: "请输入有效的日期",
-										dateISO: "请输入有效的日期 (YYYY-MM-DD)",
-										number: "请输入有效的数字",
-										digits: "只能输入数字",
-										creditCard: "请输入有效的信用卡号码",
-										equalTo: "你的输入不相同",
-										extension: "请输入有效的后缀",
-										maxLength: $.validator.format("最多可以输入 {0} 个字符"),
-										minLength: $.validator.format("最少要输入 {0} 个字符"),
-										rangeLength: $.validator.format("请输入长度在 {0} 到 {1} 之间的字符串"),
-										range: $.validator.format("请输入范围在 {0} 到 {1} 之间的数值"),
-										max: $.validator.format("请输入不大于 {0} 的数值"),
-										min: $.validator.format("请输入不小于 {0} 的数值")
-									});
-								}));
-
-
-								$('#form-validate').validate({
-									errorElement: 'div',
-									errorClass: 'help-block',
-									focusInvalid: false,
-									ignore: "",
-									rules: {
-										name: {
-											required: true
-										},
-										peopleNum: {
-											digits: true
-										}
-									},
-
-									highlight: function (e) {
-										$(e).closest('.form-group').removeClass('has-info').addClass('has-error');
-									},
-
-									success: function (e) {
-										$(e).closest('.form-group').removeClass('has-error'); //.addClass('has-info');
-										$(e).remove();
-									},
-
-
-									submitHandler: function (form) {
-										if(psZoneAdd.points[0] == undefined || psZoneAdd.points[0] != psZoneAdd.points[psZoneAdd.points.length - 1]) {
-											alert('您没有画图');
-											return;
-										}
-
-										var $form = $(form);
-										var data = {
-											name: $form.find("#inventory_name").val()
-										};
-
-										var peopleNum = $form.find("#psZonePeopleExpect").val();
-										if(peopleNum) {
-											data.expectNum = parseInt(peopleNum);
-										}
-
-										var points = [];
-										var points_length = psZoneAdd.points.length - 1;
-										for(var i = 0; i < points_length; i++) {
-											var pt = {
-												x: coordScreenToMap(psZoneAdd.points[i][0]),
-												y: coordScreenToMap(psZoneAdd.points[i][1])
-											};
-											points.push(pt);
-										}
-										data.points = points;
-
-										$('#btnDrawAddPsZone').click();
-										console.log('submitHandler send data=', data);
-
-										var result = ajaxJsonRequest('/lbs/people_stat_cfg_add', {
-											data: [data]
-										});
-
-										if(result.errorCode === 0) {
-											query_electronic();
-											showPsZone();
-										}
-										alert(result.msg);
-
-									},
-									invalidHandler: function (form) {}
-								});
-
-
-								function ajaxJsonRequest(url, txData) {
-									var ajaxData = null;
-									$.ajax({
-										url: url,
-										async: false,
-										type: 'POST',
-										contentType: "application/json;charset=UTF-8",
-										data: JSON.stringify(txData)   // 发送json数据到服务器
-									}).done(function (data) {
-										console.log('接口调用成功');
-										console.log('receive:', data);
-										ajaxData = data;
-									}).fail(function () {
-										console.log('接口调用失败');
-										ajaxData = false;
-									});
-									return ajaxData;
-								}
-
-								function query_electronic(){
-									var url = '/lbs/people_stat_cfg_get';
-									var txData = {
-										rows:2000
-									};
-									var data = ajaxJsonRequest(url, txData);
-
-									var dataData = data.data.rows;
-									var dataDataLength = dataData.length;
-									var selectHtml = '<option value="0">请选择盘点区域</option>';
-									var checkboxHtml = '';
-									for (var i = 0; i<dataDataLength; i++){
-										selectHtml += '<option value="'+dataData[i].id+'">'+dataData[i].name+'</option>';
-										if(dataData[i].id != undefined){
-											checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar-' + i + '" autocomplete="off" value="'+dataData[i].id+'" /><label class="lbl" for="ace-settings-navbar-'+i+'">'+dataData[i].name+'</div></div>'}
-									}
-									$('#alter_enclosure_name').html(selectHtml);
-									$('#enclosure_item').html(checkboxHtml);
-								}
-
-								query_electronic();
-
-								$('#enclosure_item_button').on('click',function(){
-									var $enclosure_item = $('#enclosure_item');
-									var items = $enclosure_item.find(':checked');
-
-									global_init.run();
-
-									if(items == undefined){
-										alert('请选择要删除的盘点区域!');
-										return false;
-									}
-									var ids = [];
-
-									items.each(function(){
-										ids.push($(this).val());
-									});
-
-
-									var url = '/lbs/hz_data_del';
-									var data = {
-										who:'people_stat_cfg',
-										ids:ids
-									};
-									console.log('enclosure_item_button send data:',data);
-									var result = ajaxJsonRequest(url,data);
-									alert(result.msg);
-
-									if(result.errorCode == 0)
-									{
-										query_electronic();
-										showPsZone();
-									}
-								});
-
-
-								$('#electronic-fence-query-button').click(function () {
-									global_init.run();
-									showPsZone();
-								});
-
-								function showPsZone() {
-									if ($('#btnPsZoneShow').text() !== '隐藏') return;
-
-									var url = '/lbs/people_stat_cfg_get';
-									var txData = {
-										"floorNo": 'Floor3',
-										rows: 100
-									};
-
-									var data = ajaxJsonRequest(url, txData);
-									console.log('showPsZone send data=',data);
-									ps_zone_data = data.data.rows;
-									drawPsZone(ps_zone_data);
-									zoomCallBack.push(draw_ps_zone_fn);
-								}
-
-								function clearPsZone (){
-									ps_zone_data = [];
-									for(var i=0; i< zoomCallBack.length; i++){
-										if (zoomCallBack[i] === draw_ps_zone_fn){
-											zoomCallBack.splice(i, 1);
-											break;
-										}
-									}
-									var draw_path = $('#svg-people-stat-zone');
-									var svg = draw_path.svg('get');
-									svg.clear();
-								}
-
-
-								function drawPsZone(data) {
-									console.log('drawPsZone',data);
-									var erBoard = $('#svg-people-stat-zone');
-									erBoard.svg();
-									var svg = erBoard.svg('get');
-									svg.clear();
-
-									for(var k = 0; k < data.length; k++) {
-										var pts = data[k].points;
-										var pointsScreen = [];
-										var ptArr;
-
-										for(var i = 0; i < pts.length; i++) {
-											ptArr = [];
-											ptArr.push(coordMapToScreen(pts[i].x));
-											ptArr.push(coordMapToScreen(pts[i].y));
-											pointsScreen.push(ptArr);
-										}
-
-										// 再次增加第一个画线起点
-										ptArr = [];
-										ptArr.push(coordMapToScreen(pts[0].x));
-										ptArr.push(coordMapToScreen(pts[0].y));
-										pointsScreen.push(ptArr);
-
-										svg.polyline(pointsScreen, {
-											fill: 'DeepSkyBlue',
-											opacity: 0.6,
-											stroke: 'blue',
-											strokeWidth: 5
-										});
-
-										svg.text(coordMapToScreen(pts[0].x) + 10, coordMapToScreen(pts[0].y) + 20, data[k].name, {
-											fontSize: 14,
-											fontFamily: 'Verdana',
-											fill: 'RoyalBlue'
-										});
-									}
-								}
-
-								var namespace = '/HeZhong';
-								// Connect to the Socket.IO server.
-								// The connection URL has the following format:
-								//     http[s]://<domain>:<port>[/<namespace>]
-								var connStr = location.protocol + '//' + document.domain + ':' + location.port + namespace;
-								console.log(connStr);
-								var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
-
-								socket.on('hz_position', function (msg) {
-									var json = eval(msg); // 数组
-									console.log(json);
-									$.each(json, function (index, item) {
-										hz_user_xy[index] = [item['userId'], json[index]['x'], json[index]['y']];
-									});
-
-									console.log('hz_user_xy:', hz_user_xy);
-									for(var i = 0; i < json.length; i++) {
-										hzPeopleGoto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
-												hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
-									}
-								});
-
-								// 默认显示 盘点区域
-								$('#btnPsZoneShow').click();
-
-							})
-						</script>
 
 						<div id="svg_map_base" class="each_map_layer">  					<!--基础svg图-->
 							<img src="/static/img/floor3.svg" id="svg_image" class="each_map_layer">
@@ -1516,14 +256,1281 @@
 
 					</div>
 				</div>
-			</div>
-			<!-- /.page-content -->
+
+				<!--页脚-->
+				<div class="footer">
+					<div class="footer-inner " >
+						<!-- #section:basics/footer -->
+						<div class="footer-content "> <span class="bigger-120"> 衡阳市和仲通讯科技有限公司 &copy; 2016-2018 </span> &nbsp; &nbsp; <span class="action-buttons"> <a href="#"> <i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i> </a> <a href="#"> <i class="ace-icon fa fa-facebook-square text-primary bigger-150"></i> </a> <a href="#"> <i class="ace-icon fa fa-rss-square orange bigger-150"></i> </a> </span> </div>
+						<!-- /section:basics/footer -->
+					</div>
+				</div>
+			</div>  <!-- /.page-content -->
 
 		</div>
-	</div>
-	<!-- /.main-content -->
-</div>
-<!-- /.main-container -->
+	</div> <!-- /.main-content -->
+</div> <!-- /.main-container -->
+
+<script>
+	'use strict';
+	var hzX = 0, hzY = 0; // 坐标系原点
+	var margin = 0; //外边距
+	var real_loc_to_pix = 0.0891; //物理单位转像素单位 比例      比例转换计算公式x为传来的数据   x * real_loc_to_pix * zoom
+	var map_w = 3477; /// px
+	var map_h = 1769;
+	var zoom = 0.4889; /// 地图缩放级别
+	var hz_is_navigating = false; /// 是否曾经设置过导航，或正在导航中
+	var HZ_DESTINATION_MEETING_ROOM = 27; //办公室编号
+	var hz_destination = HZ_DESTINATION_MEETING_ROOM; /// 导航的目的地，默认 第一个 目的地
+	var hz_time_id = 0; //废弃
+	var hz_user_id = 0; //下面的索引   实际函数用0应该是未选择
+	var HZ_USER_IDS = ['1918E00103AA', '1918E00103A9'];
+	var hz_user_xy = []; //用户数据  每项为一个用户
+
+	var storage = window.localStorage;
+
+	if(storage) {
+		//storage.clear();
+		///alert("浏览支持localStorage");
+		var _userId = storage['hz_user_id'];
+		if(typeof _userId !== 'undefined') {
+			hz_user_id = _userId;
+		}
+		var hz_zoom = storage['hz_zoom'];
+		///alert(hz_zoom);
+		if(typeof hz_zoom !== 'undefined') { /// 存在值
+			zoom = hz_zoom;
+		}
+		///alert(storage['hz_is_navigating'] + "  " + Boolean(storage['hz_is_navigating']));
+		hz_is_navigating = Boolean(storage['hz_is_navigating']);
+	}
+	else {
+		///alert("浏览暂不支持localStorage");
+	}
+
+
+	$(function () {
+		/**
+		 * 全局初始化变量
+		 * 	zoomCallBack 	缩放需要执行的临时函数
+		 * 	ps_zone_data  		盘点区域临时数据
+		 */
+		var	zoomCallBack = [], ps_zone_data;
+
+		var global_init = new Init();
+		var $svg_map_base = $('#svg_map_base');
+		var $svg_event = $('#svg_event');
+		var $document = $(document);
+		var hzCanvas = $('#myCanvas');
+
+		// 缩放要调用的函数
+		function people_move_zoom() {
+			var hz_user_xy_length = hz_user_xy.length;
+			for(var i = 0; i < hz_user_xy_length; i++) {
+				hzPeopleGoto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
+						hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
+			}
+		}
+
+		// 盘点区域查询缩放附加函数
+		function draw_ps_zone_fn() {
+			drawPsZone(ps_zone_data);
+		}
+
+		// 地图标识
+		var $svg_sign = $('#svg_sign');
+		$svg_sign.svg();
+		var svgRoom = $svg_sign.svg('get');
+		showRoomName(svgRoom);
+
+		// 地图缩放
+		// 鼠标滚轮缩放svg图
+		$svg_event.ready(function () {
+			//获取svg图对象
+			var mapSign = $svg_map_base;
+
+			// 移动地图到 画布 的中央
+			hzX = (hzCanvas.width() - $svg_map_base.width()) / 2;
+			hzY = (hzCanvas.height() - $svg_map_base.height()) / 2;
+			$svg_map_base.css({
+				left: hzX + 'px',
+				top: hzY + 'px'
+			});
+
+			//设置缩放速度   比例缩放
+			var zoomSpeed = 0.05;
+
+			// using the event helper
+			$svg_event.on('mousewheel', addMousewheelEvent);
+
+			function addMousewheelEvent(event, delta) {	// , deltaX, deltaY
+				//svg图的最小 最大  X和Y
+				var mapMinX, mapMaxX, mapMinY, mapMaxY;
+				var mapOffset = mapSign.offset();
+				var mapOuterWidth = mapSign.outerWidth();
+				var mapOuterHeight = mapSign.outerHeight();
+
+				mapMinX = mapOffset.left;
+				mapMaxX = mapOffset.left + mapOuterWidth;
+				mapMinY = mapOffset.top;
+				mapMaxY = mapOffset.top + mapOuterHeight;
+
+				if(event.pageX > mapMinX && event.pageX < mapMaxX && event.pageY > mapMinY && event.pageY < mapMaxY) {
+					// 取消默认事件
+					event.preventDefault();
+
+					// 计算速度
+					var mapHeight, mapWidth, mapTopBorder, mapLeftBorder, mapTop, mapLeft, speedTop, speedLeft;
+					mapHeight = mapSign.height();
+					mapWidth = mapSign.width();
+
+					mapTopBorder = parseInt(mapSign.css('border-top-width'));
+					mapLeftBorder = parseInt(mapSign.css('border-left-width'));
+
+					mapTop = parseInt(mapSign.css('top'));
+					mapLeft = parseInt(mapSign.css('left'));
+
+
+					// 计算缩放速度  单独的top  或  left
+
+					if(delta == 1) {
+						speedTop = parseInt(zoomSpeed * mapHeight);
+						console.log('speedTop', speedTop);
+						speedLeft = parseInt(zoomSpeed * mapWidth);
+					} else {
+						speedTop = -parseInt(zoomSpeed * mapHeight);
+						speedLeft = -parseInt(zoomSpeed * mapWidth);
+					}
+
+
+					// 更改后的高
+					var resultHeight = mapHeight + (speedTop * 2);
+					var resultWidth = mapWidth + (speedLeft * 2);
+
+
+					// 鼠标在图内距离
+					var currentMouseTop = event.pageY - mapMinY - mapTopBorder;
+					var currentMouseLeft = event.pageX - mapMinX - mapLeftBorder;
+					// 缩放后再图内的距离
+					var mouseTop = Math.round(currentMouseTop - (currentMouseTop / mapHeight * resultHeight));
+					var mouseLeft = Math.round(currentMouseLeft - (currentMouseLeft / mapWidth * resultWidth));
+
+					// 计算svg偏离位置
+					hzY = mapTop + mouseTop;
+					hzX = mapLeft + mouseLeft;
+
+					// 保存缩放比例
+					zoom = resultWidth / map_w;
+					storage['hz_zoom'] = zoom;
+
+					console.log('margin', margin, 'resultHeight', resultHeight, 'resultWidth', resultWidth);
+					zoomFn(resultHeight, resultWidth);
+
+					$svg_map_base.css({
+						left: hzX + 'px',
+						top: hzY + 'px'
+					});
+
+					people_move_zoom();
+
+					for(var j = 0; j < zoomCallBack.length; j++) {
+						zoomCallBack[j]();
+					}
+				}
+			}
+		});
+
+		// 缩放函数
+		zoomFn(map_h * zoom, map_w * zoom);
+
+		function zoomFn(height, width) {
+			var $each_map_layer = $('.each_map_layer');
+			$each_map_layer.animate({
+				height: height + 'px',
+				width: width + 'px'
+			}, 'fast', 'swing');
+			$each_map_layer.stop(false, true);
+
+			// 缩放 div 中 svg 的 宽和高
+			$each_map_layer.each(function () {
+				var divSvg = $(this).find('svg');
+				if(divSvg) {
+					divSvg.width($(this).width() + 10);
+					divSvg.height($(this).height() + 10);
+				}
+			});
+
+			// 地图标识;
+			svgRoom.clear();
+			showRoomName(svgRoom);
+		}
+
+
+		// 地图移动变量
+		var mapMoveMousedownX, mapMoveMousedownY;
+		var currentX, currentY;
+
+		function addMapMoveEvent() {
+			$svg_event.on('mousedown', mapMoveMousedownFn);
+		}
+		// 事件函数
+		function mapMoveMousedownFn(e) {
+			mapMoveMousedownX = e.pageX;
+			mapMoveMousedownY = e.pageY;
+
+			currentX = parseInt(hzX);
+			currentY = parseInt(hzY);
+
+			$document.on('mousemove', mapMoveMousemoveFn);
+			$document.on('mouseup', mapMoveMouseupFn);
+			return false;
+		}
+
+		function mapMoveMousemoveFn(e) {
+			currentX = e.pageX - mapMoveMousedownX + parseInt(hzX);
+			currentY = e.pageY - mapMoveMousedownY + parseInt(hzY);
+
+			$svg_map_base.css({
+				left: currentX + 'px',
+				top: currentY + 'px'
+			});
+		}
+
+		function mapMoveMouseupFn() {
+			hzX = currentX;
+			hzY = currentY;
+			$document.off('mousemove', mapMoveMousemoveFn);
+			$document.off('mouseup', mapMoveMouseupFn);
+		}
+		addMapMoveEvent();
+
+		/**
+		 * 显示盘点结果
+		 */
+		function showPsResult(data) {
+			console.log('showPsResult', data);
+			if (data.errorCode !== 0) return;
+			var psRec = data['statInfo'];
+			if (psRec.length == 0) return;
+			var text = '编号['+ psRec[0]['statNo'] +'] 盘点时间[' + psRec[0]['datetime'] + ']<br>';
+
+			for(var i=0; i< psRec.length; i++) {
+				if (psRec[i]['curPeopleNum'] > 0) {
+					text += '区域[' + psRec[i]['roomName'] + ']  人数[' + psRec[i]['curPeopleNum'] + ']  期望人数[' + psRec[i]['expectNum'] + ']<br>'
+				}
+			}
+			text += '其他区域，盘点人数为：0';
+
+			$.gritter.add({
+				title: '盘点结果',
+				text: text,
+				class_name: 'gritter-info',
+				image: '/static/img/redImageMarker.png',
+				sticky: true,
+				time: ''
+			});
+		}
+
+		// svg地图 控制面板
+		$("#map_panel_button").find('button').on('click', function () {
+			var btn = $(this);
+
+			// added by wxg 2018-01-02
+			if (btn.attr('id') === 'btnPsZoneShow'){
+				if(btn.text() === '隐藏') {	// 隐藏 盘点区域
+					btn.text('显示');
+					clearPsZone();
+				} else {	// 显示 盘点区域
+					btn.text('隐藏');
+					showPsZone();
+				}
+				return;
+			} else if (btn.attr('id') === 'btnPsExec'){
+				psExec({showMsg: false, callback: showPsResult });
+				return;
+			}
+
+			if(btn.hasClass('active')) {
+				map_button_slide_up(btn);
+			} else {
+				map_button_slide_down(btn)
+			}
+		});
+
+
+		function map_button_slide_down($this) {
+			$this.addClass('active');
+			$this.siblings().removeClass('active');
+			var $target = $($this.attr('data-hz-target'));
+			$target.siblings().slideUp('100', function () {
+				$target.slideDown();
+			})
+		}
+
+		function map_button_slide_up($this) {
+			$this.removeClass('active');
+			var $target = $($this.attr('data-hz-target'));
+			$target.slideUp();
+		}
+
+
+		var psZoneAdd = new HzDrawTools();
+
+		function changeTextPsZoneAdd($this){
+			var $span = $this.find('span');
+			var buttonText = $span.text();
+			var shape = $('#enclosure_spot_method');
+			if(shape.val() === 'polyline') {
+				if(buttonText === '清空绘制') {
+					$span.text('开始绘制');
+					shape.removeAttr('disabled');
+				} else {
+					$span.text('清空绘制');
+					shape.attr('disabled', 'disabled');
+				}
+			}
+
+			// 方形绘图
+			if(shape.val() === 'square') {
+				if(buttonText === '清空绘制') {
+					$span.text('开始绘制');
+					shape.removeAttr('disabled');
+				} else {
+					$span.text('清空绘制');
+					shape.attr('disabled', 'disabled');
+				}
+			}
+		}
+
+		$("#btnDrawAddPsZone").on('click', function () {
+			var $this = $(this);
+			var $span = $this.find('span');
+			var buttonText = $span.text();
+			var $method_select = $('#enclosure_spot_method');
+			if($method_select.val() === 'polyline') {
+
+				if(buttonText === '清空绘制') {
+					global_init.run();
+				} else {
+					$span.text('清空绘制');
+					global_init.run();
+					global_init.add(psZoneAdd,psZoneAdd.remove_event);
+					global_init.add(changeTextPsZoneAdd,$this);
+					$method_select.attr('disabled', 'disabled');
+					psZoneAdd.polyline();
+				}
+			}
+			// 方形绘图
+			if($method_select.val() === 'square') {
+				if(buttonText === '清空绘制') {
+					global_init.run();
+				} else {
+					$span.text('清空绘制');
+					global_init.run();
+					global_init.add(psZoneAdd,psZoneAdd.remove_square);
+					global_init.add(changeTextPsZoneAdd,$this);
+					$method_select.attr('disabled', 'disabled');
+					psZoneAdd.square();
+				}
+			}
+		});
+
+		var psZoneChange = new HzDrawTools();
+
+		function changeTextPsZoneChange($this){
+			var $span = $this.find('span');
+			var buttonText = $span.text();
+			var $method_select = $('#enclosure_spot_method2');
+			if($method_select.val() === 'polyline') {
+				if(buttonText === '清空绘制') {
+					$span.text('开始绘制');
+					$method_select.removeAttr('disabled');
+				} else {
+					$span.text('清空绘制');
+					$method_select.attr('disabled', 'disabled');
+				}
+			}
+
+			// 方形绘图
+			if($method_select.val() === 'square') {
+				if(buttonText === '清空绘制') {
+					$span.text('开始绘制');
+					$method_select.removeAttr('disabled');
+				} else {
+					$span.text('清空绘制');
+					$method_select.attr('disabled', 'disabled');
+				}
+			}
+		}
+
+		$("#btnDrawChangePsZone").on('click', function () {
+			var $this = $(this);
+			var $span = $this.find('span');
+			var buttonText = $span.text();
+			var $method_select = $('#enclosure_spot_method2');
+			if($method_select.val() === 'polyline') {
+				if(buttonText === '清空绘制') {
+					global_init.run();
+				} else {
+					$span.text('清空绘制');
+					global_init.run();
+					global_init.add(psZoneChange,psZoneChange.remove_event);
+					global_init.add(changeTextPsZoneChange,$this);
+					$method_select.attr('disabled', 'disabled');
+					psZoneChange.polyline();
+				}
+			}
+			// 方形绘图
+			if($method_select.val() === 'square') {
+				if(buttonText === '清空绘制') {
+					global_init.run();
+				} else {
+					$span.text('清空绘制');
+					global_init.run();
+					global_init.add(psZoneChange,psZoneChange.remove_square);
+					global_init.add(changeTextPsZoneChange,$this);
+					$method_select.attr('disabled', 'disabled');
+					psZoneChange.square();
+				}
+			}
+		});
+
+
+		$('#btnAddPsZoneDefault').click(function(){
+			var result = ajaxJsonRequest('/lbs/people_stat_cfg_add_default', {});
+			alert(result.msg);
+			showPsZone();
+		});
+
+		// 修改盘点区域
+		$('#btnChangePsZone').on('click', function () {
+			var oName = $('#alter_enclosure_name');
+			var psZoneId = oName.val();
+			var enclosure_new_expectNum = $('#enclosure_new_expectNum').val();
+			var psZoneOldName = oName.find("option:selected").text();
+			var psZoneNewName = $('#enclosure_new_name').val();
+
+			var psZoneChange_points = psZoneChange.points;
+
+			console.log('psZoneChange_points', psZoneChange_points);
+			if(psZoneId == 'undefined') {
+				alert('该盘点区域不能修改!');
+				return false;
+			}
+
+			if(psZoneId == 0) {
+				alert('请选择盘点区域!');
+				return false;
+			}
+			if(psZoneChange.points.length > 0 && psZoneChange.points[0] != psZoneChange.points[psZoneChange.points.length - 1]) {
+				alert('您没有画图');
+				return false;
+			}
+
+			var pointsToServer = [];
+
+			var points_length = psZoneChange_points.length - 1;
+			for(var i = 0; i < points_length; i++) {
+				var pt = {
+					x: coordScreenToMap(psZoneChange.points[i][0]),
+					y: coordScreenToMap(psZoneChange.points[i][1])
+				};
+				pointsToServer.push(pt);
+			}
+
+			var data = {
+				id: parseInt(psZoneId)
+			};
+
+			if(psZoneNewName == '') {
+				data.name = psZoneOldName;
+			} else {
+				data.name = psZoneNewName;
+			}
+
+			if(enclosure_new_expectNum != ''){
+				data.expectNum = enclosure_new_expectNum;
+			}
+
+			if (pointsToServer.length > 0)
+				data.points = pointsToServer;
+
+			console.log('btnChangePsZone, send data=', data);
+			var result = ajaxJsonRequest('/lbs/people_stat_cfg_chg', {data:[data]});
+
+			if(result.errorCode === 0) {
+				query_electronic();
+				$('#btnDrawChangePsZone').click();
+				showPsZone();
+			}
+			alert(result.msg);
+			return false;
+		});
+
+		// param object obj jquery对象
+		function HzDrawTools() {
+			// 坐标资料格式 [[x,y], ...]]
+			this.points = [];
+			// 操作事件的对象(jquery)
+			this.$event = $('#enclosureEvent');
+			// 临时线函数
+			this.$svg_temporary_line = this.$event;
+
+			// 画板对象(jquery)
+			this.$board = $('#svg-people-stat-zone-draft');
+			this.$board.svg();
+			this.$board_svg = this.$board.svg('get');
+			// 地图对象
+			this.$map = $('#svg_image');
+
+			// 鼠标移动坐标
+			this.mousemove_points = [];
+			// 直角是否启动判断键值
+			this.right_angle_key = 17;
+			// demo坐标位置
+			this.dotted_line = [];
+
+			// 是否是斜线判断
+			this.is_coordinate_offset = false;
+			// 需要的html对象
+			this.htmlObj = {
+				// 画线开始图标
+				line_start: '#line_start',
+				line_switch: '#btnDrawAddPsZone'
+			};
+			// 线样式
+			this.line_style = {
+				// 画线过程样式
+				demo_line: {fill: 'none', stroke: 'blue', strokeWidth: 1},
+				// 实际线样式
+				result_line: {fill: 'none', stroke: 'blue', strokeWidth: 4}
+			};
+			// 热点大小
+			this.hotspot_size = {
+				width: 20,
+				height: 20
+			};
+			// 移动需要画的虚线
+			this.spot_move_line = [];
+			// 热点坐标
+			this.hotspot_new_position = [];
+
+
+			/**
+			 * 移除事件绑定
+			 * param
+			 * is_board_clear				是否清除画板，默认为true，清除画板
+			 * is_enclosureEvent_display	是否不接收事件，默认true，不接收
+			 */
+			this.remove_event = function (is_board_clear, is_enclosureEvent_display) {
+				// 默认清除画板
+				is_board_clear = (is_board_clear !== false);
+				is_enclosureEvent_display = (is_enclosureEvent_display !== false);
+
+				if(is_enclosureEvent_display) $('#enclosureEvent').css('display', 'none');
+				var $window = $(window);
+				$window.off('keydown', this.right_angle_package);
+				$window.off('keyup', this.keyup_fn);
+				this.$event.off('click', this.line_click_package);
+				this.$event.off('mousemove', this.mousemove_line_package);
+
+				$(this.htmlObj.line_start).off('click', this.line_end);
+
+				// 清除临时线
+				this.svgPolyline([], {}, this.$svg_temporary_line);
+				// 是否清除画板
+				if(is_board_clear) {
+					this.svgPolyline([], {}, this.$board);
+					$('#svg_map_base').find('.enclosure_spot').remove();
+				}
+
+
+				$(this.htmlObj.line_start).css({
+					left: 0,
+					top: 0,
+					display: 'none'
+				});
+			};
+			// 围栏绘制功能入口
+			this.polyline = function () {
+				var _this = this;
+				var _window = $(window);
+
+				// 格式化数据
+
+				this.points = [];
+				this.is_coordinate_offset = false;
+				// 打开事件绑定div
+				$('#enclosureEvent').css('display', 'block');
+
+				_window.on('keydown', {
+					_this: _this
+				}, this.right_angle_package);
+
+				_window.on('keyup', {
+					_this: _this
+				}, this.keyup_fn);
+
+				this.$event.on('click', {
+					_this: _this
+				}, this.line_click_package);
+
+				this.$event.on('mousemove', {
+					_this: _this
+				}, this.mousemove_line_package);
+
+				$(this.htmlObj.line_start).on('click', {
+					_this: _this
+				}, this.line_end);
+			};
+
+			this.line_click_package = function (e) {
+				e.data._this.line_click(e);
+			};
+
+			// 划线函数
+			this.line_click = function (e) {
+				var mapObjOffset = this.$map.offset();
+				var map_path_line = [];
+				map_path_line[0] = e.pageX - mapObjOffset.left - parseInt(this.$map.css('border-left-width'));
+				map_path_line[1] = e.pageY - mapObjOffset.top - parseInt(this.$map.css('border-top-width'));
+
+				if(this.points.length === 0) {
+					var $line_start = $(this.htmlObj.line_start);
+					var line_start_width = $line_start.outerWidth() / 2;
+					var line_start_height = $line_start.outerWidth() / 2;
+
+					$line_start.css({
+						left: map_path_line[0] - line_start_width + 'px',
+						top: map_path_line[1] - line_start_height + 'px',
+						display: 'block'
+					})
+				}
+				// 画直角线的情况  且不是第一个数据
+				if(this.is_coordinate_offset && this.points.length !== 0) {
+					if(this.dotted_line.length = 2) {
+						//
+						this.points.push(this.dotted_line[1]);
+					}
+				} else {
+					this.points.push(map_path_line);
+				}
+
+				var points_length = this.points.length;
+
+				if(points_length > 1) this.create_hotspot($('#svg_map_base'), this.points[points_length - 1], points_length - 1);
+				this.svgPolyline(this.points, this.line_style.result_line, this.$board);
+				console.log('square_mouse_up', this.points);
+			};
+			// 按键抬起函数
+			this.keyup_fn = function (e) {
+				if(e.which === e.data._this.right_angle_key && e.data._this.mousemove_points.length > 1) {
+					e.data._this.is_coordinate_offset = false;
+					e.data._this.svgPolyline(e.data._this.mousemove_points, e.data._this.line_style.demo_line);
+				}
+			};
+
+			// 直线函数包
+			this.right_angle_package = function (e) {
+				if(e.data._this.mousemove_points.length > 1 && e.which === e.data._this.right_angle_key) {
+					//是否直线函数判断  鼠标移动也直线函数
+					e.data._this.is_coordinate_offset = true;
+					e.data._this.right_angle(e.data._this.mousemove_points[1]);
+				}
+			};
+			//直线函数
+			this.right_angle = function (new_points) {
+				this.dotted_line[0] = this.points[this.points.length - 1];
+				if(Math.abs(this.dotted_line[0][0] - new_points[0]) >= Math.abs(this.dotted_line[0][1] - new_points[1])) {
+					this.dotted_line[1] = [new_points[0], this.dotted_line[0][1]];
+				}
+				else {
+					this.dotted_line[1] = [this.dotted_line[0][0], new_points[1]];
+				}
+				this.svgPolyline(this.dotted_line, this.line_style.demo_line);
+			};
+			// 鼠标移动划线函数包
+			this.mousemove_line_package = function (e) {
+				if(e.data._this.points.length > 0) {
+					e.data._this.mousemove_line(e);
+				}
+			};
+			// 鼠标移动划线函数
+			this.mousemove_line = function (e) {
+				var mapObjOffset = this.$map.offset();
+				this.mousemove_points[0] = this.points[this.points.length - 1];
+				this.mousemove_points[1] = [
+					e.pageX - mapObjOffset.left - parseInt(this.$map.css('border-left-width')),
+					e.pageY - mapObjOffset.top - parseInt(this.$map.css('border-top-width'))
+				];
+				if(this.is_coordinate_offset) {
+					this.right_angle(this.mousemove_points[1]);
+				} else {
+					this.svgPolyline(this.mousemove_points, this.line_style.demo_line);
+				}
+			};
+			// 围栏结束
+			this.line_end = function (e) {
+				// _this 本函数的对象
+				var _this = e.data._this;
+				var points_length = _this.points.length;
+
+				// this 判定该函数的对象
+				$(this).css({
+					top: 0,
+					left: 0,
+					display: 'none'
+				});
+
+				if(points_length > 1) {
+					_this.points.push(_this.points[0]);
+					// 画热点
+					_this.create_hotspot($('#svg_map_base'), _this.points[points_length], _this.points.length - 1, true);
+				}
+
+				_this.svgPolyline(_this.points, _this.line_style.result_line, _this.$board);
+				_this.remove_event(false, false);
+			};
+			// 方框
+			this.square = function () {
+				// 打开事件绑定div
+				$('#enclosureEvent').css('display', 'block');
+
+				this.$event.on('mousedown', {
+					_this: this
+				}, this.square_mouse_down_package);
+			};
+			this.square_mouse_down_package = function (e) {
+				var _this = e.data._this;
+				_this.square_mouse_down(e);
+				return false;
+			};
+			this.square_mouse_down = function (e) {
+				// 第一个点
+				var pt = [];
+				var $map = this.$map;
+				var mapOffset = $map.offset();
+				this.points = [];
+
+				pt[0] = e.pageX - mapOffset.left - parseInt($map.css('border-left-width'));
+				pt[1] = e.pageY - mapOffset.top - parseInt($map.css('border-top-width'));
+				this.points[0] = pt;
+				var $window = $(window);
+				$window.on('mousemove', {
+					_this: this
+				}, this.square_mouse_move_package);
+				$window.on('mouseup', {
+					_this: this
+				}, this.square_mouse_up_package);
+			};
+
+			this.square_mouse_move_package = function (e) {
+				var _this = e.data._this;
+				_this.square_mouse_move(e);
+			};
+			this.square_mouse_move = function (e) {
+				var spot1 = [],
+						spot2 = [],
+						spot3 = [];
+				var $map = this.$map;
+				var mapObjOffset = $map.offset();
+				// 移动原点
+
+				spot2[0] = e.pageX - mapObjOffset.left - parseInt($map.css('border-left-width'));
+				spot2[1] = e.pageY - mapObjOffset.top - parseInt($map.css('border-top-width'));
+
+				spot1[0] = spot2[0];
+				spot1[1] = this.points[0][1];
+
+				spot3[0] = this.points[0][0];
+				spot3[1] = spot2[1];
+
+				this.points[1] = spot1;
+				this.points[2] = spot2;
+				this.points[3] = spot3;
+				this.points[4] = this.points[0];
+
+				this.svgPolyline(this.points, this.line_style.demo_line, this.$svg_temporary_line);
+			};
+
+			this.square_mouse_up_package = function (e) {
+				var _this = e.data._this;
+				_this.square_mouse_up(e);
+			};
+
+			this.square_mouse_up = function (e) {
+				this.svgPolyline([], {}, this.$svg_temporary_line);
+				this.remove_hotspot();
+				this.svgPolyline(this.points, this.line_style.result_line, this.$board);
+				var $window = $(window);
+				$window.off('mousemove', this.square_mouse_move_package);
+				$window.off('mouseup', this.square_mouse_up_package);
+				var points_length = this.points.length;
+				if(points_length < 2) {
+					this.points = [];
+				} else {
+					for(var i = 1; i < points_length; i++) {
+						if(i < (points_length - 1)) {
+							this.create_hotspot($('#svg_map_base'), this.points[i], i);
+						} else {
+							this.create_hotspot($('#svg_map_base'), this.points[i], i, true);
+						}
+					}
+				}
+				console.log('square_mouse_up', this.points, 'e=', e);
+			};
+
+			/**
+			 * 创建热点
+			 *
+			 * $parent 				父div jquery 对象
+			 * position 			坐标   left top 值
+			 * index 				索引  坐标在points 中的位置
+			 * is_end_spot boolean 	是否是尾点
+			 */
+			this.create_hotspot = function ($parent, position, index, is_end_spot) {
+				//创建对象的类
+				var hotspot_class = 'enclosure_spot';
+				is_end_spot = is_end_spot || false;
+
+				var hotspot_left = position[0] - Math.round((this.hotspot_size.width) / 2);
+				var hotspot_top = position[1] - Math.round((this.hotspot_size.height) / 2);
+
+				var $create_hotspot = $("<div></div>");
+				$create_hotspot.addClass(hotspot_class);
+
+				$create_hotspot.attr('index', index);
+				// 创建尾点标记
+				if(is_end_spot) $create_hotspot.attr('is_end_spot', 1);
+
+				$create_hotspot.css({
+					left: hotspot_left + 'px',
+					top: hotspot_top + 'px'
+				});
+
+				$create_hotspot.on('mousedown', {
+					_this: this
+				}, this.hotspot_mouse_down_package);
+
+				$parent.append($create_hotspot);
+			};
+
+			this.hotspot_mouse_down_package = function (e) {
+				var _this = e.data._this;
+				_this.hotspot_mouse_down(e, this);
+				return false;
+			};
+			this.hotspot_mouse_down = function (e, obj) {
+				// 事件
+				var $this = $(obj);
+				var current_spot_index = parseInt($this.attr('index'));
+
+				// 实线数量
+				var points_size = this.points.length;
+				console.log('hotspot_mouse_down');
+
+				$(window).on('mousemove', {
+					_this: this,
+					$obj: $this,
+					current_spot_index: current_spot_index,
+					points_size: points_size
+				}, this.hotspot_mouse_move_package);
+
+				$(window).on('mouseup', {
+					_this: this,
+					$obj: $this,
+					current_spot_index: current_spot_index,
+					points_size: points_size
+				}, this.hotspot_mouse_up_package);
+			};
+
+			this.hotspot_mouse_move_package = function (e) {
+				var _this = e.data._this;
+				_this.hotspot_mouse_move(e);
+
+			};
+			this.hotspot_mouse_move = function (e) {
+				console.log('hotspot_mouse_move');
+
+				// $obj 当前点下的元素
+				var $obj = e.data.$obj;
+				var current_spot_index = e.data.current_spot_index;
+				var points_size = e.data.points_size;
+				var mapObjOffset = this.$map.offset();
+
+				var map_path_line1 = [];
+				map_path_line1[0] = e.pageX - mapObjOffset.left - parseInt(this.$map.css('border-left-width'));
+				map_path_line1[1] = e.pageY - mapObjOffset.top - parseInt(this.$map.css('border-top-width'));
+
+				$obj.css({
+					left: (map_path_line1[0] - Math.round((this.hotspot_size.width) / 2)) + 'px',
+					top: (map_path_line1[1] - Math.round((this.hotspot_size.height) / 2)) + 'px'
+				});
+
+				// 线位置
+				if($obj.attr('is_end_spot') != 1) { // 不是尾点的情况
+					if(points_size > 1) {
+						// 大于一个点  才需要划线
+						this.spot_move_line[0] = this.points[current_spot_index - 1];
+						this.spot_move_line[1] = map_path_line1;
+						this.hotspot_new_position = map_path_line1;
+						if(current_spot_index < (points_size - 1) && points_size > 2) this.spot_move_line[2] = this.points[current_spot_index + 1];
+						this.svgPolyline(this.spot_move_line, this.line_style.demo_line, this.$svg_temporary_line);
+					} else {
+						this.hotspot_new_position = map_path_line1;
+					}
+				} else {
+					if(points_size > 1) {
+						// 大于一个点  才需要划线
+						this.spot_move_line[0] = this.points[1];
+						this.spot_move_line[1] = map_path_line1;
+						this.hotspot_new_position = map_path_line1;
+						if(points_size > 2) this.spot_move_line[2] = this.points[current_spot_index - 1];
+						this.svgPolyline(this.spot_move_line, this.line_style.demo_line, this.$svg_temporary_line);
+					} else {
+						this.hotspot_new_position = map_path_line1;
+					}
+				}
+			};
+
+			this.hotspot_mouse_up_package = function (e) {
+				var _this = e.data._this;
+				_this.hotspot_mouse_up(e);
+			};
+			this.hotspot_mouse_up = function (e) {
+				console.log('hotspot_mouse_up');
+				var $obj = e.data.$obj;
+				var current_spot_index = e.data.current_spot_index;
+				this.svgPolyline([], {}, this.$svg_temporary_line);
+
+				// 不是尾点的情况
+				if($obj.attr('is_end_spot') != 1) {
+					this.points[current_spot_index] = this.hotspot_new_position;
+				}
+				else {
+					this.points[current_spot_index] = this.hotspot_new_position;
+					this.points[0] = this.hotspot_new_position;
+				}
+
+				console.log('this.spot_move_line[1]', this.spot_move_line[1]);
+				$(window).off('mousemove', this.hotspot_mouse_move_package);
+
+				this.svgPolyline(this.points, this.line_style.result_line, this.$board);
+
+				console.log('spot_mouse_up', this.points);
+
+				this.hotspot_new_position = [];
+				this.spot_move_line = [];
+
+				$(window).off('mouseup', this.hotspot_mouse_up_package);
+			};
+
+			this.remove_hotspot = function () {
+				$('#svg_map_base').find('.enclosure_spot').remove();
+			};
+
+			this.remove_square = function () {
+				$('#enclosureEvent').css('display', 'none');
+				this.$event.off('mousedown', this.square_mouse_down_package);
+				this.$board_svg.clear();
+				this.remove_hotspot();
+			};
+
+			/**
+			 * 画曲线函数
+			 * is_clear			是否清除原画板，默认 true
+			 */
+			this.svgPolyline = function (points, param, obj, is_clear) {
+				var settings = param || this.line_style.result_line;
+				obj = obj || this.$svg_temporary_line;
+				is_clear = (is_clear !== false);
+				obj.svg();
+				var $svg = obj.svg('get');
+				if(is_clear) $svg.clear();
+				if(points.length !== 0) $svg.polyline(points, settings);
+			}
+		}
+
+		(function (factory) {
+			if(typeof define === "function" && define.amd) {
+				define(["jquery", ""], factory);
+			}
+			else {
+				factory(jQuery);
+			}
+		}(function ($) {
+			/*
+			 * Translated default messages for the jQuery validation plugin.
+			 * Locale: ZH (Chinese, 中文, 汉语, 漢語)
+			 */
+			$.extend($.validator.messages, {
+				required: "这是必填字段",
+				remote: "请修正此字段",
+				email: "请输入有效的电子邮件地址",
+				url: "请输入有效的网址",
+				date: "请输入有效的日期",
+				dateISO: "请输入有效的日期 (YYYY-MM-DD)",
+				number: "请输入有效的数字",
+				digits: "只能输入数字",
+				creditCard: "请输入有效的信用卡号码",
+				equalTo: "你的输入不相同",
+				extension: "请输入有效的后缀",
+				maxLength: $.validator.format("最多可以输入 {0} 个字符"),
+				minLength: $.validator.format("最少要输入 {0} 个字符"),
+				rangeLength: $.validator.format("请输入长度在 {0} 到 {1} 之间的字符串"),
+				range: $.validator.format("请输入范围在 {0} 到 {1} 之间的数值"),
+				max: $.validator.format("请输入不大于 {0} 的数值"),
+				min: $.validator.format("请输入不小于 {0} 的数值")
+			});
+		}));
+
+
+		$('#form-validate').validate({
+			errorElement: 'div',
+			errorClass: 'help-block',
+			focusInvalid: false,
+			ignore: "",
+			rules: {
+				name: {
+					required: true
+				},
+				peopleNum: {
+					digits: true
+				}
+			},
+
+			highlight: function (e) {
+				$(e).closest('.form-group').removeClass('has-info').addClass('has-error');
+			},
+
+			success: function (e) {
+				$(e).closest('.form-group').removeClass('has-error'); //.addClass('has-info');
+				$(e).remove();
+			},
+
+
+			submitHandler: function (form) {
+				if(psZoneAdd.points[0] == undefined || psZoneAdd.points[0] != psZoneAdd.points[psZoneAdd.points.length - 1]) {
+					alert('您没有画图');
+					return;
+				}
+
+				var $form = $(form);
+				var data = {
+					name: $form.find("#inventory_name").val()
+				};
+
+				var peopleNum = $form.find("#psZonePeopleExpect").val();
+				if(peopleNum) {
+					data.expectNum = parseInt(peopleNum);
+				}
+
+				var points = [];
+				var points_length = psZoneAdd.points.length - 1;
+				for(var i = 0; i < points_length; i++) {
+					var pt = {
+						x: coordScreenToMap(psZoneAdd.points[i][0]),
+						y: coordScreenToMap(psZoneAdd.points[i][1])
+					};
+					points.push(pt);
+				}
+				data.points = points;
+
+				$('#btnDrawAddPsZone').click();
+				console.log('submitHandler send data=', data);
+
+				var result = ajaxJsonRequest('/lbs/people_stat_cfg_add', {
+					data: [data]
+				});
+
+				if(result.errorCode === 0) {
+					query_electronic();
+					showPsZone();
+				}
+				alert(result.msg);
+
+			},
+			invalidHandler: function (form) {}
+		});
+
+
+		function ajaxJsonRequest(url, txData) {
+			var ajaxData = null;
+			$.ajax({
+				url: url,
+				async: false,
+				type: 'POST',
+				contentType: "application/json;charset=UTF-8",
+				data: JSON.stringify(txData)   // 发送json数据到服务器
+			}).done(function (data) {
+				console.log('接口调用成功');
+				console.log('receive:', data);
+				ajaxData = data;
+			}).fail(function () {
+				console.log('接口调用失败');
+				ajaxData = false;
+			});
+			return ajaxData;
+		}
+
+		function query_electronic(){
+			var url = '/lbs/people_stat_cfg_get';
+			var txData = {
+				rows:2000
+			};
+			var data = ajaxJsonRequest(url, txData);
+
+			var dataData = data.data.rows;
+			var dataDataLength = dataData.length;
+			var selectHtml = '<option value="0">请选择盘点区域</option>';
+			var checkboxHtml = '';
+			for (var i = 0; i<dataDataLength; i++){
+				selectHtml += '<option value="'+dataData[i].id+'">'+dataData[i].name+'</option>';
+				if(dataData[i].id != undefined){
+					checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar-' + i + '" autocomplete="off" value="'+dataData[i].id+'" /><label class="lbl" for="ace-settings-navbar-'+i+'">'+dataData[i].name+'</div></div>'}
+			}
+			$('#alter_enclosure_name').html(selectHtml);
+			$('#enclosure_item').html(checkboxHtml);
+		}
+
+		query_electronic();
+
+		$('#enclosure_item_button').on('click',function(){
+			var $enclosure_item = $('#enclosure_item');
+			var items = $enclosure_item.find(':checked');
+
+			global_init.run();
+
+			if(items == undefined){
+				alert('请选择要删除的盘点区域!');
+				return false;
+			}
+			var ids = [];
+
+			items.each(function(){
+				ids.push($(this).val());
+			});
+
+
+			var url = '/lbs/hz_data_del';
+			var data = {
+				who:'people_stat_cfg',
+				ids:ids
+			};
+			console.log('enclosure_item_button send data:',data);
+			var result = ajaxJsonRequest(url,data);
+			alert(result.msg);
+
+			if(result.errorCode == 0)
+			{
+				query_electronic();
+				showPsZone();
+			}
+		});
+
+
+		$('#electronic-fence-query-button').click(function () {
+			global_init.run();
+			showPsZone();
+		});
+
+		function showPsZone() {
+			if ($('#btnPsZoneShow').text() !== '隐藏') return;
+
+			var url = '/lbs/people_stat_cfg_get';
+			var txData = {
+				"floorNo": 'Floor3',
+				rows: 100
+			};
+
+			var data = ajaxJsonRequest(url, txData);
+			console.log('showPsZone send data=',data);
+			ps_zone_data = data.data.rows;
+			drawPsZone(ps_zone_data);
+			zoomCallBack.push(draw_ps_zone_fn);
+		}
+
+		function clearPsZone (){
+			ps_zone_data = [];
+			for(var i=0; i< zoomCallBack.length; i++){
+				if (zoomCallBack[i] === draw_ps_zone_fn){
+					zoomCallBack.splice(i, 1);
+					break;
+				}
+			}
+			var draw_path = $('#svg-people-stat-zone');
+			var svg = draw_path.svg('get');
+			svg.clear();
+		}
+
+
+		function drawPsZone(data) {
+			console.log('drawPsZone',data);
+			var erBoard = $('#svg-people-stat-zone');
+			erBoard.svg();
+			var svg = erBoard.svg('get');
+			svg.clear();
+
+			for(var k = 0; k < data.length; k++) {
+				var pts = data[k].points;
+				var pointsScreen = [];
+				var ptArr;
+
+				for(var i = 0; i < pts.length; i++) {
+					ptArr = [];
+					ptArr.push(coordMapToScreen(pts[i].x));
+					ptArr.push(coordMapToScreen(pts[i].y));
+					pointsScreen.push(ptArr);
+				}
+
+				// 再次增加第一个画线起点
+				ptArr = [];
+				ptArr.push(coordMapToScreen(pts[0].x));
+				ptArr.push(coordMapToScreen(pts[0].y));
+				pointsScreen.push(ptArr);
+
+				svg.polyline(pointsScreen, {
+					fill: 'DeepSkyBlue',
+					opacity: 0.6,
+					stroke: 'blue',
+					strokeWidth: 5
+				});
+
+				svg.text(coordMapToScreen(pts[0].x) + 10, coordMapToScreen(pts[0].y) + 20, data[k].name, {
+					fontSize: 14,
+					fontFamily: 'Verdana',
+					fill: 'RoyalBlue'
+				});
+			}
+		}
+
+		var namespace = '/HeZhong';
+		// Connect to the Socket.IO server.
+		// The connection URL has the following format:
+		//     http[s]://<domain>:<port>[/<namespace>]
+		var connStr = location.protocol + '//' + document.domain + ':' + location.port + namespace;
+		console.log(connStr);
+		var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+
+		socket.on('hz_position', function (msg) {
+			var json = eval(msg); // 数组
+			console.log(json);
+			$.each(json, function (index, item) {
+				hz_user_xy[index] = [item['userId'], json[index]['x'], json[index]['y']];
+			});
+
+			console.log('hz_user_xy:', hz_user_xy);
+			for(var i = 0; i < json.length; i++) {
+				hzPeopleGoto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
+						hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
+			}
+		});
+
+		// 默认显示 盘点区域
+		$('#btnPsZoneShow').click();
+
+	})
+</script>
 
 <script type="text/javascript">
 	if('ontouchstart' in document.documentElement) document.write("<script src='/static/ace/components/_mod/jquery.mobile.custom/jquery.mobile.custom.js'>" + "<" + "/script>");

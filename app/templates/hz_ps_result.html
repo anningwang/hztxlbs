@@ -27,111 +27,6 @@
 
     <link rel="shortcut icon" href="/static/img/favicon.ico" />
     <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
-
-    <script>
-
-        'use strict';
-
-        $(function(){
-
-            function ajaxRequest(url, txData) {
-                // 接收到的数据
-                var result = false;
-                $.ajax({
-                    url: url,
-                    async: false,
-                    type: 'POST',
-                    contentType: "application/json;charset=UTF-8",
-                    data: JSON.stringify(txData)
-                }).done(function(data) {
-                    console.log('接口调用成功');
-                    console.log('receive:', data);
-                    result = data;
-                }).fail(function() {
-                    console.log('接口调用失败');
-                });
-                return result;
-            }
-
-            $("#btnPsQuery").click(function(){
-                queryPsInfo();
-            });
-
-            function queryPsInfo(){
-                var psHtml;     // 页面输出内容
-                var datetimeFrom = $("#dateFrom").val();
-                var datetimeTo = $("#dateTo").val();
-
-                var page = $("#page").val();
-                if(page == ''){
-                    alert('请填写查询页数,默认请填1');
-                    return;
-                }
-                var rows = $("#rows").val();
-                if(rows == ''){
-                    alert('请填写查询数据条数,默认请填100');
-                    return;
-                }
-
-                var field = $("#psOrderField").val();
-                var oper = $("#psOrderOp").val();
-
-                var url = '/lbs/people_stat_get';
-                var txData = {
-                    "page": page,       // 查询的页码。 当记录很多时，需要分页查询。可选参数，默认为第一页
-                    "rows": rows,       // 当前页记录条数。可选参数。默认100条
-                    "sort": [{"field": field, "oper": oper}]
-                };
-
-                if(datetimeFrom != ''){
-                    txData.datetimeFrom = datetimeFrom;
-                }
-                if(datetimeTo != ''){
-                    txData.datetimeTo = datetimeTo;
-                }
-
-                var data = ajaxRequest(url, txData);
-                if(data == false){
-                    alert('连接服务器失败');
-                    return;
-                } else if (data.errorCode !== 0){
-                    alert(data.msg);
-                    return;
-                }
-
-                var psData = data.data.rows;
-                var total = data.data.total;
-
-                if (data.data.rows.length == 0){
-                    alert('该检索范围没有数据');
-                    return;
-                }else{
-                    psHtml = '<h4 class="pink"><i class="ace-icon fa fa-hand-o-right icon-animated-hand-pointer blue"></i><a href="" role="button" class="green" data-toggle="modal"> 盘点结果内容（总条数：'+ total  +'） </a></h4>' +
-                            '<div class="hr hr-18 dotted hr-double"></div><div class="col-xs-12"><!-- PAGE CONTENT BEGINS -->' +
-                            '<table id="simple-table" class="table  table-bordered table-hover">' +
-                            '<thead><tr><th class="detail-col"></th><th>记录ID</th><th>盘点编号</th><th>盘点区域名称</th><th>盘点时间</th><th>盘点人数</th><th>期望人数</th></tr></thead><tbody>';
-                }
-
-                for(var i = 0; i< psData.length; i++){
-                    var etDetails = psData[i];
-                    psHtml += '<tr><td>'+etDetails['no']+'</td><td>'+etDetails.id+'</td><td>'+etDetails['statNo']+'</td><td>'+etDetails['roomName']+'</td><td>'
-                            +etDetails.datetime+'</td><td>'+etDetails['curPeopleNum']+'</td><td>'+(etDetails['expectNum']<=0?'-':etDetails['expectNum'])+'</td></tr>';
-                }
-
-                psHtml +='</tbody></table><div class="hr hr-18 dotted hr-double"></div>';
-                $('#psResult').html(psHtml);
-            }
-
-            // 以下为时间日历插件
-            $('.date-timepicker').datetimepicker({
-                //format: 'MM/DD/YYYY h:mm:ss A',     // use this option to display seconds
-                language: 'zh-CN',
-                format: 'yyyy-mm-dd hh:ii:ss',
-                autoclose: true
-            })
-        })
-    </script>
-
 </head>
 
 <body class="no-skin" style="min-width: 1200px;">
@@ -270,7 +165,7 @@
                                 </div>
 
                             </div>
-                            <div class="hr hr-24"></div>
+                            <div class="hr hr-10"></div>
                         </div>
 
                         <div class="row" style="min-height:600px;" id="psResult"></div>
@@ -289,6 +184,109 @@
     </div>
 </div>
 
+<script>
+
+    'use strict';
+
+    $(function(){
+
+        function ajaxRequest(url, txData) {
+            // 接收到的数据
+            var result = false;
+            $.ajax({
+                url: url,
+                async: false,
+                type: 'POST',
+                contentType: "application/json;charset=UTF-8",
+                data: JSON.stringify(txData)
+            }).done(function(data) {
+                console.log('接口调用成功');
+                console.log('receive:', data);
+                result = data;
+            }).fail(function() {
+                console.log('接口调用失败');
+            });
+            return result;
+        }
+
+        $("#btnPsQuery").click(function(){
+            queryPsInfo();
+        });
+
+        function queryPsInfo(){
+            var psHtml;     // 页面输出内容
+            var datetimeFrom = $("#dateFrom").val();
+            var datetimeTo = $("#dateTo").val();
+
+            var page = $("#page").val();
+            if(page == ''){
+                alert('请填写查询页数,默认请填1');
+                return;
+            }
+            var rows = $("#rows").val();
+            if(rows == ''){
+                alert('请填写查询数据条数,默认请填100');
+                return;
+            }
+
+            var field = $("#psOrderField").val();
+            var oper = $("#psOrderOp").val();
+
+            var url = '/lbs/people_stat_get';
+            var txData = {
+                "page": page,       // 查询的页码。 当记录很多时，需要分页查询。可选参数，默认为第一页
+                "rows": rows,       // 当前页记录条数。可选参数。默认100条
+                "sort": [{"field": field, "oper": oper}]
+            };
+
+            if(datetimeFrom != ''){
+                txData.datetimeFrom = datetimeFrom;
+            }
+            if(datetimeTo != ''){
+                txData.datetimeTo = datetimeTo;
+            }
+
+            var data = ajaxRequest(url, txData);
+            if(data == false){
+                alert('连接服务器失败');
+                return;
+            } else if (data.errorCode !== 0){
+                alert(data.msg);
+                return;
+            }
+
+            var psData = data.data.rows;
+            var total = data.data.total;
+
+            if (data.data.rows.length == 0){
+                alert('该检索范围没有数据');
+                return;
+            }else{
+                psHtml = '<h4 class="pink"><i class="ace-icon fa fa-hand-o-right icon-animated-hand-pointer blue"></i><a href="" role="button" class="green" data-toggle="modal"> 盘点结果内容（总条数：'+ total  +'） </a></h4>' +
+                        '<div class="hr hr-18 dotted hr-double"></div><div class="col-xs-12"><!-- PAGE CONTENT BEGINS -->' +
+                        '<table id="simple-table" class="table  table-bordered table-hover">' +
+                        '<thead><tr><th class="detail-col"></th><th>记录ID</th><th>盘点编号</th><th>盘点区域名称</th><th>盘点时间</th><th>盘点人数</th><th>期望人数</th></tr></thead><tbody>';
+            }
+
+            for(var i = 0; i< psData.length; i++){
+                var etDetails = psData[i];
+                psHtml += '<tr><td>'+etDetails['no']+'</td><td>'+etDetails.id+'</td><td>'+etDetails['statNo']+'</td><td>'+etDetails['roomName']+'</td><td>'
+                        +etDetails.datetime+'</td><td>'+etDetails['curPeopleNum']+'</td><td>'+(etDetails['expectNum']<=0?'-':etDetails['expectNum'])+'</td></tr>';
+            }
+
+            psHtml +='</tbody></table><div class="hr hr-18 dotted hr-double"></div>';
+            $('#psResult').html(psHtml);
+        }
+
+        // 以下为时间日历插件
+        $('.date-timepicker').datetimepicker({
+            language: 'zh-CN',
+            format: 'yyyy-mm-dd hh:ii:ss',
+            autoclose: true
+        })
+    })
+</script>
+
 
 <script type="text/javascript">
     if('ontouchstart' in document.documentElement) document.write("<script src='/static/ace/components/_mod/jquery.mobile.custom/jquery.mobile.custom.js'>"+"<"+"/script>");
@@ -296,6 +294,7 @@
 <script src="/static/ace/components/bootstrap/dist/js/bootstrap.js"></script>
 <script src="/static/ace/components/jqGrid/js/jquery.jqGrid.min.js"></script>
 <script src="/static/ace/components/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.min.js"></script>
+<script src="/static/ace/components/bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
 <script src="/static/ace/assets/js/src/elements.scroller.js"></script>
 <script src="/static/ace/assets/js/src/elements.colorpicker.js"></script>
 <script src="/static/ace/assets/js/src/elements.fileinput.js"></script>

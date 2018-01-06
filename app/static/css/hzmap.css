@@ -13,19 +13,16 @@
 	position: relative;
 	overflow: hidden;
 	border: 1px solid brown;
-	//min-width:1702px;
+	min-width:1000px;
 	width: 100%;
-	min-height:852px;
-	//background:url(/static/img/cross.gif);
+	min-height:800px;
+	// background:url(/static/img/cross.gif);
 	background-color: #B1B1B1;
 
 	z-index:300;
 }
 
-#svg_map_base {
-	position:absolute;
-	z-index:400;
-}
+
 #svg_image					{	z-index:100;	}
 #svg-people-stat-zone		{	z-index:110;	}
 #svg-people-stat-zone-draft {	z-index:111;	}
@@ -38,5 +35,6 @@
 #svg_temporary_line			{  	z-index:200;	}
 #svg_event					{	z-index:300;	}
 #enclosureEvent				{	z-index:400;	}
+#svg_map_base 				{	z-index:400;	}
 
-.each_map_layer{ position:absolute; height:850px; width:1700px;}
+.each_map_layer{ position:absolute;}
