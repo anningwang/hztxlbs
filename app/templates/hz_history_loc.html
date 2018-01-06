@@ -45,7 +45,7 @@
 		<!-- /section:basics/sidebar.mobile.toggle -->
 		<div class="navbar-header pull-left">
 			<!-- #section:basics/navbar.layout.brand -->
-			<a href="#" class="navbar-brand" style="padding-top:0; padding-bottom:0;"> <img src="/static/img/logo.jpg" /> </a>
+			<a href="http://www.hezhongsz.com" class="navbar-brand" style="padding-top:0; padding-bottom:0;" target="_blank"> <img src="/static/img/logo.jpg" /> </a>
 			<!-- /section:basics/navbar.layout.brand -->
 
 			<!-- #section:basics/navbar.toggle -->
@@ -157,9 +157,8 @@
 							<button class="btn btn-info btn-sm" id="btnClearHisLoc">清除</button>
 						</div>
 
-					</div>
-					<!-- /.col -->
-				</div>
+					</div> <!-- /.col -->
+				</div> <!-- /.row -->
 
 				<div class="hr hr-24"></div>
 				<div id="myCanvas">
@@ -209,12 +208,10 @@
 	var hz_is_navigating = false;      /// 是否曾经设置过导航，或正在导航中
 	var HZ_DESTINATION_MEETING_ROOM = 27;     //办公室编号
 	var hz_destination = HZ_DESTINATION_MEETING_ROOM;            /// 导航的目的地，默认 第一个 目的地
-	var hz_time_id = 0;    //废弃
 	var hz_user_id = 0;   //下面的索引   实际函数用0应该是未选择
 	var HZ_USER_IDS = ['1918E00103AA', '1918E00103A9'];
 	var hz_user_xy = [];   //用户数据  每项为一个用户
 	var storage = window.localStorage;
-
 
 	if(storage){
 		//storage.clear();

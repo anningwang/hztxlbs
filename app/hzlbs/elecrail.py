@@ -103,7 +103,7 @@ def hz_lbs_elect_rail(userlist):
     ret = []
 
     tm = datetime.datetime.today()
-    tm_str = datetime.datetime.strftime(tm, '%Y-%m-%d %H:%M:%S');
+    tm_str = datetime.datetime.strftime(tm, '%Y-%m-%d %H:%M:%S')
 
     er_dict = get_er_data()
     for usr in userlist:
