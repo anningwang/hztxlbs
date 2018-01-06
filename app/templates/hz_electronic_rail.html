@@ -425,6 +425,7 @@
 
 			$document.on('mousemove', mapMoveMousemoveFn);
 			$document.on('mouseup', mapMoveMouseupFn);
+			$svg_event.css('cursor', 'move');
 			return false;
 		}
 
@@ -448,6 +449,7 @@
 
 			$document.off('mousemove', mapMoveMousemoveFn);
 			$document.off('mouseup', mapMoveMouseupFn);
+			$svg_event.css('cursor', 'default');
 		}
 
 		addMapMoveEvent();

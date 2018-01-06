@@ -455,6 +455,7 @@
 
 			$document.on('mousemove', mapMoveMousemoveFn);
 			$document.on('mouseup', mapMoveMouseupFn);
+			$svg_event.css('cursor', 'move');
 			return false;
 		}
 
@@ -473,6 +474,7 @@
 			hzY = currentY;
 			$document.off('mousemove', mapMoveMousemoveFn);
 			$document.off('mouseup', mapMoveMouseupFn);
+			$svg_event.css('cursor', 'default');
 		}
 		addMapMoveEvent();
 
