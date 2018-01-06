@@ -327,7 +327,7 @@
 		function people_move_zoom() {
 			var hz_user_xy_length = hz_user_xy.length;
 			for(var i = 0; i < hz_user_xy_length; i++) {
-				hzPeopleGoto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
+				hzPeopleSetPosition(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
 						hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
 			}
 		}

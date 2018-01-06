@@ -85,7 +85,7 @@ function mapZoom(height, width) {
 }
 
 
-// 移动标签位置到指定坐标 (x, y) 为屏幕坐标
+// 移动标签位置到指定坐标 (x, y) 为屏幕坐标，people 为标签id。移动标签，有动画。
 function hzPeopleGoto(x, y, people) {
     people = people || '1918E00103AA'; // 设置默认参数
     var p = $('#'+people);
@@ -101,6 +101,23 @@ function hzPeopleGoto(x, y, people) {
             top: (y - 45)
         });
     }
+}
+
+// 移动标签位置到指定坐标 (x, y) 为屏幕坐标，people 为标签id。 无动画移动标签。
+function hzPeopleSetPosition(x, y, people) {
+    people = people || '1918E00103AA'; // 设置默认参数
+    var p = $('#'+people);
+    p.css({left: x-24, top: y-45});
+    if (p.css("display") == 'none') {
+        p.toggle();
+    }
+}
+
+// 清除导航路径
+function hz_clear_path() {
+    var pathLayer = $('#svg_path');
+    var svg = pathLayer.svg('get');
+    if (svg) svg.clear();
 }
 
 // 初始化对象

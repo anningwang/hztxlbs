@@ -2,81 +2,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-<meta charset="utf-8" />
-<title>和仲位置服务平台</title>
-<meta name="description" content="" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta charset="utf-8" />
+    <title>和仲位置服务平台</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 
-<!-- bootstrap & fontawesome -->
-<link rel="stylesheet" href="../static/ace/assets/css/bootstrap.css" />
-<link rel="stylesheet" href="../static/ace/components/font-awesome/css/font-awesome.css" />
+    <link rel="stylesheet" href="/static/ace/assets/css/bootstrap.css" />
+    <link rel="stylesheet" href="/static/ace/components/font-awesome/css/font-awesome.css" />
+    <link rel="stylesheet" href="/static/ace/assets/css/ace-fonts.css" />
 
-<!-- page specific plugin styles -->
+    <link rel="stylesheet" href="/static/ace/assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
+    <link rel="stylesheet" href="/static/ace/assets/css/ace-skins.css" />
+    <link rel="stylesheet" href="/static/ace/assets/css/ace-rtl.css" />
 
-<!-- text fonts -->
-<link rel="stylesheet" href="../static/ace/assets/css/ace-fonts.css" />
+    <link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css">
+    <link rel="stylesheet" href="/static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css"/>
+    <script src="/static/ace/assets/js/ace-extra.js"></script>
 
-<!-- ace styles -->
-<link rel="stylesheet" href="../static/ace/assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
-<link rel="stylesheet" href="../static/ace/assets/css/ace-skins.css" />
-<link rel="stylesheet" href="../static/ace/assets/css/ace-rtl.css" />
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script>
+    <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script>
+    <script src="/static/js/jquery.mousewheel.js"></script>
 
-<!-- svg样式 -->
-<link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css">
+    <script src="/static/js/hzlbs/hzlbs.tools.js"></script>
+    <script src="/static/js/hzlbs/hzlbs.maps.js"></script>
+    <link rel="stylesheet" href="/static/css/hzmap.css" />
+    <script src="/static/js/hztx/common_nav.js"></script>
 
-<!-- inline styles related to this page -->
-<!--时间插件-->
-
-<link rel="stylesheet" href="../static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css"/>
-
-<!-- ace settings handler -->
-<script src="../static/ace/assets/js/ace-extra.js"></script>
-<link rel="shortcut icon" href="/static/img/favicon.ico" />
-<link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
-<script src="/static/js/jquery.min.js"></script> 
+    <link rel="shortcut icon" href="/static/img/favicon.ico" />
+    <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
 </head>
 
-<body class="no-skin"  style=" min-width:1905px;">
+<body class="no-skin"  style=" min-width:1200px;">
+
 <!-- #section:basics/navbar.layout -->
 <div id="navbar" class="navbar navbar-default ace-save-state" style="min-width:190px;">
-  <div class="navbar-container ace-save-state" id="navbar-container"> 
-    <!-- #section:basics/sidebar.mobile.toggle -->
-    <button type="button" class="navbar-toggle menu-toggler pull-left" id="menu-toggler" data-target="#sidebar"> <span class="sr-only">Toggle sidebar</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
-    
-    <!-- /section:basics/sidebar.mobile.toggle -->
-    <div class="navbar-header pull-left"> 
-      <!-- #section:basics/navbar.layout.brand --> 
-      <a href="#" class="navbar-brand" style="padding-top:0; padding-bottom:0;"> <img src="../static/img/logo.jpg" /> </a> 
-      
-      <!-- /section:basics/navbar.layout.brand --> 
-      
-      <!-- #section:basics/navbar.toggle --> 
-      
-      <!-- /section:basics/navbar.toggle --> 
-    </div>
-    
-    <!-- #section:basics/navbar.dropdown -->
-    <div class="navbar-buttons navbar-header pull-right" role="navigation">
-      <ul class="nav ace-nav">
-        
-        <!-- #section:basics/navbar.user_menu -->
-        <li class="light-blue dropdown-modal"> <a data-toggle="dropdown" href="#" class="dropdown-toggle"> <img class="nav-user-photo" src="../static/ace/assets/avatars/user.jpg" alt="Jason's Photo" /> <span class="user-info"> <small>欢迎登入,</small> 欧先生 </span> <i class="ace-icon fa fa-caret-down"></i> </a>
-          <ul class="user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
-            <li> <a href="#"> <i class="ace-icon fa fa-cog"></i> Settings </a> </li>
-            <li> <a href="#"> <i class="ace-icon fa fa-user"></i> Profile </a> </li>
-            <li class="divider"></li>
-            <li> <a href="#"> <i class="ace-icon fa fa-power-off"></i> Logout </a> </li>
-          </ul>
-        </li>
-        
-        <!-- /section:basics/navbar.user_menu -->
-      </ul>
-    </div>
-    
-    <!-- /section:basics/navbar.dropdown --> 
-  </div>
-  <!-- /.navbar-container --> 
+    <div class="navbar-container ace-save-state" id="navbar-container">
+        <!-- #section:basics/sidebar.mobile.toggle -->
+        <button type="button" class="navbar-toggle menu-toggler pull-left" id="menu-toggler" data-target="#sidebar"> <span class="sr-only">Toggle sidebar</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
+        <!-- /section:basics/sidebar.mobile.toggle -->
+
+        <div class="navbar-header pull-left">
+            <a href="http://www.hezhongsz.com" class="navbar-brand" style="padding-top:0; padding-bottom:0;" target="_blank"> <img src="/static/img/logo.jpg" /> </a>
+        </div>
+
+        <!-- #section:basics/navbar.dropdown -->
+        <div class="navbar-buttons navbar-header pull-right" role="navigation">
+            <ul class="nav ace-nav">
+
+                <!-- #section:basics/navbar.user_menu -->
+                <li class="light-blue dropdown-modal"> <a data-toggle="dropdown" href="#" class="dropdown-toggle"> <img class="nav-user-photo" src="/static/ace/assets/avatars/user.jpg" alt="Jason's Photo" /> <span class="user-info"> <small>欢迎登入,</small> 欧先生 </span> <i class="ace-icon fa fa-caret-down"></i> </a>
+                    <ul class="user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
+                        <li> <a href="#"> <i class="ace-icon fa fa-cog"></i> Settings </a> </li>
+                        <li> <a href="#"> <i class="ace-icon fa fa-user"></i> Profile </a> </li>
+                        <li class="divider"></li>
+                        <li> <a href="#"> <i class="ace-icon fa fa-power-off"></i> Logout </a> </li>
+                    </ul>
+                </li> <!-- /section:basics/navbar.user_menu -->
+            </ul>
+        </div> <!-- /section:basics/navbar.dropdown -->
+    </div> <!-- /.navbar-container -->
 </div>
 
 <!-- /section:basics/navbar.layout -->
@@ -86,318 +72,507 @@
     </script>
 
     <!-- #section:basics/sidebar -->
-  <div id="sidebar" class="sidebar responsive ace-save-state">
-      <script type="text/javascript">
-          try{ace.settings.loadState('sidebar')}catch(e){}
-      </script>
-    <div class="sidebar-shortcuts" id="sidebar-shortcuts">
-      <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
-        <button class="btn btn-success"> <i class="ace-icon fa fa-signal"></i> </button>
-        <button class="btn btn-info"> <i class="ace-icon fa fa-pencil"></i> </button>
-        
-        <!-- #section:basics/sidebar.layout.shortcuts -->
-        <button class="btn btn-warning"> <i class="ace-icon fa fa-users"></i> </button>
-        <button class="btn btn-danger"> <i class="ace-icon fa fa-cogs"></i> </button>
-        
-        <!-- /section:basics/sidebar.layout.shortcuts --> 
-      </div>
-      
-      <div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
-          <span class="btn btn-success"></span>
-          <span class="btn btn-info"></span>
-          <span class="btn btn-warning"></span>
-          <span class="btn btn-danger"></span>
-      </div>
-    </div>
-    <!-- /.sidebar-shortcuts -->
-    
-            <!--导航JS-->
-    <script src="../static/js/hztx/common_nav.js"></script>
-    <ul class="nav nav-list" id="hz_nav">
-      
-    </ul>
-    <!-- /.nav-list --> 
-    
-    <!-- #section:basics/sidebar.layout.minimize -->
-    <div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse"> <i id="sidebar-toggle-icon" class="ace-icon fa fa-angle-double-left ace-save-state" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i> </div>
-    
-    <!-- /section:basics/sidebar.layout.minimize --> 
-  </div>
-  
-  <!-- /section:basics/sidebar -->
-  <div class="main-content">
-    <div class="main-content-inner"> 
-      <!-- #section:basics/content.breadcrumbs --> 
-      
-      <!-- /section:basics/content.breadcrumbs -->
-      <div class="page-content">
-        <div class="page-header">
-          <h1>地图导航</h1>
-        </div>
-        
-        <!-- /section:settings.box -->
-        <div class="row">
-          <div class="col-sm-12" >
-          <!-- PAGE CONTENT BEGINS -->
-          
-          <style>
-        #myCanvas{width: 1690px; height: 860px; position:relative;}
-        #floor3 {
-			width: 1700px; height: 860px;
-            position: absolute;
-            overflow: hidden;
-            border: 1px solid #b94a48;
-			top:0px; left:10px;
-			}
-        #svg_map{
-            width: 1700px;
-            height: 860px;
-            position:absolute;
-            overflow:hidden;
-        }
-        #svg_path{
-            width: 1700px;
-            height: 860px;
-            position:absolute;
-			z-index:10;
-        }
- 
-    </style>
-          
-          <script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script> 
-          <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script> 
-          <script src="../static/js/jquery.mousewheel.js"></script>
-          <script src="../static/js/hztx/common_map_js.js"></script> 
-		  <script>
-          	//iii
-			//鼠标滚轮缩放svg图
-			$(function(){
-				 
-				 //localStorage.clear();
-				
-				 
-				$('#svg_map').ready(
-					function(){
-						
-						//获取svg图对象
-						var mapSign = $('#map');
-						//设置缩放速度   比例缩放
-						var zoomSpeed = 0.05;
-						
-		 
-						// using the event helper
-						$('#svg_map').mousewheel(function(event, delta, deltaX, deltaY) {
-						
-						 		//svg图的最小 最大  X和Y
-								var mapMinX,mapMaxX,mapMinY,mapMaxY;
-								
-								var mapOffset = mapSign.offset();
-								
-								var mapOuterWidth = mapSign.outerWidth();
-								var mapOuterHeight = mapSign.outerHeight();
-								
-								mapMinX = mapOffset.left;
-								mapMaxX = mapOffset.left + mapOuterWidth;
-								mapMinY = mapOffset.top;
-								mapMaxY = mapOffset.top + mapOuterHeight;
-								
-								
-								
-								
-							
-							
-							if(event.pageX > mapMinX && event.pageX < mapMaxX && event.pageY > mapMinY && event.pageY <  mapMaxY){
+    <div id="sidebar" class="sidebar responsive ace-save-state">
+        <script type="text/javascript">
+            try{ace.settings.loadState('sidebar')}catch(e){}
+        </script>
+        <div class="sidebar-shortcuts" id="sidebar-shortcuts">
+            <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
+                <button class="btn btn-success"> <i class="ace-icon fa fa-signal"></i> </button>
+                <button class="btn btn-info"> <i class="ace-icon fa fa-pencil"></i> </button>
 
-								
-								  /*取消默认事件*/
-								  event.preventDefault()
-								  /*计算速度*/
- 						 			
-								  
-								  var mapHeight, mapWidth, mapTopBorder , mapLeftBorder ,mapTop, mapLeft , speedTop ,speedLeft;
-								  /*#map 的基本参数*/
-								  mapHeight = mapSign.height();
-								  mapWidth = mapSign.width();
-								  
-								  mapTopBorder = parseInt(mapSign.css('border-top-width'));
-								  mapLeftBorder = parseInt(mapSign.css('border-left-width'));
-								  
-								  mapTop = parseInt(mapSign.css('top'));
-								  mapLeft = parseInt(mapSign.css('left'));
-								  
-								  
-								  
-								  /*计算缩放速度  单独的top  或  left*/
-								  
-								  if(delta == 1){
-								  	  speedTop =  parseInt(zoomSpeed * mapHeight);
-									  console.log ('speedTop',speedTop); 
-									  speedLeft =  parseInt(zoomSpeed * mapWidth);
-								  }else{
-								  	  speedTop =  -parseInt(zoomSpeed * mapHeight);
-									  speedLeft = -parseInt(zoomSpeed * mapWidth);
-								  }
-								  
-								 
-								/*更改后的高*/
-								var resultHeight = mapHeight + (speedTop * 2); 
-								var resultWidth = mapWidth + (speedLeft * 2);
-								
-								
-								/*鼠标在图内距离*/
-								var currentMouseTop = event.pageY - mapMinY - mapTopBorder;
-								var currentMouseLeft = event.pageX - mapMinX - mapLeftBorder;
-								/*缩放后再图内的距离*/
-								var mouseTop = Math.round(currentMouseTop - (currentMouseTop / mapHeight * resultHeight));
-								var mouseLeft = Math.round(currentMouseLeft - (currentMouseLeft / mapWidth * resultWidth));
-								 
-								 
-		
- 
- 								/*计算svg偏离距离*/
-								/*svg图的left*/
- 
-									
-										
-								hzY = mapTop + mouseTop  ;
-					 			hzX =  mapLeft + mouseLeft ;
-									
-					 				
-								/*保存缩放比例*/
-							 	zoom = resultWidth / map_w;
-								storage['hz_zoom'] = zoom;
-									
-									
-									
- 
-        						  hz_map_zoom(margin, margin, resultHeight , resultWidth);
- 		  						  hz_change_item_in_map();
-								  
-								 /*计算图片相对父元素位置*/
- 								  
-							}
-  							 
-						});
- 
-					}
-				);	
-			})
-			
-          </script>
-          <div class="row">
-          	<div class="row">
-            	<div class="col-xs-1"></div>
-                <div class="col-xs-11">
-                 <div id="txtHint">
-                <select id="userId" onchange="selectUser(this.value)">
-                <option value="0">请选择用户开启导航</option>
-                <option value="1">1918E00103AA</option>
-                <option value="2">1918E00103A9</option>
-              </select>
-              导航到
-              <select id="loc" class="loc" name="locations" onchange="selectLocation(this.value)" style="font-family:Verdana, Arial, Helvetica, sans-serif;">
-                <option value="27">Room 1 测试区</option>
-                <option value="29">Room 2</option>
-                <option value="30">Room 3</option>
-                <option value="31">Room 4 健身房</option>
-                <option value="32">Room 5</option>
-                <option value="33">Room 6</option>
-                <option value="34">Room 7 演示厅</option>
-                <option value="23">会议室</option>
-                <option value="28">总裁办公室</option>
-                <option value="24">副总办公室1</option>
-                <option value="25">副总办公室2</option>
-                <option value="26">仓库</option>
-              </select>
-              <button class="navigation btn btn-success btn-sm" id="go">开始导航</button>
-              <button id="stop"  class="btn btn-danger btn-sm">结束导航</button>
-              <button id="myPosition" style="visibility:hidden">占位</button>
-              地图：
-              <button id="zoomOut" class="btn btn-info btn-sm">放大</button>
-              <button id="zoomIn" class="btn btn-info btn-sm">缩小</button>
-              <br />
-      
-          </div>
-      			</div>
-      		</div>
-            <div class="hr hr-24"></div>
-          	<div class="row">
-            	<div id="myCanvas">
-              <div id="floor3" style="background:url(/static/img/cross.gif) fixed"> <img src="/static/img/floor3.svg"   style="position:absolute" id="map" >
-              <div id="svg_map">
-                <div id="svg_path"></div>
-                 
-                <img src="/static/img/people.png" style="position:absolute" id="1918E00103AA" title="1918E00103AA"> <img src="/static/img/people.png" style="position:absolute" id="1918E00103A9" title="1918E00103A9"> <img src="/static/img/dest.png" style="position:absolute" id="destination" title="终点"> 
+                <!-- #section:basics/sidebar.layout.shortcuts -->
+                <button class="btn btn-warning"> <i class="ace-icon fa fa-users"></i> </button>
+                <button class="btn btn-danger"> <i class="ace-icon fa fa-cogs"></i> </button>
+                <!-- /section:basics/sidebar.layout.shortcuts -->
+            </div>
+
+            <div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
+                <span class="btn btn-success"></span>
+                <span class="btn btn-info"></span>
+                <span class="btn btn-warning"></span>
+                <span class="btn btn-danger"></span>
+            </div>
+        </div> <!-- /.sidebar-shortcuts -->
+
+        <ul class="nav nav-list" id="hz_nav"></ul>
+
+        <!-- #section:basics/sidebar.layout.minimize -->
+        <div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse"> <i id="sidebar-toggle-icon" class="ace-icon fa fa-angle-double-left ace-save-state" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i> </div>
+        <!-- /section:basics/sidebar.layout.minimize -->
+    </div>
+
+    <!-- /section:basics/sidebar -->
+    <div class="main-content">
+        <div class="main-content-inner">
+            <!-- #section:basics/content.breadcrumbs -->
+            <!-- /section:basics/content.breadcrumbs -->
+
+            <div class="page-content">
+                <div class="page-header"><h1>地图导航</h1></div>
+
+                <!-- /section:settings.box -->
+                <div class="row">
+                    <div class="col-xs-12" >
+                        <div class="row">
+                            <div class="col-xs-11">
+                                <div id="txtHint">
+                                    <select id="selUserId" onchange="selectUser(this.value)" title="选择用户">
+                                        <option value="0">请选择用户开启导航</option>
+                                        <option value="1">1918E00103AA</option>
+                                        <option value="2">1918E00103A9</option>
+                                    </select>
+                                    导航到
+                                    <select id="navDest" name="locations" onchange="selectLocation(this.value)" style="font-family:Verdana, Arial, Helvetica, sans-serif;" title="目的地">
+                                        <option value="27">Room 1 测试区</option>
+                                        <option value="29">Room 2</option>
+                                        <option value="30">Room 3</option>
+                                        <option value="31">Room 4 健身房</option>
+                                        <option value="32">Room 5</option>
+                                        <option value="33">Room 6</option>
+                                        <option value="34">Room 7 演示厅</option>
+                                        <option value="23">会议室</option>
+                                        <option value="28">总裁办公室</option>
+                                        <option value="24">副总办公室1</option>
+                                        <option value="25">副总办公室2</option>
+                                        <option value="26">仓库</option>
+                                    </select>
+                                    <button class="navigation btn btn-success btn-sm" id="btnBeginNav">开始导航</button>
+                                    <button id="btnStopNav"  class="btn btn-danger btn-sm">结束导航</button>
+                                    <button id="myPosition" style="visibility:hidden">占位</button>
+                                    地图：
+                                    <button id="zoomOut" class="btn btn-info btn-sm">放大</button>
+                                    <button id="zoomIn" class="btn btn-info btn-sm">缩小</button>
+                                    <br />
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- /.col -->
+                </div> <!-- /.row -->
+
+                <div class="hr hr-10"></div>
+
+                <div id="myCanvas">
+                    <div id="svg_map_base" class="each_map_layer">  					<!--基础svg图-->
+                        <img src="/static/img/floor3.svg" id="svg_image" class="each_map_layer">
+                        <div id="svg_path" class="each_map_layer"></div>				<!--导航路径-->
+                        <div id="svg-electronic-rail" class="each_map_layer"></div>		<!--电子围栏-->
+                        <div id="svg-electronic-rail-draft" class="each_map_layer"></div>
+
+                        <div id="svg-people-stat-zone" class="each_map_layer"></div>	<!-- 人员盘点区域 -->
+                        <div id="svg-people-stat-zone-draft" class="each_map_layer"></div>
+
+                        <div id="svg_path_history" class="each_map_layer"></div>		<!-- 历史轨迹 -->
+
+                        <div id="svg_sign" class="each_map_layer"></div>				<!--房间等信息标识-->
+
+                        <!--用户标识区域-->
+                        <div id="svg_user_sign" class="each_map_layer"> <img src="/static/img/people.png" style="position:absolute; display: none" id="1918E00103AA" title="1918E00103AA"> <img src="/static/img/people.png" style="position:absolute;display: none" id="1918E00103A9" title="1918E00103A9"><img src="/static/img/dest.png" style="position:absolute;display: none" id="destination" title="终点"> </div>
+                        <div id="svg_temporary_line" class="each_map_layer"></div>
+                        <div id="enclosureEvent" class="each_map_layer" style="display:none;"> <img src="/static/img/drawing.png" id="line_start" title="围栏绘制起点" style="position:absolute; display:none;"> </div>
+                        <div id="svg_event" class="each_map_layer"></div>
+                    </div>
                 </div>
-            </div>
-          </div>
-          	</div>
-          </div>
-          <!--页脚-->
-          
-          <div class="footer">
-            <div class="footer-inner " > 
-              <!-- #section:basics/footer -->
-              <div class="footer-content "  style=" min-width:1713px;" > <span class="bigger-120"> 衡阳市和仲通讯科技有限公司 &copy; 2016-2018 </span> &nbsp; &nbsp; <span class="action-buttons"> <a href="#"> <i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i> </a> <a href="#"> <i class="ace-icon fa fa-facebook-square text-primary bigger-150"></i> </a> <a href="#"> <i class="ace-icon fa fa-rss-square orange bigger-150"></i> </a> </span> </div>
-              
-              <!-- /section:basics/footer --> 
-            </div>
-          </div>
-          
-          <!-- PAGE CONTENT ENDS --> 
+
+                <!--页脚-->
+                <div class="footer">
+                    <div class="footer-inner " >
+                        <!-- #section:basics/footer -->
+                        <div class="footer-content "  style=" min-width:1713px;" > <span class="bigger-120"> 衡阳市和仲通讯科技有限公司 &copy; 2016-2018 </span> &nbsp; &nbsp; <span class="action-buttons"> <a href="#"> <i class="ace-icon fa fa-twitter-square light-blue bigger-150"></i> </a> <a href="#"> <i class="ace-icon fa fa-facebook-square text-primary bigger-150"></i> </a> <a href="#"> <i class="ace-icon fa fa-rss-square orange bigger-150"></i> </a> </span> </div>
+                        <!-- /section:basics/footer -->
+                    </div>
+                </div>
+
+            </div> <!-- /.page-content -->
         </div>
-        <!-- /.col --> 
-      </div>
-      <!-- /.row --> 
-    </div>
-    <!-- /.page-content --> 
-  </div>
-</div>
-<!-- /.main-content --> 
+    </div> <!-- /.main-content -->
+</div> <!-- /.main-container -->
 
-<!--<a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
-				<i class="ace-icon fa fa-angle-double-up icon-only bigger-110"></i>
-			</a>-->
-</div>
-<!-- /.main-container --> 
+<script>
+    'use strict';
+    var hzX = 0, hzY = 0;   // 地图在容器中的位置（距离左上角的距离，left, top）
+    var margin = 0;        //外边距
+    var real_loc_to_pix = 0.0891;      //物理单位转像素单位 比例      比例转换计算公式x为传来的数据   x * real_loc_to_pix * zoom
+    var map_w = 3477;       /// px
+    var map_h = 1769;
+    var zoom = 0.486;          /// 地图缩放级别
+    var hz_is_navigating = false;      /// 是否曾经设置过导航，或正在导航中
+    var HZ_DESTINATION_MEETING_ROOM = 27;     //办公室编号
+    var hz_destination = HZ_DESTINATION_MEETING_ROOM;            /// 导航的目的地，默认 第一个 目的地
+    var hz_user_id = 0;   //下面的索引   实际函数用0应该是未选择
+    var HZ_USER_IDS = ['1918E00103AA', '1918E00103A9'];
+    var hz_user_xy = [];   //用户数据  每项为一个用户
+    var storage = window.localStorage;
 
-<!-- basic scripts --> 
+    if(storage){
+        //storage.clear();
+        ///alert("浏览支持localStorage");
+        var _userId = storage['hz_user_id'];
+        if(typeof _userId !== 'undefined') {
+            hz_user_id = _userId;
+        }
+        var hz_zoom = storage['hz_zoom'];
+        if(typeof hz_zoom !== 'undefined') {    /// 存在值
+            zoom = hz_zoom;
+        }
+
+        var _dest = parseInt(storage['hz_destination']);
+        isNaN(_dest) ? hz_destination = HZ_DESTINATION_MEETING_ROOM : hz_destination = _dest;
+
+        ///alert(storage['hz_is_navigating'] + "  " + Boolean(storage['hz_is_navigating']));
+        hz_is_navigating = Boolean(storage['hz_is_navigating']);
+    }else{
+        ///alert("浏览暂不支持localStorage");
+    }
+
+    var $svg_map_base = $('#svg_map_base');
+    var $svg_event = $('#svg_event');
+    var $document = $(document);
+    var hzCanvas = $('#myCanvas');
+    var	zoomCallBack = [];
+    var pathData = undefined;
+
+    var $btnBeginNav = $("#btnBeginNav");
+
+    $(function(){
+
+        mapZoom(map_h * zoom, map_w * zoom);
+
+        // 移动地图到 画布 的中央
+        hzX = (hzCanvas.width() - $svg_map_base.width()) / 2;
+        hzY = (hzCanvas.height() - $svg_map_base.height()) / 2;
+        $svg_map_base.css({
+            left: hzX + 'px',
+            top: hzY + 'px'
+        });
+
+
+        if(hz_user_id != 0) {       /// 设置选择用户（标签）图片
+            $('#'+ HZ_USER_IDS[hz_user_id-1]).attr('src', '/static/img/peoplesel.png');
+        }
+        $("#navDest").val(parseInt(hz_destination))
+                .attr("disabled", hz_user_id == '0');
+        $("#selUserId").val(parseInt(hz_user_id));
+        $btnBeginNav.attr("disabled", hz_user_id == '0');
+        $('#destination').hide();
+
+
+        var socket = io.connect(hz_connStr);
+        socket.on('connect', function() {
+            socket.emit('hz_event', {data: "I'm connected!"});
+            if (hz_is_navigating) {
+                $('#btnBeginNav').click();
+            }
+        });
+
+        socket.on('hz_position', function(msg) {
+            console.log('hz_position', msg);
+            for (var i=0; i<msg.length; i++){
+                hz_user_xy[i] = [msg[i]['userId'], msg[i]['x'], msg[i]['y']];
+                hzPeopleGoto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
+                        hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
+            }
+        });
+
+
+        // 导航路径
+        socket.on('hz_path', function (msg) {
+            console.log('hz_path', msg);
+            pathData = msg;
+
+            drawNavPath();
+        });
+
+        zoomCallBack.push(drawNavPath);
+        function drawNavPath() {
+            if (!pathData) return;
+
+            var msg = pathData;
+            var pt_path = [];
+            pt_path[0] = [coordMapToScreen(msg.x), coordMapToScreen(msg.y)];
+
+            // 44px 为 地图上的路线宽度
+            for(var m = 0; m< msg.path.length; m++){
+                pt_path[m+1] = [parseInt((msg.path[m].x+44/2-2) * zoom), parseInt((msg.path[m].y+44/2-2) * zoom)];
+            }
+
+            hzPeopleSetPosition(pt_path[pt_path.length-1][0], pt_path[pt_path.length-1][1], 'destination');
+            $('#destination').show();
+
+            var pathLayer = $('#svg_path');
+            pathLayer.svg();
+            var svg = pathLayer.svg('get');
+
+            svg.clear();
+            svg.polyline(pt_path, {fill: 'none', stroke: 'blue', strokeWidth: 4});
+        }
+
+
+        // 鼠标滚轮缩放svg图
+        $svg_event.ready(function () {
+            //获取svg图对象
+            var mapSign = $svg_map_base;
+
+            // 移动地图到 画布 的中央
+            hzX = (hzCanvas.width() - $svg_map_base.width()) / 2;
+            hzY = (hzCanvas.height() - $svg_map_base.height()) / 2;
+            $svg_map_base.css({
+                left: hzX + 'px',
+                top: hzY + 'px'
+            });
+
+            //设置缩放速度   比例缩放
+            var zoomSpeed = 0.05;
+
+            // using the event helper
+            $svg_event.on('mousewheel', addMousewheelEvent);
+
+            function addMousewheelEvent(event, delta) {	// , deltaX, deltaY
+                //svg图的最小 最大  X和Y
+                var mapMinX, mapMaxX, mapMinY, mapMaxY;
+                var mapOffset = mapSign.offset();
+                var mapOuterWidth = mapSign.outerWidth();
+                var mapOuterHeight = mapSign.outerHeight();
+
+                mapMinX = mapOffset.left;
+                mapMaxX = mapOffset.left + mapOuterWidth;
+                mapMinY = mapOffset.top;
+                mapMaxY = mapOffset.top + mapOuterHeight;
+
+                if(event.pageX > mapMinX && event.pageX < mapMaxX && event.pageY > mapMinY && event.pageY < mapMaxY) {
+                    // 取消默认事件
+                    event.preventDefault();
+
+                    // 计算速度
+                    var mapHeight, mapWidth, mapTopBorder, mapLeftBorder, mapTop, mapLeft, speedTop, speedLeft;
+                    mapHeight = mapSign.height();
+                    mapWidth = mapSign.width();
+
+                    mapTopBorder = parseInt(mapSign.css('border-top-width'));
+                    mapLeftBorder = parseInt(mapSign.css('border-left-width'));
+
+                    mapTop = parseInt(mapSign.css('top'));
+                    mapLeft = parseInt(mapSign.css('left'));
+
+
+                    // 计算缩放速度  单独的top  或  left
+
+                    if(delta == 1) {
+                        speedTop = parseInt(zoomSpeed * mapHeight);
+                        console.log('speedTop', speedTop);
+                        speedLeft = parseInt(zoomSpeed * mapWidth);
+                    } else {
+                        speedTop = -parseInt(zoomSpeed * mapHeight);
+                        speedLeft = -parseInt(zoomSpeed * mapWidth);
+                    }
+
+
+                    // 更改后的高
+                    var resultHeight = mapHeight + (speedTop * 2);
+                    var resultWidth = mapWidth + (speedLeft * 2);
+
+
+                    // 鼠标在图内距离
+                    var currentMouseTop = event.pageY - mapMinY - mapTopBorder;
+                    var currentMouseLeft = event.pageX - mapMinX - mapLeftBorder;
+                    // 缩放后在图内的距离
+                    var mouseTop = Math.round(currentMouseTop - (currentMouseTop / mapHeight * resultHeight));
+                    var mouseLeft = Math.round(currentMouseLeft - (currentMouseLeft / mapWidth * resultWidth));
+
+                    // 计算svg偏离位置
+                    hzY = mapTop + mouseTop;
+                    hzX = mapLeft + mouseLeft;
+
+                    // 保存缩放比例
+                    zoom = resultWidth / map_w;
+                    storage['hz_zoom'] = zoom;
+
+                    console.log('margin', margin, 'resultHeight', resultHeight, 'resultWidth', resultWidth);
+                    mapZoom(resultHeight, resultWidth);
+
+                    $svg_map_base.css({
+                        left: hzX + 'px',
+                        top: hzY + 'px'
+                    });
+
+                    people_move_zoom();
+
+                    for(var j = 0; j < zoomCallBack.length; j++) {
+                        zoomCallBack[j]();
+                    }
+                }
+            }
+        });
+
+
+        // 地图移动变量
+        var mapMoveMousedownX, mapMoveMousedownY;
+        var currentX, currentY;
+
+        function addMapMoveEvent() {
+            $svg_event.on('mousedown', mapMoveMousedownFn);
+        }
+        // 事件函数
+        function mapMoveMousedownFn(e) {
+            mapMoveMousedownX = e.pageX;
+            mapMoveMousedownY = e.pageY;
+
+            currentX = parseInt(hzX);
+            currentY = parseInt(hzY);
+
+            $document.on('mousemove', mapMoveMousemoveFn);
+            $document.on('mouseup', mapMoveMouseupFn);
+            $svg_event.css('cursor', 'move');
+            return false;
+        }
+
+        function mapMoveMousemoveFn(e) {
+            currentX = e.pageX - mapMoveMousedownX + parseInt(hzX);
+            currentY = e.pageY - mapMoveMousedownY + parseInt(hzY);
+
+            $svg_map_base.css({
+                left: currentX + 'px',
+                top: currentY + 'px'
+            });
+        }
+
+        function mapMoveMouseupFn() {
+            hzX = currentX;
+            hzY = currentY;
+            $document.off('mousemove', mapMoveMousemoveFn);
+            $document.off('mouseup', mapMoveMouseupFn);
+            $svg_event.css('cursor', 'default');
+        }
+        addMapMoveEvent();
+
+        // 开始导航 按钮
+        $("#btnBeginNav").click(function(){
+            $("#btnBeginNav").attr("disabled", true);
+            $("#navDest").attr("disabled", true);
+            $("#selUserId").attr("disabled", true);
+
+            storage['hz_is_navigating'] = true;
+            hz_is_navigating = true;
+
+            socket.emit('hz_navigating',
+                    {'location': hz_destination, 'userId':HZ_USER_IDS[hz_user_id-1] });
+        });
+
+        /// 停止导航
+        $("#btnStopNav").click(function () {
+            navigationStop();
+        });
+
+        // 停止导航函数
+        function navigationStop(){
+            if(hz_is_navigating){
+                hz_clear_path();
+                storage.removeItem('hz_is_navigating');
+                hz_is_navigating = false;
+                $("#btnBeginNav").attr("disabled", false);
+                $("#navDest").attr("disabled", false);
+                $("#selUserId").attr("disabled", false);
+                $("#destination").hide();
+                socket.emit('hz_stop_navigating');
+            }
+
+            pathData = undefined;
+        }
+
+    });
+
+
+    // 缩放要调用的函数
+    function people_move_zoom() {
+        for(var i = 0; i < hz_user_xy.length; i++) {
+            hzPeopleSetPosition(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
+                    hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
+        }
+    }
+    
+    
+    function zoomDo(zoom) {
+        var mapCenterX = hzX + $svg_map_base.outerWidth() / 2;
+        var mapCenterY = hzY + $svg_map_base.outerHeight() / 2;
+
+        mapZoom(zoom * map_h, zoom * map_w);
+
+        hzX = Math.round(mapCenterX - $svg_map_base.outerWidth() / 2);
+        hzY = Math.round(mapCenterY - $svg_map_base.outerHeight() / 2);
+        $svg_map_base.css({
+            left: hzX + 'px',
+            top: hzY + 'px'
+        });
+
+        people_move_zoom();
+        for(var j = 0; j < zoomCallBack.length; j++) {
+            zoomCallBack[j]();
+        }
+    }
+
+    $("#zoomIn").click(function () {
+        zoom = parseFloat(zoom) - 0.05;
+        storage['hz_zoom'] = zoom;
+        zoomDo(zoom);
+    });
+
+    $("#zoomOut").click(function () {
+        zoom = parseFloat(zoom) + 0.05;
+        storage['hz_zoom'] = zoom;
+        zoomDo(zoom);
+    });
+
+    function selectLocation(str){
+        hz_destination = parseInt(str);
+        storage['hz_destination'] = hz_destination;
+    }
+
+    function selectUser(str){
+        if(hz_user_id != 0) {       /// 还原用户（标签）图片为“未选中”状态
+            $('#'+ HZ_USER_IDS[hz_user_id-1]).attr('src', '/static/img/people.png');
+        }
+        hz_user_id = str;
+        storage['hz_user_id'] = hz_user_id;
+        if(hz_user_id != 0) {       /// 设置选择用户（标签）图片
+            $('#'+ HZ_USER_IDS[hz_user_id-1]).attr('src', '/static/img/peoplesel.png');
+        }
+
+        $("#btnBeginNav").attr("disabled", hz_user_id == '0');
+        $("#navDest").attr("disabled", hz_user_id == '0');
+    }
+
+
+</script>
 
 <script type="text/javascript">
-			if('ontouchstart' in document.documentElement) document.write("<script src='../static/ace/components/_mod/jquery.mobile.custom/jquery.mobile.custom.js'>"+"<"+"/script>");
-		</script> 
-<script src="../static/ace/components/bootstrap/dist/js/bootstrap.js"></script> 
+    if('ontouchstart' in document.documentElement) document.write("<script src='/static/ace/components/_mod/jquery.mobile.custom/jquery.mobile.custom.js'>"+"<"+"/script>");
+</script>
+<script src="/static/ace/components/bootstrap/dist/js/bootstrap.js"></script>
+<script src="/static/ace/components/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.min.js"></script>
+<script src="/static/ace/assets/js/src/elements.scroller.js"></script>
+<script src="/static/ace/assets/js/src/elements.colorpicker.js"></script>
+<script src="/static/ace/assets/js/src/elements.fileinput.js"></script>
+<script src="/static/ace/assets/js/src/elements.typeahead.js"></script>
+<script src="/static/ace/assets/js/src/elements.wysiwyg.js"></script>
+<script src="/static/ace/assets/js/src/elements.spinner.js"></script>
+<script src="/static/ace/assets/js/src/elements.treeview.js"></script>
+<script src="/static/ace/assets/js/src/elements.wizard.js"></script>
+<script src="/static/ace/assets/js/src/elements.aside.js"></script>
+<script src="/static/ace/assets/js/src/ace.js"></script>
+<script src="/static/ace/assets/js/src/ace.basics.js"></script>
+<script src="/static/ace/assets/js/src/ace.scrolltop.js"></script>
+<script src="/static/ace/assets/js/src/ace.ajax-content.js"></script>
+<script src="/static/ace/assets/js/src/ace.touch-drag.js"></script>
+<script src="/static/ace/assets/js/src/ace.sidebar.js"></script>
+<script src="/static/ace/assets/js/src/ace.sidebar-scroll-1.js"></script>
+<script src="/static/ace/assets/js/src/ace.submenu-hover.js"></script>
+<script src="/static/ace/assets/js/src/ace.widget-box.js"></script>
+<script src="/static/ace/assets/js/src/ace.settings.js"></script>
+<script src="/static/ace/assets/js/src/ace.settings-rtl.js"></script>
+<script src="/static/ace/assets/js/src/ace.settings-skin.js"></script>
+<script src="/static/ace/assets/js/src/ace.widget-on-reload.js"></script>
+<script src="/static/ace/assets/js/src/ace.searchbox-autocomplete.js"></script>
 
-<!--时间控制插件--> 
-
-<script src="../static/ace/components/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.min.js"></script> 
-
-<!-- ace scripts --> 
-<script src="../static/ace/assets/js/src/elements.scroller.js"></script> 
-<script src="../static/ace/assets/js/src/elements.colorpicker.js"></script> 
-<script src="../static/ace/assets/js/src/elements.fileinput.js"></script> 
-<script src="../static/ace/assets/js/src/elements.typeahead.js"></script> 
-<script src="../static/ace/assets/js/src/elements.wysiwyg.js"></script> 
-<script src="../static/ace/assets/js/src/elements.spinner.js"></script> 
-<script src="../static/ace/assets/js/src/elements.treeview.js"></script> 
-<script src="../static/ace/assets/js/src/elements.wizard.js"></script> 
-<script src="../static/ace/assets/js/src/elements.aside.js"></script> 
-<script src="../static/ace/assets/js/src/ace.js"></script> 
-<script src="../static/ace/assets/js/src/ace.basics.js"></script> 
-<script src="../static/ace/assets/js/src/ace.scrolltop.js"></script> 
-<script src="../static/ace/assets/js/src/ace.ajax-content.js"></script> 
-<script src="../static/ace/assets/js/src/ace.touch-drag.js"></script> 
-<script src="../static/ace/assets/js/src/ace.sidebar.js"></script> 
-<script src="../static/ace/assets/js/src/ace.sidebar-scroll-1.js"></script> 
-<script src="../static/ace/assets/js/src/ace.submenu-hover.js"></script> 
-<script src="../static/ace/assets/js/src/ace.widget-box.js"></script> 
-<script src="../static/ace/assets/js/src/ace.settings.js"></script> 
-<script src="../static/ace/assets/js/src/ace.settings-rtl.js"></script> 
-<script src="../static/ace/assets/js/src/ace.settings-skin.js"></script> 
-<script src="../static/ace/assets/js/src/ace.widget-on-reload.js"></script> 
-<script src="../static/ace/assets/js/src/ace.searchbox-autocomplete.js"></script> 
-
-<!-- inline scripts related to this page -->
 
 </body>
 </html>

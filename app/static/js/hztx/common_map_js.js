@@ -14,7 +14,6 @@ var zoom = 0.486;          /// 地图缩放级别
 var hz_is_navigating = false;      /// 是否曾经设置过导航，或正在导航中
 var HZ_DESTINATION_MEETING_ROOM = 27;     //办公室编号
 var hz_destination = HZ_DESTINATION_MEETING_ROOM;            /// 导航的目的地，默认 第一个 目的地
-var hz_time_id = 0;    //废弃
 var hz_user_id = 0;   //下面的索引   实际函数用0应该是未选择
 var HZ_USER_IDS = ['1918E00103AA', '1918E00103A9'];
 var hz_user_xy = [];   //用户数据  每项为一个用户
@@ -106,104 +105,7 @@ $(document).ready(function(){
                     hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
         }
     });
-		//导航路径
-    socket.on('hz_path', function (msg) {
-		
-        console.log(msg);
-		
-		console.log(msg.path[0].pt_name)
-		
-        var pt_path = [];
-        pt_path[0] = [msg.x * real_loc_to_pix * zoom, msg.y * real_loc_to_pix * zoom];
-        var json = eval(msg.path); // 数组
-        $.each(json, function (index, item) {
-            // 循环获取数据
-            pt_path[index+1] = [parseInt((json[index].x+44/2-2) * zoom), parseInt((json[index].y+44/2-2) * zoom)];
-        });
 
-        hz_people_go_no_animate(pt_path[pt_path.length-1][0], pt_path[pt_path.length-1][1], 'destination');
-        $('#destination').show();
-
-        var svg = $('#svg_path').svg('get');
-		
- 
-		
-        for ( var i = 0; i< pt_path.length; i++) {        // 转换坐标
-            pt_path[i][0] += hzX;
-            pt_path[i][1] += hzY;
-        }
-		
-        svg.clear();
-        svg.polyline(pt_path, {fill: 'none', stroke: 'blue', strokeWidth: 4});
-    });
-
-    $("#go").click(function(){
-        $("#go").attr("disabled", true);
-        $("#loc").attr("disabled", true);
-        $("#userId").attr("disabled", true);
-
-        storage['hz_is_navigating'] = true;
-        hz_is_navigating = true;
-
-        socket.emit('hz_navigating',
-                {'location': hz_destination, 'userId':HZ_USER_IDS[hz_user_id-1] });
-
-        /*
-        // 未做错误处理。后续需要改正
-        $.post("/go", {"location": hz_destination, "userId": HZ_USER_IDS[hz_user_id-1]}, function(data, status){
-            var pt_path = [];
-            var pt = eval(data.points); // 数组
-            $.each(pt, function (index, item) {
-                hz_people_goto(item['x'] * real_loc_to_pix * zoom + margin, item['y'] * real_loc_to_pix * zoom + margin, item['userId']);
-                if (item['userId'] == HZ_USER_IDS[hz_user_id-1]) {
-                    pt_path[0] = [item['x'] * real_loc_to_pix * zoom, item['y'] * real_loc_to_pix * zoom];
-                }
-            });
-
-            var json = eval(data.path); // 数组
-            $.each(json, function (index, item) {
-                // 循环获取数据
-                pt_path[index+1] = [parseInt((json[index].x+44/2-2) * zoom), parseInt((json[index].y+44/2-2) * zoom)];
-            });
-
-            hz_people_go_no_animate(pt_path[pt_path.length-1][0], pt_path[pt_path.length-1][1], 'destination');
-            $('#destination').show();
-
-            var svg = $('#svg_path').svg('get');
-            svg.clear();
-            for ( var i = 0; i< pt_path.length; i++) {        // 转换坐标
-                pt_path[i][0] += hzX;
-                pt_path[i][1] += hzY;
-            }
-
-            svg.polyline(pt_path, {fill: 'none', stroke: 'blue', strokeWidth: 4});
-
-            storage['hz_is_navigating'] = true;
-            hz_is_navigating = true;
-        });
-        */
-     });
-
-    /// 停止导航
-    $("#stop").click(function () {
-       navgationStop();
-    });
-		
-	//停止导航函数
-	
-	function navgationStop(){
-		 if(hz_is_navigating){
-            hz_clear_path();
-            storage.removeItem('hz_is_navigating');
-            hz_is_navigating = false;
-            $("#go").attr("disabled", false);
-            $("#loc").attr("disabled", false);
-            $("#userId").attr("disabled", false);
-            $("#destination").hide();
-
-            socket.emit('hz_stop_navigating');
-        }	
-	}
 
 	
 
@@ -343,9 +245,7 @@ function hz_people_go_no_animate(x, y, people) {
     }).stop(true, true);
 }
 
-function hz_clear_path() {
-    $('#svg_path').svg('get').clear();
-}
+
 
 $(function() {
 	$('#svg_map').svg({onLoad: drawInitial});
@@ -518,23 +418,7 @@ function getPos()
 
 /// hz_time_id = window.setInterval("getPos()", 1000);
 
-function selectLocation(str){
-    hz_destination = parseInt(str);
-    storage['hz_destination'] = hz_destination;
-}
 
-function selectUser(str){
-    if(hz_user_id != 0) {       /// 还原用户（标签）图片为“未选中”状态
-        $('#'+ HZ_USER_IDS[hz_user_id-1]).attr('src', '/static/img/people.png');
-    }
-    hz_user_id = str;
-    storage['hz_user_id'] = hz_user_id;
-    if(hz_user_id != 0) {       /// 设置选择用户（标签）图片
-        $('#'+ HZ_USER_IDS[hz_user_id-1]).attr('src', '/static/img/peoplesel.png');
-    }
 
-    $("#go").attr("disabled", hz_user_id == '0');
-    $("#loc").attr("disabled", hz_user_id == '0');
-}
 
  
