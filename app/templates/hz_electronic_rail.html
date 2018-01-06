@@ -306,12 +306,6 @@
 			drawElectronicRail(er_data);
 		}
 
-		// 地图 房间名称
-		var $svg_sign = $('#svg_sign');
-		$svg_sign.svg();
-		var svgRoom = $svg_sign.svg('get');
-		showRoomName(svgRoom);
-
 		$svg_event.ready(function () {
 			// 获取svg图对象
 			var mapSign = $svg_map_base;
@@ -394,7 +388,7 @@
 					storage['hz_zoom'] = zoom;
 
 					console.log('margin', margin, 'resultHeight', resultHeight, 'resultWidth', resultWidth);
-					zoomFn(resultHeight, resultWidth);
+					mapZoom(resultHeight, resultWidth);
 
 					$svg_map_base.css({
 						left: hzX + 'px',
@@ -412,29 +406,7 @@
 
 
 		// 缩放函数
-		zoomFn(map_h * zoom, map_w * zoom);
-
-		function zoomFn(height, width) {
-			var $each_map_layer = $('.each_map_layer');
-			$each_map_layer.animate({
-				height: height + 'px',
-				width: width + 'px'
-			}, 'fast', 'swing');
-			$each_map_layer.stop(false, true);
-
-			// 缩放 div 中 svg 的 宽和高
-			$each_map_layer.each(function () {
-				var divSvg = $(this).find('svg');
-				if(divSvg) {
-					divSvg.width($(this).width() + 10);
-					divSvg.height($(this).height() + 10);
-				}
-			});
-
-			// 地图标识;
-			svgRoom.clear();
-			showRoomName(svgRoom);
-		}
+		mapZoom(map_h * zoom, map_w * zoom);
 
 		// 地图移动变量
 		var mapMoveMousedownX, mapMoveMousedownY;
