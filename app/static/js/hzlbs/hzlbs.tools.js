@@ -6,8 +6,10 @@
 
 'use strict';
 
-var zoom = 0.4889; // 地图缩放级别
-var real_loc_to_pix = 0.0891; // 物理单位转像素单位比例, 比例转换计算公式x为传来的数据  px = x * real_loc_to_pix * zoom
+var real_loc_to_pix = 0.0891;  // 物理坐标转像素的比例，比例转换计算公式: px = mm * real_loc_to_pix * zoom
+var zoom = 0.486;       // 地图缩放级别
+
+
 
 // 像素坐标转物理坐标
 function coordScreenToMap(px) {

@@ -25,9 +25,11 @@
     <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script>
     <script src="/static/js/jquery.mousewheel.js"></script>
 
+    <link rel="stylesheet" href="/static/css/hzmap.css" />
     <script src="/static/js/hzlbs/hzlbs.tools.js"></script>
     <script src="/static/js/hzlbs/hzlbs.maps.js"></script>
-    <link rel="stylesheet" href="/static/css/hzmap.css" />
+    <script src="/static/js/hzlbs/hzlbs.showmap.js"></script>
+
     <script src="/static/js/hzlbs/hzlbs.nav.js"></script>
 
     <link rel="shortcut icon" href="/static/img/favicon.ico" />
@@ -141,8 +143,8 @@
                                     <button id="btnStopNav"  class="btn btn-danger btn-sm">结束导航</button>
                                     <button id="myPosition" style="visibility:hidden">占位</button>
                                     地图：
-                                    <button id="zoomOut" class="btn btn-info btn-sm">放大</button>
-                                    <button id="zoomIn" class="btn btn-info btn-sm">缩小</button>
+                                    <button class="btn btn-info btn-sm" onclick="hzZoomIn()">放大</button>
+                                    <button class="btn btn-info btn-sm" onclick="hzZoomOut()">缩小</button>
                                     <br />
                                 </div>
                             </div>
@@ -153,6 +155,19 @@
                 <div class="hr hr-10"></div>
 
                 <div id="myCanvas">
+
+                    <div  id="ctrl-panel" style="position:absolute; top:10px; left: 10px; z-index:1000;">
+                        <div class="btn-group btn-group-vertical btn-group-sm" style="background:#FFF; border:1px solid #CCC;">
+                            <div style="margin: 5px 5px;">
+                                <button type="button" class="btn btn-inverse btn-sm" onclick="hzZoomIn()"><i class="ace-icon fa fa-plus align-middle"></i></button>
+                            </div>
+
+                            <div style="margin: 5px 5px;">
+                                <button type="button" class="btn btn-inverse btn-sm" onclick="hzZoomOut()"><i class="ace-icon fa fa-minus align-middle"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div id="svg_map_base" class="each_map_layer">  					<!--基础svg图-->
                         <img src="/static/img/floor3.svg" id="svg_image" class="each_map_layer">
                         <div id="svg_path" class="each_map_layer"></div>				<!--导航路径-->
@@ -189,67 +204,11 @@
 </div> <!-- /.main-container -->
 
 <script>
-    'use strict';
-    var hzX = 0, hzY = 0;   // 地图在容器中的位置（距离左上角的距离，left, top）
-    var margin = 0;        //外边距
-    var real_loc_to_pix = 0.0891;      //物理单位转像素单位 比例      比例转换计算公式x为传来的数据   x * real_loc_to_pix * zoom
-    var map_w = 3477;       /// px
-    var map_h = 1769;
-    var zoom = 0.486;          /// 地图缩放级别
-    var hz_is_navigating = false;      /// 是否曾经设置过导航，或正在导航中
-    var HZ_DESTINATION_MEETING_ROOM = 27;     //办公室编号
-    var hz_destination = HZ_DESTINATION_MEETING_ROOM;            /// 导航的目的地，默认 第一个 目的地
-    var hz_user_id = 0;   //下面的索引   实际函数用0应该是未选择
-    var HZ_USER_IDS = ['1918E00103AA', '1918E00103A9'];
-    var hz_user_xy = [];   //用户数据  每项为一个用户
-    var storage = window.localStorage;
-
-    if(storage){
-        //storage.clear();
-        ///alert("浏览支持localStorage");
-        var _userId = storage['hz_user_id'];
-        if(typeof _userId !== 'undefined') {
-            hz_user_id = _userId;
-        }
-        var hz_zoom = storage['hz_zoom'];
-        if(typeof hz_zoom !== 'undefined') {    /// 存在值
-            zoom = hz_zoom;
-        }
-
-        var _dest = parseInt(storage['hz_destination']);
-        isNaN(_dest) ? hz_destination = HZ_DESTINATION_MEETING_ROOM : hz_destination = _dest;
-
-        ///alert(storage['hz_is_navigating'] + "  " + Boolean(storage['hz_is_navigating']));
-        hz_is_navigating = Boolean(storage['hz_is_navigating']);
-    }else{
-        ///alert("浏览暂不支持localStorage");
-    }
-
-    var $svg_map_base = $('#svg_map_base');
-    var $svg_event = $('#svg_event');
-    var $document = $(document);
-    var hzCanvas = $('#myCanvas');
-    var	zoomCallBack = [];
-    var pathData = undefined;
-
-    var $btnBeginNav = $("#btnBeginNav");
 
     $(function(){
+        var pathData = undefined;
+        var $btnBeginNav = $("#btnBeginNav");
 
-        mapZoom(map_h * zoom, map_w * zoom);
-
-        // 移动地图到 画布 的中央
-        hzX = (hzCanvas.width() - $svg_map_base.width()) / 2;
-        hzY = (hzCanvas.height() - $svg_map_base.height()) / 2;
-        $svg_map_base.css({
-            left: hzX + 'px',
-            top: hzY + 'px'
-        });
-
-
-        if(hz_user_id != 0) {       /// 设置选择用户（标签）图片
-            $('#'+ HZ_USER_IDS[hz_user_id-1]).attr('src', '/static/img/peoplesel.png');
-        }
         $("#navDest").val(parseInt(hz_destination))
                 .attr("disabled", hz_user_id == '0');
         $("#selUserId").val(parseInt(hz_user_id));
@@ -307,146 +266,8 @@
             svg.polyline(pt_path, {fill: 'none', stroke: 'blue', strokeWidth: 4});
         }
 
-
-        // 鼠标滚轮缩放svg图
-        $svg_event.ready(function () {
-            //获取svg图对象
-            var mapSign = $svg_map_base;
-
-            // 移动地图到 画布 的中央
-            hzX = (hzCanvas.width() - $svg_map_base.width()) / 2;
-            hzY = (hzCanvas.height() - $svg_map_base.height()) / 2;
-            $svg_map_base.css({
-                left: hzX + 'px',
-                top: hzY + 'px'
-            });
-
-            //设置缩放速度   比例缩放
-            var zoomSpeed = 0.05;
-
-            // using the event helper
-            $svg_event.on('mousewheel', addMousewheelEvent);
-
-            function addMousewheelEvent(event, delta) {	// , deltaX, deltaY
-                //svg图的最小 最大  X和Y
-                var mapMinX, mapMaxX, mapMinY, mapMaxY;
-                var mapOffset = mapSign.offset();
-                var mapOuterWidth = mapSign.outerWidth();
-                var mapOuterHeight = mapSign.outerHeight();
-
-                mapMinX = mapOffset.left;
-                mapMaxX = mapOffset.left + mapOuterWidth;
-                mapMinY = mapOffset.top;
-                mapMaxY = mapOffset.top + mapOuterHeight;
-
-                if(event.pageX > mapMinX && event.pageX < mapMaxX && event.pageY > mapMinY && event.pageY < mapMaxY) {
-                    // 取消默认事件
-                    event.preventDefault();
-
-                    // 计算速度
-                    var mapHeight, mapWidth, mapTopBorder, mapLeftBorder, mapTop, mapLeft, speedTop, speedLeft;
-                    mapHeight = mapSign.height();
-                    mapWidth = mapSign.width();
-
-                    mapTopBorder = parseInt(mapSign.css('border-top-width'));
-                    mapLeftBorder = parseInt(mapSign.css('border-left-width'));
-
-                    mapTop = parseInt(mapSign.css('top'));
-                    mapLeft = parseInt(mapSign.css('left'));
-
-
-                    // 计算缩放速度  单独的top  或  left
-
-                    if(delta == 1) {
-                        speedTop = parseInt(zoomSpeed * mapHeight);
-                        console.log('speedTop', speedTop);
-                        speedLeft = parseInt(zoomSpeed * mapWidth);
-                    } else {
-                        speedTop = -parseInt(zoomSpeed * mapHeight);
-                        speedLeft = -parseInt(zoomSpeed * mapWidth);
-                    }
-
-
-                    // 更改后的高
-                    var resultHeight = mapHeight + (speedTop * 2);
-                    var resultWidth = mapWidth + (speedLeft * 2);
-
-
-                    // 鼠标在图内距离
-                    var currentMouseTop = event.pageY - mapMinY - mapTopBorder;
-                    var currentMouseLeft = event.pageX - mapMinX - mapLeftBorder;
-                    // 缩放后在图内的距离
-                    var mouseTop = Math.round(currentMouseTop - (currentMouseTop / mapHeight * resultHeight));
-                    var mouseLeft = Math.round(currentMouseLeft - (currentMouseLeft / mapWidth * resultWidth));
-
-                    // 计算svg偏离位置
-                    hzY = mapTop + mouseTop;
-                    hzX = mapLeft + mouseLeft;
-
-                    // 保存缩放比例
-                    zoom = resultWidth / map_w;
-                    storage['hz_zoom'] = zoom;
-
-                    console.log('margin', margin, 'resultHeight', resultHeight, 'resultWidth', resultWidth);
-                    mapZoom(resultHeight, resultWidth);
-
-                    $svg_map_base.css({
-                        left: hzX + 'px',
-                        top: hzY + 'px'
-                    });
-
-                    people_move_zoom();
-
-                    for(var j = 0; j < zoomCallBack.length; j++) {
-                        zoomCallBack[j]();
-                    }
-                }
-            }
-        });
-
-
-        // 地图移动变量
-        var mapMoveMousedownX, mapMoveMousedownY;
-        var currentX, currentY;
-
-        function addMapMoveEvent() {
-            $svg_event.on('mousedown', mapMoveMousedownFn);
-        }
-        // 事件函数
-        function mapMoveMousedownFn(e) {
-            mapMoveMousedownX = e.pageX;
-            mapMoveMousedownY = e.pageY;
-
-            currentX = parseInt(hzX);
-            currentY = parseInt(hzY);
-
-            $document.on('mousemove', mapMoveMousemoveFn);
-            $document.on('mouseup', mapMoveMouseupFn);
-            $svg_event.css('cursor', 'move');
-            return false;
-        }
-
-        function mapMoveMousemoveFn(e) {
-            currentX = e.pageX - mapMoveMousedownX + parseInt(hzX);
-            currentY = e.pageY - mapMoveMousedownY + parseInt(hzY);
-
-            $svg_map_base.css({
-                left: currentX + 'px',
-                top: currentY + 'px'
-            });
-        }
-
-        function mapMoveMouseupFn() {
-            hzX = currentX;
-            hzY = currentY;
-            $document.off('mousemove', mapMoveMousemoveFn);
-            $document.off('mouseup', mapMoveMouseupFn);
-            $svg_event.css('cursor', 'default');
-        }
-        addMapMoveEvent();
-
         // 开始导航 按钮
-        $("#btnBeginNav").click(function(){
+        $btnBeginNav.click(function(){
             $("#btnBeginNav").attr("disabled", true);
             $("#navDest").attr("disabled", true);
             $("#selUserId").attr("disabled", true);
@@ -481,47 +302,6 @@
 
     });
 
-
-    // 缩放要调用的函数
-    function people_move_zoom() {
-        for(var i = 0; i < hz_user_xy.length; i++) {
-            hzPeopleSetPosition(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
-                    hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
-        }
-    }
-    
-    
-    function zoomDo(zoom) {
-        var mapCenterX = hzX + $svg_map_base.outerWidth() / 2;
-        var mapCenterY = hzY + $svg_map_base.outerHeight() / 2;
-
-        mapZoom(zoom * map_h, zoom * map_w);
-
-        hzX = Math.round(mapCenterX - $svg_map_base.outerWidth() / 2);
-        hzY = Math.round(mapCenterY - $svg_map_base.outerHeight() / 2);
-        $svg_map_base.css({
-            left: hzX + 'px',
-            top: hzY + 'px'
-        });
-
-        people_move_zoom();
-        for(var j = 0; j < zoomCallBack.length; j++) {
-            zoomCallBack[j]();
-        }
-    }
-
-    $("#zoomIn").click(function () {
-        zoom = parseFloat(zoom) - 0.05;
-        storage['hz_zoom'] = zoom;
-        zoomDo(zoom);
-    });
-
-    $("#zoomOut").click(function () {
-        zoom = parseFloat(zoom) + 0.05;
-        storage['hz_zoom'] = zoom;
-        zoomDo(zoom);
-    });
-
     function selectLocation(str){
         hz_destination = parseInt(str);
         storage['hz_destination'] = hz_destination;
@@ -540,8 +320,6 @@
         $("#btnBeginNav").attr("disabled", hz_user_id == '0');
         $("#navDest").attr("disabled", hz_user_id == '0');
     }
-
-
 </script>
 
 <script type="text/javascript">
