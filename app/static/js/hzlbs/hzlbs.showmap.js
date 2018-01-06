@@ -223,9 +223,9 @@ $(function(){
 			var mapMouseTop = parseInt(mapBase.css('border-top-width'));
 			if(isNaN(mapMouseTop)) mapMouseTop = 0;
 			
-			mapMouseLeft = event.pageX - mapOffset.left - mapMouseLeft;
+			mapMouseLeft = e.pageX - mapOffset.left - mapMouseLeft;
 			mapMouseLeft = coordScreenToMap(mapMouseLeft);
-			mapMouseTop = event.pageY - mapOffset.top - mapMouseTop;
+			mapMouseTop = e.pageY - mapOffset.top - mapMouseTop;
 			mapMouseTop = coordScreenToMap(mapMouseTop);
 			
 			if (_mouseMoveCallback)  _mouseMoveCallback(mapMouseLeft, mapMouseTop);
