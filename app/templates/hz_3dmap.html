@@ -235,7 +235,7 @@
                 console.log('hz_position', msg);
                 for(var i = 0; i < msg.length; i++) {
                     var coord = {x: msg[i].x, y: msg[i].y};
-                    var fm_coord = hzTransformToFMap(coord);
+                    var fm_coord = hzPlaneCoordToFMap(coord);
                     if (msg[i].userId in hz_marker) {
                         hz_marker[msg[i].userId].marker.moveTo({
                             x: fm_coord.x,
@@ -251,7 +251,6 @@
                     }
                 }
             });
-
 
         });
 
