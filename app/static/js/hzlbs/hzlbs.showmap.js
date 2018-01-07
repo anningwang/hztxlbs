@@ -1,8 +1,14 @@
-
+/**
+ * 和仲通讯 版权所有 2016-2018
+ * 版本号：v0.3
+ * SVG地图 Toolkit，实现地图显示、操作等函数
+ */
 
 'use strict';
 
-var hzX = 0, hzY = 0;   // 地图在容器中的位置（距离左上角的距离，left, top）
+var hzX = undefined, hzY = undefined;   // 地图在容器中的位置（距离左上角的距离，left, top）
+var real_loc_to_pix = 0.0891;  // 物理坐标转像素的比例，比例转换计算公式: px = mm * real_loc_to_pix * zoom
+var zoom = 0.486;       // 地图缩放级别
 var margin = 0;         //外边距
 var map_w = 3477;       // px
 var map_h = 1769;       // 地图图片高度
@@ -43,19 +49,8 @@ $(function(){
 	var $svg_map_base = $('#svg_map_base');
 	var $svg_event = $('#svg_event');
 	var $document = $(document);
-	var hzCanvas = $('#myCanvas');
-
 
 	mapZoom(map_h * zoom, map_w * zoom);
-
-	// 移动地图到 画布 的中央
-	// console.log(hzCanvas.width(), $svg_map_base.width());
-	hzX = (hzCanvas.width() - $svg_map_base.width()) / 2;
-	hzY = (hzCanvas.height() - $svg_map_base.height()) / 2;
-	$svg_map_base.css({
-		left: hzX + 'px',
-		top: hzY + 'px'
-	});
 
 	if(hz_user_id != 0) {       /// 设置选择用户（标签）图片
 		$('#'+ HZ_USER_IDS[hz_user_id-1]).attr('src', '/static/img/peoplesel.png');
@@ -66,7 +61,7 @@ $(function(){
 		// 获取svg图对象
 		var mapSign = $svg_map_base;
 		
-		//设置缩放速度   比例缩放
+		// 设置缩放速度   比例缩放
 		var zoomSpeed = 0.05;
 		
 		// using the event helper
@@ -133,18 +128,7 @@ $(function(){
 				storage['hz_zoom'] = zoom;
 				
 				console.log('margin', margin, 'resultHeight', resultHeight, 'resultWidth', resultWidth);
-				mapZoom(resultHeight, resultWidth);
-				
-				$svg_map_base.css({
-					left: hzX + 'px',
-					top: hzY + 'px'
-				});
-				
-				people_move_zoom();
-				
-				for(var j = 0; j < zoomCallBack.length; j++) {
-					zoomCallBack[j]();
-				}
+				mapZoom(resultHeight, resultWidth, hzX, hzY);   // hzX, hzY 也可以不传递，由mapZoom函数自动计算
 			}
 		}
 	});
@@ -251,42 +235,171 @@ function people_move_zoom() {
 }
 
 
-function zoomDo(zoom) {
-	var $svg_map_base = $('#svg_map_base');
-
-	var mapCenterX = hzX + $svg_map_base.outerWidth() / 2;
-	var mapCenterY = hzY + $svg_map_base.outerHeight() / 2;
-	
-	mapZoom(zoom * map_h, zoom * map_w);
-	
-	hzX = Math.round(mapCenterX - $svg_map_base.outerWidth() / 2);
-	hzY = Math.round(mapCenterY - $svg_map_base.outerHeight() / 2);
-	$svg_map_base.css({
-		left: hzX + 'px',
-		top: hzY + 'px'
-	});
-	
-	people_move_zoom();
-	for(var j = 0; j < zoomCallBack.length; j++) {
-		zoomCallBack[j]();
-	}
-}
-
 // 缩小
 function hzZoomOut() {
 	zoom = parseFloat(zoom) - 0.05;
 	storage['hz_zoom'] = zoom;
-	zoomDo(zoom);
+	mapZoom(zoom * map_h, zoom * map_w);
 }
 
 // 放大
 function hzZoomIn() {
 	zoom = parseFloat(zoom) + 0.05;
 	storage['hz_zoom'] = zoom;
-	zoomDo(zoom);
+	mapZoom(zoom * map_h, zoom * map_w);
 }
 
 // 坐标拾取回调函数, fn 参数 x, y 单位 mm
 function getCoordCallback(fn) {
 	_mouseMoveCallback = fn;
+}
+
+
+
+// 像素坐标转物理坐标
+function coordScreenToMap(px) {
+	return Math.round(px / real_loc_to_pix / zoom);
+}
+
+// 物理坐标（单位：mm）转屏幕坐标（单位：像素）
+function coordMapToScreen(mm) {
+	return parseInt(mm * real_loc_to_pix * zoom)
+}
+
+// 房间名称所在坐标
+var roomNameCoord = [
+	{name: '会议室',      x: 2067,  y: 3563,  fontSize: 20},
+	{name: '副总办公室',  x: 2067,  y: 8981,  fontSize: 20},
+	{name: '总裁室',      x: 2067,  y: 15609, fontSize: 20},
+	{name: '仓库1',       x: 7947,  y: 15609, fontSize: 20},
+	{name: '仓库2',       x: 12046, y: 15609, fontSize: 20},
+	{name: '大会议室',    x: 31148, y: 14433, fontSize: 20},
+	{name: '智慧医疗',    x: 34569, y: 9587,  fontSize: 16},
+	{name: '智慧园区',    x: 34309, y: 6486,  fontSize: 16},
+	{name: '健身房',      x: 33678, y: 3101,  fontSize: 16},
+	{name: '智慧安防',    x: 31000, y: 3101,  fontSize: 16},
+	{name: '智慧消防',    x: 28403, y: 3101,  fontSize: 16},
+	{name: '北斗羲和',    x: 25588, y: 3101,  fontSize: 16},
+	{name: '机房',        x: 19244, y: 4775,  fontSize: 20},
+	{name: '前台',        x: 19244, y: 7456,  fontSize: 20}
+];
+
+// 显示房间名称
+function showRoomName(svg) {
+	var roomLayer = $('#svg_sign');
+	roomLayer.svg();
+	var svgRoom = roomLayer.svg('get');
+
+	svg = svg || svgRoom;
+	if(!svg) {
+		console.log('showRoomName svg param is null, svg=', svg );
+		return false;
+	}
+	svg.clear();
+
+	for(var i = 0; i < roomNameCoord.length; i++) {
+		var str = 'translate(' + coordMapToScreen(roomNameCoord[i].x) + ',' + coordMapToScreen(roomNameCoord[i].y) + ')';
+		var g1 = svg.group({
+			transform: str
+		});
+		svg.text(g1, 0, 0, roomNameCoord[i].name, {
+			fontSize: roomNameCoord[i].fontSize,
+			fontFamily: 'Verdana',
+			fill: 'blue'
+		});
+	}
+}
+
+// 缩放地图，并设置地图的位置（left, top）
+function mapZoom(height, width, left, top) {
+	var $each_map_layer = $('.each_map_layer');
+
+	var $svg_map_base = $('#svg_map_base');
+
+	var mapOldW = $svg_map_base.outerWidth() / 2;
+	var mapOldH = $svg_map_base.outerHeight() / 2;
+
+	// 缩放 div 中 svg 的 宽和高
+	$each_map_layer.each(function () {
+		$(this).css({height: height+'px', width: width+'px'});
+
+		var divSvg = $(this).find('svg');
+		if(divSvg) {
+			divSvg.width($(this).width() + 10);
+			divSvg.height($(this).height() + 10);
+		}
+	});
+
+	var hzCanvas = $('#myCanvas');
+	if (left !== undefined) hzX = left;
+	else if(hzX === undefined)  hzX = (hzCanvas.width() - $svg_map_base.width()) / 2;
+	else {
+		var mapNewW = $svg_map_base.outerWidth() / 2;
+		hzX +=  Math.round(mapOldW - mapNewW);
+	}
+
+	if (top !== undefined) hzY = top;
+	else if(hzY === undefined) hzY = (hzCanvas.height() - $svg_map_base.height()) / 2;
+	else {
+		var mapNewH = $svg_map_base.outerHeight() / 2;
+		hzY +=  Math.round(mapOldH - mapNewH);
+	}
+
+	$svg_map_base.css({
+		left: hzX + 'px',
+		top: hzY + 'px'
+	});
+
+	var mapLayer = $('#svg_image');
+	if (mapLayer.css('display') == 'none') {
+		mapLayer.toggle();
+	}
+
+	// 地图标识;
+	showRoomName();
+
+	// 移动 人员 marker
+	people_move_zoom();
+
+	// 地图缩放后的回调函数
+	for(var j = 0; j < zoomCallBack.length; j++) {
+		zoomCallBack[j]();
+	}
+
+}
+
+
+// 移动标签位置到指定坐标 (x, y) 为屏幕坐标，people 为标签id。移动标签，有动画。
+function hzPeopleGoto(x, y, people) {
+	people = people || '1918E00103AA'; // 设置默认参数
+	var p = $('#'+people);
+
+	// 24, 45是定位图标的 针尖 位置。显示图片时，是以图片左上角为参考坐标。故需要对坐标进行偏移。
+
+	if (p.css("display") == 'none') {
+		p.css({left: x-24, top: y-45});
+		p.toggle();
+	} else {
+		p.stop(true, true).animate({
+			left: (x - 24),
+			top: (y - 45)
+		});
+	}
+}
+
+// 移动标签位置到指定坐标 (x, y) 为屏幕坐标，people 为标签id。 无动画移动标签。
+function hzPeopleSetPosition(x, y, people) {
+	people = people || '1918E00103AA'; // 设置默认参数
+	var p = $('#'+people);
+	p.css({left: x-24, top: y-45});
+	if (p.css("display") == 'none') {
+		p.toggle();
+	}
+}
+
+// 清除导航路径
+function hzClearNavPath() {
+	var pathLayer = $('#svg_path');
+	var svg = pathLayer.svg('get');
+	if (svg) svg.clear();
 }
