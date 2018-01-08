@@ -217,11 +217,10 @@
     $(function(){
         var socket = io.connect(hz_connStr);
         socket.on('hz_position', function(msg) {
-            console.log(msg);
+            console.log('hz_position', msg);
             for (var i=0; i<msg.length; i++){
-                hz_user_xy[i] = [msg[i]['userId'], msg[i]['x'], msg[i]['y']];
-                hzPeopleGoto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
-                        hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
+                hzPeopleGoto(coordMapToScreen(msg[i]['x'])-margin, coordMapToScreen(msg[i]['y'])-margin, msg[i]['userId']);
+                setPeopleCoord(msg[i]['userId'], msg[i]['x'], msg[i]['y']);
             }
         });
 

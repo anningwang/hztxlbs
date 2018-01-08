@@ -30,10 +30,10 @@ if(storage){
 	if(typeof hz_zoom !== 'undefined') {    // 存在值
 		zoom = hz_zoom;
 	}
-
+	
 	var _dest = parseInt(storage['hz_destination']);
 	hz_destination = isNaN(_dest) ? HZ_DESTINATION_MEETING_ROOM : _dest;
-
+	
 	//console.log(storage['hz_is_navigating'] + "  " + Boolean(storage['hz_is_navigating']));
 	hz_is_navigating = Boolean(storage['hz_is_navigating']);
 }else{
@@ -45,13 +45,13 @@ var _mouseMoveCallback = undefined;     // 函数指针，鼠标移动回调函�
 var	zoomCallBack = [];      // func Array 缩放需要执行的临时函数
 
 $(function(){
-
+	
 	var $svg_map_base = $('#svg_map_base');
 	var $svg_event = $('#svg_event');
 	var $document = $(document);
-
+	
 	mapZoom(map_h * zoom, map_w * zoom);
-
+	
 	if(hz_user_id != 0) {       /// 设置选择用户（标签）图片
 		$('#'+ HZ_USER_IDS[hz_user_id-1]).attr('src', '/static/img/peoplesel.png');
 	}
@@ -222,7 +222,7 @@ $(function(){
 		if (_mouseMoveCallback)  _mouseMoveCallback('', '');
 	}
 	
-
+	
 });
 
 
@@ -289,14 +289,14 @@ function showRoomName(svg) {
 	var roomLayer = $('#svg_sign');
 	roomLayer.svg();
 	var svgRoom = roomLayer.svg('get');
-
+	
 	svg = svg || svgRoom;
 	if(!svg) {
 		console.log('showRoomName svg param is null, svg=', svg );
 		return false;
 	}
 	svg.clear();
-
+	
 	for(var i = 0; i < roomNameCoord.length; i++) {
 		var str = 'translate(' + coordMapToScreen(roomNameCoord[i].x) + ',' + coordMapToScreen(roomNameCoord[i].y) + ')';
 		var g1 = svg.group({
@@ -313,23 +313,23 @@ function showRoomName(svg) {
 // 缩放地图，并设置地图的位置（left, top）
 function mapZoom(height, width, left, top) {
 	var $each_map_layer = $('.each_map_layer');
-
+	
 	var $svg_map_base = $('#svg_map_base');
-
+	
 	var mapOldW = $svg_map_base.outerWidth() / 2;
 	var mapOldH = $svg_map_base.outerHeight() / 2;
-
+	
 	// 缩放 div 中 svg 的 宽和高
 	$each_map_layer.each(function () {
 		$(this).css({height: height+'px', width: width+'px'});
-
+		
 		var divSvg = $(this).find('svg');
 		if(divSvg) {
 			divSvg.width($(this).width() + 10);
 			divSvg.height($(this).height() + 10);
 		}
 	});
-
+	
 	var hzCanvas = $('#myCanvas');
 	if (left !== undefined) hzX = left;
 	else if(hzX === undefined)  hzX = (hzCanvas.width() - $svg_map_base.width()) / 2;
@@ -337,35 +337,35 @@ function mapZoom(height, width, left, top) {
 		var mapNewW = $svg_map_base.outerWidth() / 2;
 		hzX +=  Math.round(mapOldW - mapNewW);
 	}
-
+	
 	if (top !== undefined) hzY = top;
 	else if(hzY === undefined) hzY = (hzCanvas.height() - $svg_map_base.height()) / 2;
 	else {
 		var mapNewH = $svg_map_base.outerHeight() / 2;
 		hzY +=  Math.round(mapOldH - mapNewH);
 	}
-
+	
 	$svg_map_base.css({
 		left: hzX + 'px',
 		top: hzY + 'px'
 	});
-
+	
 	var mapLayer = $('#svg_image');
 	if (mapLayer.css('display') == 'none') {
 		mapLayer.toggle();
 	}
-
+	
 	// 地图标识;
 	showRoomName();
-
+	
 	// 移动 人员 marker
 	people_move_zoom();
-
+	
 	// 地图缩放后的回调函数
 	for(var j = 0; j < zoomCallBack.length; j++) {
 		zoomCallBack[j]();
 	}
-
+	
 }
 
 
@@ -373,9 +373,9 @@ function mapZoom(height, width, left, top) {
 function hzPeopleGoto(x, y, people) {
 	people = people || '1918E00103AA'; // 设置默认参数
 	var p = $('#'+people);
-
+	
 	// 24, 45是定位图标的 针尖 位置。显示图片时，是以图片左上角为参考坐标。故需要对坐标进行偏移。
-
+	
 	if (p.css("display") == 'none') {
 		p.css({left: x-24, top: y-45});
 		p.toggle();
@@ -402,4 +402,21 @@ function hzClearNavPath() {
 	var pathLayer = $('#svg_path');
 	var svg = pathLayer.svg('get');
 	if (svg) svg.clear();
+}
+
+
+// 保存用户的当前位置坐标, 地图坐标，单位mm
+function setPeopleCoord(userId, x, y) {
+	var i;
+	for (i = 0; i < hz_user_xy.length; i++) {
+		if (hz_user_xy[i][0] === userId) {
+			hz_user_xy[i][1] = x;
+			hz_user_xy[i][2] = y;
+			break;
+		}
+	}
+	
+	if (i === hz_user_xy.length) {  // not find, add new user & coord.
+		hz_user_xy[i] = [userId, x, y];
+	}
 }

@@ -7,6 +7,14 @@
 'use strict';
 
 
+// need socket.io.min.js
+var hz_namespace = '/HeZhong';
+// Connect to the Socket.IO server.
+// The connection URL has the following format:
+//     http[s]://<domain>:<port>[/<namespace>]
+var hz_connStr = location.protocol + '//' + document.domain + ':' + location.port + hz_namespace;
+
+
 // 初始化对象
 function Init(){
     // 存运行函数的清除方法

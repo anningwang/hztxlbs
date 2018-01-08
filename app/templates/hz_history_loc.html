@@ -224,22 +224,17 @@
 	'use strict';
 
 	$(function(){
-
 		var hisLocData = undefined;
 
 		var socket = io.connect(hz_connStr);
 		socket.on('hz_position', function(msg) {
-			console.log(msg);
+			console.log('hz_position', msg);
 			for (var i=0; i<msg.length; i++){
-				hz_user_xy[i] = [msg[i]['userId'], msg[i]['x'], msg[i]['y']];
-				hzPeopleGoto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
-						hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
+				hzPeopleGoto(coordMapToScreen(msg[i]['x'])-margin, coordMapToScreen(msg[i]['y'])-margin, msg[i]['userId']);
+				setPeopleCoord(msg[i]['userId'], msg[i]['x'], msg[i]['y']);
 			}
 		});
 
-		if(hz_user_id != 0) {    /// 设置选择用户（标签）图片
-			$('#'+ HZ_USER_IDS[hz_user_id-1]).attr('src', '/static/img/peoplesel.png');
-		}
 
 		//override dialog's title function to allow for HTML titles
 		$.widget("ui.dialog", $.extend({}, $.ui.dialog.prototype, {

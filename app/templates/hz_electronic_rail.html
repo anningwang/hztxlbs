@@ -1060,8 +1060,8 @@
 					data: JSON.stringify(txData)
 				}
 			}).done(function (data) {
-				console.log('接口调用成功');
-				console.log('receive:', data);
+				//console.log('接口调用成功');
+				console.log('url & data(tx rx)', url, txData, data);
 				result = data;
 			}).fail(function () {
 				console.log('接口调用失败');
@@ -1078,9 +1078,8 @@
 				contentType: "application/json;charset=UTF-8",
 				data: JSON.stringify(txData)    // 发送json数据到服务器
 			}).done(function (data) {
-				console.log('接口调用成功');
-				console.log('send: url=', url, 'data=', txData);
-				console.log('receive:', data);
+				//console.log('接口调用成功');
+				console.log('url & data(tx rx)', url, txData, data);
 				result = data;
 			}).fail(function () {
 				console.log('接口调用失败');
@@ -1213,26 +1212,13 @@
 		}
 
 
-		var namespace = '/HeZhong';
-		// Connect to the Socket.IO server.
-		// The connection URL has the following format:
-		//     http[s]://<domain>:<port>[/<namespace>]
-		var connStr = location.protocol + '//' + document.domain + ':' + location.port + namespace;
-		console.log(connStr);
-		var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
-
+		var socket = io.connect(hz_connStr);
 		// 标签实时位置
-		socket.on('hz_position', function (msg) {
-			var json = eval(msg); // 数组
-			console.log(json);
-			$.each(json, function (index, item) {
-				hz_user_xy[index] = [item['userId'], json[index]['x'], json[index]['y']];
-			});
-
-			console.log('hz_user_xy:', hz_user_xy);
-			for(var i = 0; i < json.length; i++) {
-				hzPeopleGoto(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
-						hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
+		socket.on('hz_position', function(msg) {
+			console.log('hz_position', msg);
+			for (var i=0; i<msg.length; i++){
+				hzPeopleGoto(coordMapToScreen(msg[i]['x'])-margin, coordMapToScreen(msg[i]['y'])-margin, msg[i]['userId']);
+				setPeopleCoord(msg[i]['userId'], msg[i]['x'], msg[i]['y']);
 			}
 		});
 
