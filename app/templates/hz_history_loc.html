@@ -11,13 +11,13 @@
 	<link rel="stylesheet" href="/static/ace/components/font-awesome/css/font-awesome.css" />
 	<link rel="stylesheet" href="/static/ace/assets/css/ace-fonts.css" />
 
-	<link rel="stylesheet" href="/static/ace/assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
-	<link rel="stylesheet" href="/static/ace/assets/css/ace-skins.css" />
-	<link rel="stylesheet" href="/static/ace/assets/css/ace-rtl.css" />
-
 	<link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css">
 	<link rel="stylesheet" href="/static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.css"/>
 	<link rel="stylesheet" href="/static/ace/components/_mod/jquery-ui/jquery-ui.min.css"/>
+
+	<link rel="stylesheet" href="/static/ace/assets/css/ace.min.css" />
+	<link rel="stylesheet" href="/static/ace/assets/css/ace-skins.css" />
+	<link rel="stylesheet" href="/static/ace/assets/css/ace-rtl.css" />
 
 	<link rel="stylesheet" href="/static/css/hzmap.css" />
 
@@ -214,9 +214,11 @@
 
 
 <div id="dialog-message" class="hide">
+	<div class="space-6"></div>
 	<p>
 		<b>请选择查询起始时间。</b>
 	</p>
+	<div class="space-6"></div>
 </div><!-- #dialog-message -->
 
 
@@ -277,8 +279,11 @@
 			if(startTime == ''){
 				//alert('请选择查询起始时间');
 				var dialog = $( "#dialog-message" ).removeClass('hide').dialog({
+					resizable: false,
+					width: '320',
 					modal: true,
-					title: "提示",
+					title: "<div class='widget-header widget-header-small'><h4 class='smaller'><i class='ace-icon fa fa-info'></i> 提示 </h4></div>",
+
 					title_html: true,
 					buttons: [
 						{

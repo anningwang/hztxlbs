@@ -54,7 +54,6 @@
             <ul class="nav">
               <li><a href="{{ url_for('index') }}">{{ _('Home') }}</a></li>
               <li><a href="{{ url_for('gettoken') }}">{{ _('位置服务平台') }}</a></li>
-              <li><a href="{{ url_for('hz_test') }}">{{ _('接口测试') }}</a></li>
 
               {% if g.user.is_authenticated %}
               <li><a href="{{ url_for('user', nickname = g.user.nickname) }}">{{ _('Your Profile') }}</a></li>

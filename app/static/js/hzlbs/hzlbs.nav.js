@@ -22,6 +22,7 @@ $(function(){
 		'<ul class="submenu">' +
 		'<li class=""><a href="/hz_ps_zone"><i class="menu-icon fa fa-caret-right"></i>盘点区域</a><b class="arrow"></b></li>' +
 		'<li class=""><a href="/hz_ps_result"><i class="menu-icon fa fa-caret-right"></i>盘点结果</a><b class="arrow"></b></li>' +
+		'<li class=""><a href="/hz_people_stat_task"><i class="menu-icon fa fa-caret-right"></i>定时盘点</a><b class="arrow"></b></li>' +
 		'</ul></li>' +
 
 		'</ul></li>' +
@@ -32,7 +33,13 @@ $(function(){
 				'<span class="menu-text"> 3D地图 </span>' +
 			'</a>' +
 			'<b class="arrow"></b>'
-		+'</li>'
+		+'</li>' +
+
+		'<li class=""><a href="#" class="dropdown-toggle"><i class="menu-icon fa fa-tags"></i><span class="menu-text">测试专用页</span><b class="arrow fa fa-angle-down"></b></a><b class="arrow"></b>' +
+		'<ul class="submenu">' +
+		'<li class=""><a href="/hz_test_jqgrid"><i class="menu-icon fa fa-caret-right"></i>jqGrid测试页</a><b class="arrow"></b></li>' +
+		'<li class=""><a href="/test"><i class="menu-icon fa fa-caret-right"></i>API接口测试</a><b class="arrow"></b></li>' +
+		'</ul></li>'
 	);
 
 	$sign_position = $nav.find('[href="'+location.pathname+'"]').parent('li').addClass('active').parent('ul');

@@ -362,6 +362,18 @@ def hz_ps_result():
     return render_template('hz_ps_result.html')
 
 
+@app.route('/hz_people_stat_task', methods=['POST', 'GET'])
+def hz_people_stat_task():
+    """ 人员盘点定时任务页 """
+    return render_template('hz_people_stat_task.html')
+
+
+@app.route('/hz_test_jqgrid', methods=['POST', 'GET'])
+def hz_test_jqgrid():
+    """ jqGrid 表格测试页 """
+    return render_template('hz_test_jqgrid.html')
+
+
 @app.route('/lbs/get_history_location', methods=['POST'])
 def get_history_location():
     """

@@ -871,7 +871,8 @@ def people_stat_task_chg():
 @app.route('/lbs/people_stat_task_get', methods=['POST'])
 def people_stat_task_get():
     """ 查询定时盘点任务 """
-    return jsonify(ps.get_jobs(request.json))
+    parm = request.form if request.json is None else request.json
+    return jsonify(ps.get_jobs(parm))
 
 
 @app.route('/lbs/people_stat_get', methods=['POST'])
