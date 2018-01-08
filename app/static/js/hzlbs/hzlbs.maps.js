@@ -14,10 +14,3 @@ function hzPlaneCoordToFMap(coord) {
     return {'x': x, 'y': y};
 }
 
-
-// need socket.io.min.js
-var hz_namespace = '/HeZhong';
-// Connect to the Socket.IO server.
-// The connection URL has the following format:
-//     http[s]://<domain>:<port>[/<namespace>]
-var hz_connStr = location.protocol + '//' + document.domain + ':' + location.port + hz_namespace;
