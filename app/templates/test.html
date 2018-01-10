@@ -10,6 +10,12 @@
     <link rel="stylesheet" href="/static/css/remodal.css">
     <script src="/static/js/remodal.min.js"></script>
 
+    <link rel="stylesheet" href="/static/ace/components/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/ace/components/bootstrap-multiselect/dist/css/bootstrap-multiselect.css" />
+    <script src="/static/ace/components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="/static/ace/components/bootstrap-multiselect/dist/js/bootstrap-multiselect.js"></script>
+
+
     <link rel="shortcut icon" href="/static/img/favicon.ico" />
     <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
 
@@ -323,6 +329,35 @@
         socket.on('hz_electronic_tail', function(msg) {
             console.log('电子围栏：', msg);
         });
+
+
+        <!-- Initialize the plugin: -->
+        // $('#hz-multi-test').multiselect();     // #hz-multi-test
+
+
+        $('#hz-multi-test').multiselect({
+            buttonText: function(options, select) {
+                console.log(options, select);
+                if (options.length == 0) {
+                    return '无';
+                }
+                else {
+                    var selected = '周';
+                    options.each(function() {
+                        var label = ($(this).attr('label') !== undefined) ? $(this).attr('label') : $(this).html();
+
+                        selected += label.substr(1) + ' ';
+                    });
+                    return selected.substr(0, selected.length - 1);
+                }
+            },
+            buttonWidth: '200px',
+            includeSelectAllOption: true,
+            selectAllText: '全选'
+        });
+
+
+
     });
 
 </script>
@@ -380,6 +415,19 @@
 
 <a data-remodal-target="modal" href="#">Call the modal with data-remodal-id="modal"</a>
 
+
+<div style="margin-top: 20px">
+    <!-- Build your select: -->
+    <select class="multiselect" id="hz-multi-test" multiple="multiple" title="multiselect test">
+        <option value="0">周一</option>
+        <option value="1">周二</option>
+        <option value="2">周三</option>
+        <option value="3">周四</option>
+        <option value="4">周五</option>
+        <option value="5">周六</option>
+        <option value="6">周日</option>
+    </select>
+</div>
 
 </body>
 </html>

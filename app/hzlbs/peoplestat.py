@@ -560,7 +560,8 @@ class PeopleStat:
             if 'name' not in dt:
                 return {'errorCode': 103, 'msg': u'输入参数错误！缺少[name]字段'}
             name = dt['name']
-            day_of_week = dt['dayOfWeek'] if 'dayOfWeek' in dt else None
+            day_of_week = dt['dayOfWeek'].strip() if 'dayOfWeek' in dt and dt['dayOfWeek'].strip() != '' else None
+
             if 'hour' not in dt:
                 return {'errorCode': 102, 'msg': u'输入参数错误！缺少[hour]字段'}
             hour = dt['hour']
@@ -589,14 +590,17 @@ class PeopleStat:
                              'second': second, 'start_date': start_date, 'end_date': end_date,
                              'name': name, 'id': PeopleStat.gen_job_id(job.id)})
 
+        try:
+            for jp in job_parm:
+                ps_scheduler.add_job(job_stat, trigger='cron', day_of_week=jp['day_of_week'],
+                                     hour=jp['hour'], minute=jp['minute'],
+                                     second=jp['second'], start_date=jp['start_date'], end_date=jp['end_date'],
+                                     name=jp['name'], id=jp['id'])
+        except ValueError, e:
+            print e
+            return {'errorCode': 1000, 'msg': u'发生异常.'}
+
         db.session.commit()
-
-        for jp in job_parm:
-            ps_scheduler.add_job(job_stat, trigger='cron', day_of_week=jp['day_of_week'],
-                                 hour=jp['hour'], minute=jp['minute'],
-                                 second=jp['second'], start_date=jp['start_date'], end_date=jp['end_date'],
-                                 name=jp['name'], id=jp['id'])
-
         return {'errorCode': 0, 'msg': 'ok'}
 
     @staticmethod
@@ -719,7 +723,6 @@ class PeopleStat:
                              'second': second, 'start_date': start_date, 'end_date': end_date,
                              'name': name, 'id': jid})
 
-        db.session.commit()
         for jp in job_parm:
             job_id = PeopleStat.gen_job_id(jp['id'])
             job = ps_scheduler.get_job(job_id)
@@ -736,6 +739,8 @@ class PeopleStat:
                 ps_scheduler.reschedule_job(job_id, trigger='cron', day_of_week=day_of_week, hour=hour,
                                             minute=minute, second=second,
                                             start_date=start_date, end_date=end_date)
+
+        db.session.commit()
         return {'errorCode': 0, 'msg': 'ok'}
 
     @staticmethod
@@ -761,7 +766,7 @@ class PeopleStat:
                     id:         int     任务id， 唯一
                     no:         str     任务编号，唯一
                     name:       str     任务名称
-                    dayOfWeek:  str     周几，为空，表示每天循环。 0 表示周一，6 表示周六。
+                    dayOfWeek:  str     周几，为空，表示每天循环。 0 表示周一，6 表示周日。
                                         多个日期用逗号分割，例如：0,1,2,3,4 表示周一至周五
                     hour:       str     小时，取值范围 0~23。多个小时用逗号分割
                     minute:     str     分钟，取值范围 0~59。多个分钟用逗号分割
@@ -805,7 +810,7 @@ class PeopleStat:
     @staticmethod
     def gen_job_id(uid):
         """ 生成 job id， 供 APScheduler 使用"""
-        job_id = '%s-%d' % (HZ_JOB_ID, uid)
+        job_id = '%s-%d' % (HZ_JOB_ID, int(uid))
         return job_id
 
 
@@ -871,13 +876,87 @@ def people_stat_task_chg():
 @app.route('/lbs/people_stat_task_get', methods=['POST'])
 def people_stat_task_get():
     """ 查询定时盘点任务 """
-    parm = request.form if request.json is None else request.json
-    return jsonify(ps.get_jobs(parm))
+    param = request.form if request.json is None else request.json
+    return jsonify(ps.get_jobs(param))
 
 
 @app.route('/lbs/people_stat_get', methods=['POST'])
 def people_stat_get():
     """ 查询盘点结果 """
     return jsonify(ps.get_stat_results(request.json))
+
+
+@app.route('/lbs/people_stat_task_edit', methods=['POST'])
+def people_stat_task_edit():
+    """ jqGrid 交互接口，增、删、改统一入口 """
+    param = request.form if request.json is None else request.json
+    if 'oper' not in param:
+        return jsonify({'errorCode': 200, 'msg': u'参数错误，缺少[oper]。'})
+
+    if param['oper'] == 'add':
+        row = {}
+        if 'name' in param:
+            row['name'] = param['name']
+        if 'dayOfWeek' in param:
+            row['dayOfWeek'] = param['dayOfWeek']
+        if 'hour' in param:
+            row['hour'] = param['hour']
+        if 'minute' in param:
+            row['minute'] = param['minute']
+        if 'second' in param:
+            row['second'] = param['second']
+        if 'startDate' in param:
+            row['startDate'] = param['startDate']
+        if 'endDate' in param:
+            row['endDate'] = param['endDate']
+        in_param = {'data': [row]}
+        return jsonify(ps.add_jobs(in_param))
+    elif param['oper'] == 'del':
+        """ 删除 oper=='del', id=1,2,3,..."""
+        ids = param['id'].split(',')
+        return jsonify(ps.del_jobs(ids))
+    elif param['oper'] == 'edit':
+        """
+        :param param:           输入参数，JSON 格式
+        {
+            data: [{  要修改的任务字段，可选字段，表示忽略对应字段
+                id:         int     任务id
+                name:       str     任务名称，可选参数
+                dayOfWeek:  str     周几，可选参数
+                                    0 表示周一，6 表示周六。
+                                    多个日期用逗号分割，例如：0,1,2,3,4 表示周一至周五
+                hour:       str     小时，取值范围 0~23。多个小时用逗号分割， 可选参数
+                minute:     str     分钟，取值范围 0~59。多个分钟用逗号分割。可选参数
+                second:     str     秒，取值范围 0~59。多个秒值用逗号分割。 可选参数
+                startDate:  str     任务开始日期（包含本日期），格式： 年-月-日 时:分:秒 （2017-12-24 13:30:00）
+                                    可选参数
+                endDate:    str     任务结束日期（包含本日期），格式： 年-月-日 时:分:秒 （2018-12-24 13:30:00）
+                                    可选参数
+            }]
+        }
+
+        """
+        row = {}
+        if 'id' in param:
+            row['id'] = param['id']
+        if 'name' in param:
+            row['name'] = param['name']
+        if 'dayOfWeek' in param:
+            row['dayOfWeek'] = param['dayOfWeek']
+        if 'hour' in param:
+            row['hour'] = param['hour']
+        if 'minute' in param:
+            row['minute'] = param['minute']
+        if 'second' in param:
+            row['second'] = param['second']
+        if 'startDate' in param:
+            row['startDate'] = param['startDate']
+        if 'endDate' in param:
+            row['endDate'] = param['endDate']
+        in_param = {'data': [row]}
+        return jsonify(ps.change_jobs(in_param))
+    else:
+        return jsonify({'errorCode': 201, 'msg': u'参数错误，参数[oper]取值[%s]错误。' % param['oper']})
+
 
 # 人员盘点功能 ---- route end --------------------------------------------------------------------------

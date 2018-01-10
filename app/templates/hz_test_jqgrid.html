@@ -18,6 +18,9 @@
     <link rel="stylesheet" href="/static/ace/components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css" />
     <link rel="stylesheet" href="/static/ace/components/_mod/jqgrid/ui.jqgrid.min.css" />
 
+    <link rel="stylesheet" href="/static/ace/components/bootstrap-multiselect/dist/css/bootstrap-multiselect.css" />
+
+
     <!-- 确保 ace.min.css 在 jquery-ui.min.css 和 ui.jqgrid.min.css 之下。防止ace表格样式不生效 -->
     <link rel="stylesheet" href="/static/ace/assets/css/ace.min.css" />
     <link rel="stylesheet" href="/static/ace/assets/css/ace-skins.css" />
@@ -25,8 +28,11 @@
 
     <link rel="stylesheet" href="/static/css/hzmap.css" />
 
+    <!-- 防止其他使用jquery的脚本不起作用，将jquery.min.js设置为第一个出现的js脚本 -->
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/ace/assets/js/ace-extra.js"></script>
+
+    <script src="/static/ace/components/bootstrap-multiselect/dist/js/bootstrap-multiselect.js"></script>
 
     <script src="/static/js/hzlbs/hzlbs.tools.js"></script>
     <script src="/static/js/hzlbs/hzlbs.maps.js"></script>
@@ -120,6 +126,21 @@
                         <table id="grid-table"></table>
                         <div id="grid-pager"></div>
 
+
+                        <div style="margin-top: 20px">
+                            <!-- Build your select:  class="multiselect" -->
+                            <select id="hz-multi-test" multiple="multiple" title="multiselect test">
+                                <option value="cheese">Cheese</option>
+                                <option value="tomatoes">Tomatoes</option>
+                                <option value="mozarella">Mozzarella</option>
+                                <option value="mushrooms">Mushrooms</option>
+                                <option value="pepperoni">Pepperoni</option>
+                                <option value="onions">Onions</option>
+                            </select>
+                        </div>
+
+
+
                         <!-- PAGE CONTENT ENDS -->
                     </div><!-- /.col -->
                 </div><!-- /.row -->
@@ -142,6 +163,7 @@
     </a>
 
 </div> <!-- /.main-container -->
+
 
 <script>
 
@@ -183,6 +205,7 @@
     ];
 
     jQuery(function($) {
+
         var grid_selector = "#grid-table";
         var pager_selector = "#grid-pager";
 
@@ -530,6 +553,33 @@
             $.jgrid.gridDestroy(grid_selector);
             $('.ui-jqdialog').remove();
         });
+
+
+
+        <!-- Initialize the plugin: -->
+        // $('.multiselect').multiselect();     // #hz-multi-test
+
+        $('#hz-multi-test').multiselect({
+            buttonText: function(options, select) {
+                console.log(options, select);
+                if (options.length == 0) {
+                    return '未选择';
+                }
+                else {
+                    var selected = '';
+                    options.each(function() {
+                        var label = ($(this).attr('label') !== undefined) ? $(this).attr('label') : $(this).html();
+
+                        selected += label + ', ';
+                    });
+                    return selected.substr(0, selected.length - 2);
+                }
+            },
+            buttonWidth: '600px',
+            includeSelectAllOption: true
+        });
+
+
     });
 
 

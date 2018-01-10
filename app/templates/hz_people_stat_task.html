@@ -14,17 +14,18 @@
 
     <link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css" />
     <link rel="stylesheet" href="/static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" />
-    <link rel="stylesheet" href="/static/ace/components/_mod/jquery-ui/jquery-ui.min.css" />
     <link rel="stylesheet" href="/static/ace/components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css" />
     <link rel="stylesheet" href="/static/ace/components/_mod/jqgrid/ui.jqgrid.min.css" />
+    <link rel="stylesheet" href="/static/ace/components/bootstrap-multiselect/dist/css/bootstrap-multiselect.css" />
 
-    <!-- 确保 ace.min.css 在 jquery-ui.min.css 和 ui.jqgrid.min.css 之下。防止ace表格样式不生效 -->
+    <!-- 确保 ace.min.css 在 ui.jqgrid.min.css 之下。防止ace表格样式不生效 -->
     <link rel="stylesheet" href="/static/ace/assets/css/ace.min.css" />
     <link rel="stylesheet" href="/static/ace/assets/css/ace-skins.css" />
     <link rel="stylesheet" href="/static/ace/assets/css/ace-rtl.css" />
 
     <link rel="stylesheet" href="/static/css/hzmap.css" />
 
+    <!-- 防止其他使用jquery的脚本不起作用，将jquery.min.js设置为第一个出现的js脚本 -->
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/ace/assets/js/ace-extra.js"></script>
 
@@ -117,6 +118,16 @@
                     <div class="col-xs-12">
                         <!-- PAGE CONTENT BEGINS -->
 
+                        <div class="alert alert-info">
+                            <button class="close" data-dismiss="alert">
+                                <i class="ace-icon fa fa-times"></i>
+                            </button>
+
+                            <i class="ace-icon fa fa-hand-o-right"></i>
+                            定时任务启动时刻为 >=开始日期，<=结束日期，每周几，每时，每分，每秒。“开始日期”、“结束日期”和“每周”为可选参数，其他为必填参数。“每周”不填表示“每天循环的任务”。<br>
+                            时、分、秒取值，以“时”为例： 14 —— 某天（前面参数限定的日期）的14时。10, 14 —— 某天的 10时和14时。 11-14, 16 ——某天的11,12,13,14,16时。
+                        </div>
+
                         <table id="grid-table"></table>
                         <div id="grid-pager"></div>
 
@@ -165,7 +176,6 @@
             }
         });
 
-
         jQuery(grid_selector).jqGrid({
             rownumbers: true,
             url: '/lbs/people_stat_task_get',
@@ -176,8 +186,8 @@
                 root: "data.rows",
                 total: "total"
             },
-            height: 560,
-            colNames:[' ', 'ID','名称','编号', '时', '分','秒', '每周', '开始日期', '结束日期', '创建时间'],
+            height: 450,
+            colNames:[' ', 'ID','名称', '时', '分','秒', '每周', '开始日期', '结束日期', '创建时间'],
             colModel:[
                 {name:'myac',index:'', width:80, fixed:true, sortable:false, resize:false,
                     formatter:'actions',
@@ -185,20 +195,22 @@
                         keys:true,
                         //delbutton: false,//disable delete button
 
-                        delOptions:{recreateForm: true, beforeShowForm:beforeDeleteCallback}
-                        //editformbutton:true, editOptions:{recreateForm: true, beforeShowForm:beforeEditCallback}
+                        delOptions:{recreateForm: true, beforeShowForm:beforeDeleteCallback},
+                        editformbutton:true, editOptions:{recreateForm: true, beforeShowForm:beforeEditCallback}    // 注释此行，开启行编辑。否则 弹出对话框编辑记录
                     }
                 },
-                {name:'id',index:'id', width:60, sorttype:"int", editable: true},
-                {name:'name',index:'name',width:90, editable:true},
-                {name:'no',index:'no', width:200,editable: true,editoptions:{size:"20",maxlength:"30"}},
-                {name:'hour',index:'hour', width:70, editable: true},
-                {name:'minute',index:'minute', width:70, editable: true},
-                {name:'second',index:'second', width:70, sortable:false,editable: true,edittype:"textarea", editoptions:{rows:"2",cols:"10"}},
-                {name:'dayOfWeek',index:'dayOfWeek', width:70, editable: true},
-                {name:'startDate',index:'startDate', width:90, editable: true},
-                {name:'endDate',index:'minute', endDate:90, editable: true},
-                {name:'createAt',index:'createAt', endDate:90}
+                {name:'id',index:'id', width:50, sorttype:"int",editable:true},
+                {name:'name',index:'name',width:90,editable:true},
+                {name:'hour',index:'hour', width:70,editable: true},
+                {name:'minute',index:'minute', width:70,editable: true},
+                {name:'second',index:'second', width:70,editable: true},
+                {name:'dayOfWeek',index:'dayOfWeek', width:70, editable: true,edittype:"select",editoptions:{
+                    value:"0:周一;1:周二;2:周三;3:周四;4:周五;5:周六;6:周日", multiple:true, size:20},
+                    formatter: formatDayOfWeek, unformat: unformatDayOfWeek
+                },
+                {name:'startDate',index:'startDate', width:90, editable: true,sorttype : "date",unformat: pickDate},
+                {name:'endDate',index:'endDate', width:90, editable: true,sorttype : "date",unformat: pickDate},
+                {name:'createAt',index:'createAt', width:90}
             ],
 
             viewrecords : true,
@@ -224,7 +236,7 @@
                 }, 0);
             },
 
-            editurl: "./dummy.php",//nothing is saved
+            editurl: "/lbs/people_stat_task_edit",
             caption: "定时盘点任务列表"
 
             //,autowidth: true,
@@ -244,8 +256,6 @@
         });
         $(window).triggerHandler('resize.jqGrid');//trigger window resize to make the grid get the correct size
 
-
-
         //enable search/filter toolbar
         //jQuery(grid_selector).jqGrid('filterToolbar',{defaultSearch:true,stringResult:true})
         //jQuery(grid_selector).filterToolbar({});
@@ -253,6 +263,7 @@
 
         //switch element when editing inline
         function aceSwitch( cellvalue, options, cell ) {
+            console.log('aceSwitch', cellvalue,options,cell);
             setTimeout(function(){
                 $(cell) .find('input[type=checkbox]')
                         .addClass('ace ace-switch ace-switch-5')
@@ -261,10 +272,28 @@
         }
         //enable datepicker
         function pickDate( cellvalue, options, cell ) {
+            console.log('pickDate', cellvalue,options,cell);
             setTimeout(function(){
                 $(cell) .find('input[type=text]')
-                        .datepicker({format:'yyyy-mm-dd' , autoclose:true});
+                        .datepicker({format:'yyyy-mm-dd', autoclose:true, language: 'zh-CN'});
             }, 0);
+        }
+
+        function formatDayOfWeek(cellvalue, options, cell) {
+            console.log('formatDayOfWeek', cellvalue,options,cell);
+            if (!cellvalue) return '';
+            var newVal = cellvalue;
+            var from = ['0','1','2','3','4','5','6'];
+            var to = ['一','二','三','四','五','六','日'];
+            for(var i=0; i< from.length; i++) {
+                newVal = newVal.replace(from[i], to[i]);
+            }
+            return newVal;
+        }
+
+        function unformatDayOfWeek(cellvalue, options, cell) {
+            console.log('unformatDayOfWeek', cellvalue,options,cell);
+
         }
 
 
@@ -355,10 +384,12 @@
 
 
         function style_edit_form(form) {
-            //enable datepicker on "sdate" field and switches for "stock" field
-            form.find('input[name=sdate]').datepicker({format:'yyyy-mm-dd' , autoclose:true});
+            //enable datepicker on "startDate" and "endDate" field
+            form.find('input[name=startDate]').datepicker({format:'yyyy-mm-dd' , autoclose:true, language: 'zh-CN'});
+            form.find('input[name=endDate]').datepicker({format:'yyyy-mm-dd' , autoclose:true, language: 'zh-CN'});
 
-            form.find('input[name=stock]').addClass('ace ace-switch ace-switch-5').after('<span class="lbl"></span>');
+            //form.find('input[name=stock]').addClass('ace ace-switch ace-switch-5').after('<span class="lbl"></span>');
+
             //don't wrap inside a label element, the checkbox value won't be submitted (POST'ed)
             //.addClass('ace ace-switch ace-switch-5').wrap('<label class="inline" />').after('<span class="lbl"></span>');
 
@@ -473,7 +504,7 @@
 
         //var selr = jQuery(grid_selector).jqGrid('getGridParam','selrow');
 
-        $(document).one('ajaxloadstart.page', function(e) {
+        $(document).one('ajaxloadstart.page', function() { // e
             $.jgrid.gridDestroy(grid_selector);
             $('.ui-jqdialog').remove();
         });
@@ -514,6 +545,8 @@
 <script src="/static/ace/assets/js/src/ace.settings-skin.js"></script>
 <script src="/static/ace/assets/js/src/ace.widget-on-reload.js"></script>
 <script src="/static/ace/assets/js/src/ace.searchbox-autocomplete.js"></script>
+
+<script src="/static/ace/components/bootstrap-multiselect/dist/js/bootstrap-multiselect.js"></script>
 
 </body>
 </html>
