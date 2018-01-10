@@ -130,7 +130,7 @@
                         <p>Click to select date.</p>
                         <div style="margin:20px 0"></div>
                         <table class="easyui-datagrid" title="Basic DataGrid" style="width:700px;height:250px"
-                               data-options="singleSelect:true,collapsible:true,url:'datagrid_data1.json',method:'get'">
+                               data-options="singleSelect:true,collapsible:true,url:'/static/ajax/datagrid_data1.json',method:'get'">
                             <thead>
                             <tr>
                                 <th data-options="field:'itemid',width:80">Item ID</th>
@@ -147,11 +147,15 @@
                         <h2>Alert Messager</h2>
                         <p>Click on each button to display different alert message box.</p>
                         <div style="margin:20px 0;">
-                            <a href="#" class="easyui-linkbutton" onclick="alert1()">Alert</a>
+                            <a href="#" class="btn btn-sm btn-primary" onclick="alert1()">Alert</a>
                             <a href="#" class="easyui-linkbutton" onclick="alert2()">Error</a>
                             <a href="#" class="easyui-linkbutton" onclick="alert3()">Info</a>
                             <a href="#" class="easyui-linkbutton" onclick="alert4()">Question</a>
                             <a href="#" class="easyui-linkbutton" onclick="alert5()">Warning</a>
+                        </div>
+
+                        <div style="margin:20px 0;">
+                            easyui.css 和 jquery.easyui.min.js 中的 css class： menu-text 和 menu-icon 和 ACE 定义冲突，已经将 easyui 中的定义改名为 menu-text-wxg 和 menu-icon-wxg 。
                         </div>
 
                         <!-- PAGE CONTENT ENDS -->
