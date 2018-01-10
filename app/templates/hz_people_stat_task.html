@@ -199,8 +199,8 @@
                         editformbutton:true, editOptions:{recreateForm: true, beforeShowForm:beforeEditCallback}    // 注释此行，开启行编辑。否则 弹出对话框编辑记录
                     }
                 },
-                {name:'id',index:'id', width:50, sorttype:"int",editable:true},
-                {name:'name',index:'name',width:90,editable:true},
+                {name:'id',index:'id', width:30, sorttype:"int",editable:true},
+                {name:'name',index:'name',width:140,editable:true},
                 {name:'hour',index:'hour', width:70,editable: true},
                 {name:'minute',index:'minute', width:70,editable: true},
                 {name:'second',index:'second', width:70,editable: true},
@@ -208,8 +208,8 @@
                     value:"0:周一;1:周二;2:周三;3:周四;4:周五;5:周六;6:周日", multiple:true, size:20},
                     formatter: formatDayOfWeek, unformat: unformatDayOfWeek
                 },
-                {name:'startDate',index:'startDate', width:90, editable: true,sorttype : "date",unformat: pickDate},
-                {name:'endDate',index:'endDate', width:90, editable: true,sorttype : "date",unformat: pickDate},
+                {name:'startDate',index:'startDate', width:70, editable: true,sorttype : "date",unformat: pickDate},
+                {name:'endDate',index:'endDate', width:70, editable: true,sorttype : "date",unformat: pickDate},
                 {name:'createAt',index:'createAt', width:90}
             ],
 

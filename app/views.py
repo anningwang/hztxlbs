@@ -374,6 +374,18 @@ def hz_test_jqgrid():
     return render_template('hz_test_jqgrid.html')
 
 
+@app.route('/hz_ace_blank', methods=['POST', 'GET'])
+def hz_page_ace_blank():
+    """ ace 框架 空白页 """
+    return render_template('ace_blank.html')
+
+
+@app.route('/hz_ace_easyui', methods=['POST', 'GET'])
+def hz_page_ace_easyui():
+    """ ace 框架 & JQuery EasyUI 测试页 """
+    return render_template('ace_eayui_test.html')
+
+
 @app.route('/lbs/get_history_location', methods=['POST'])
 def get_history_location():
     """
