@@ -2,6 +2,8 @@
  * 和仲通讯 版权所有 2016-2018
  * 版本号：v0.3
  * SVG地图 Toolkit，实现地图显示、操作等函数
+ * 
+ * Requires: jQuery 1.2.2+
  */
 
 'use strict';
@@ -45,6 +47,9 @@ var _mouseMoveCallback = undefined;     // 函数指针，鼠标移动回调函�
 var	zoomCallBack = [];      // func Array 缩放需要执行的临时函数
 
 $(function(){
+	createZoomCtrl();
+
+	createHMap();
 	
 	var $svg_map_base = $('#svg_map_base');
 	var $svg_event = $('#svg_event');
@@ -223,16 +228,98 @@ $(function(){
 	}
 	
 	
-});
+	function createHMap() {
+		var container = $('#myCanvas');
+		container.append('<div id="svg_map_base"  class="each_map_layer" />');      // <!--基础svg图-->
 
+		var baseLayer = $('#svg_map_base');
+		baseLayer.append('<img src="/static/img/floor3.svg" id="svg_image" class="each_map_layer" style="display:none">')
+			.append('<div id="svg_path" class="each_map_layer"></div>')     // <!--导航路径-->
+			.append('<div id="svg-electronic-rail" class="each_map_layer"></div>')  // <!--导航路径-->
+			.append('<div id="svg-electronic-rail" class="each_map_layer"></div>')  // <!--电子围栏-->
+			.append('<div id="svg-electronic-rail-draft" class="each_map_layer"></div>')
+			.append('<div id="svg-people-stat-zone" class="each_map_layer"></div>') // <!-- 人员盘点区域 -->
+			.append('<div id="svg-people-stat-zone-draft" class="each_map_layer"></div>')
+			.append('<div id="svg_path_history" class="each_map_layer"></div>') // <!-- 历史轨迹 -->
+			.append('<div id="svg_sign" class="each_map_layer"></div>')    // <!--房间等信息标识-->
+			.append('<div id="svg_user_sign" class="each_map_layer">')  // <!--用户标识区域-->
+			.append('<div id="svg_temporary_line" class="each_map_layer"></div>')
+			.append('<div id="enclosureEvent" class="each_map_layer" style="display:none;"> <img src="/static/img/drawing.png" id="line_start" title="围栏绘制起点" style="position:absolute; display:none;"> </div>')
+			.append('<div id="svg_event" class="each_map_layer"></div>');
+		
+		var userLayer = $('#svg_user_sign');
+		userLayer.append('<img src="/static/img/people.png" style="position:absolute; display: none" id="1918E00103AA" title="1918E00103AA">')
+			.append('<img src="/static/img/people.png" style="position:absolute;display: none" id="1918E00103A9" title="1918E00103A9">')
+			.append('<img src="/static/img/dest.png" style="position:absolute;display: none" id="destination" title="终点">')
+			.append('<img src="/static/img/dest.png" style="position:absolute;display: none" id="destination" title="终点">')
+			.append('<div id="1918E00103AA-t" class="hz-div-people-txt" style="position:absolute;display: none">1918E00103AA</div>')
+			.append('<div id="1918E00103A9-t" class="hz-div-people-txt" style="position:absolute;display: none">9527-A9</div>');
+		
+		/*
+		 <div id="svg_map_base" class="each_map_layer">  					<!--基础svg图-->
+			 <img src="/static/img/floor3.svg" id="svg_image" class="each_map_layer" style="display: none">
+			 <div id="svg_path" class="each_map_layer"></div>				<!--导航路径-->
+			 <div id="svg-electronic-rail" class="each_map_layer"></div>		<!--电子围栏-->
+			 <div id="svg-electronic-rail-draft" class="each_map_layer"></div>
 
-// 缩放要调用的函数
-function people_move_zoom() {
-	for(var i = 0; i < hz_user_xy.length; i++) {
-		hzPeopleSetPosition(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
-			hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
+			 <div id="svg-people-stat-zone" class="each_map_layer"></div>	<!-- 人员盘点区域 -->
+			 <div id="svg-people-stat-zone-draft" class="each_map_layer"></div>
+
+			 <div id="svg_path_history" class="each_map_layer"></div>		<!-- 历史轨迹 -->
+
+			 <div id="svg_sign" class="each_map_layer"></div>				<!--房间等信息标识-->
+
+			 <!--用户标识区域-->
+			 <div id="svg_user_sign" class="each_map_layer">
+				 <img src="/static/img/people.png" style="position:absolute; display: none" id="1918E00103AA" title="1918E00103AA">
+				 <img src="/static/img/people.png" style="position:absolute;display: none" id="1918E00103A9" title="1918E00103A9">
+				 <img src="/static/img/dest.png" style="position:absolute;display: none" id="destination" title="终点">
+				 <div id="1918E00103AA-t" class="hz-div-people-txt" style="position:absolute;display: none">1918E00103AA</div>
+				 <div id="1918E00103A9-t" class="hz-div-people-txt" style="position:absolute;display: none">9527-A9</div>
+			 </div>
+
+			 <div id="svg_temporary_line" class="each_map_layer"></div>
+			 <div id="enclosureEvent" class="each_map_layer" style="display:none;"> <img src="/static/img/drawing.png" id="line_start" title="围栏绘制起点" style="position:absolute; display:none;"> </div>
+			 <div id="svg_event" class="each_map_layer"></div>
+		 </div>
+
+		*/
 	}
-}
+
+	// 使用 ACE 框架。创建地图 缩放 按钮
+	function createZoomCtrl() {
+		var container = $('#myCanvas');
+		container.append(
+			'<div  id="ctrl-panel" style="position:absolute; top:10px; left: 10px; z-index:1000;">' +
+				'<div class="btn-group btn-group-vertical btn-group-sm" style="background:#FFF; border:1px solid #CCC;">' +
+					'<div style="margin: 5px 5px;">' +
+						'<button type="button" class="btn btn-inverse btn-sm" onclick="hzZoomIn()"><i class="ace-icon fa fa-plus align-middle"></i></button>' +
+					'</div>' +
+					'<div style="margin: 5px 5px;">'+
+						'<button type="button" class="btn btn-inverse btn-sm" onclick="hzZoomOut()"><i class="ace-icon fa fa-minus align-middle"></i></button>'+
+					'</div>'+
+				'</div>'+
+			'</div>'
+		);
+
+		/*
+		 <!-- 地图内置 放大 和 缩小 按钮 -->
+		 <div  id="ctrl-panel" style="position:absolute; top:10px; left: 10px; z-index:1000;">
+			 <div class="btn-group btn-group-vertical btn-group-sm" style="background:#FFF; border:1px solid #CCC;">
+				 <div style="margin: 5px 5px;">
+				    <button type="button" class="btn btn-inverse btn-sm" onclick="hzZoomIn()"><i class="ace-icon fa fa-plus align-middle"></i></button>
+				 </div>
+
+				 <div style="margin: 5px 5px;">
+				    <button type="button" class="btn btn-inverse btn-sm" onclick="hzZoomOut()"><i class="ace-icon fa fa-minus align-middle"></i></button>
+				 </div>
+			 </div>
+		 </div>
+		*/
+	}
+	
+	
+});
 
 
 // 缩小
@@ -359,7 +446,10 @@ function mapZoom(height, width, left, top) {
 	showRoomName();
 	
 	// 移动 人员 marker
-	people_move_zoom();
+	for(var i = 0; i < hz_user_xy.length; i++) {
+		hzPeopleSetPosition(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
+			hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
+	}
 	
 	// 地图缩放后的回调函数
 	for(var j = 0; j < zoomCallBack.length; j++) {
@@ -377,13 +467,16 @@ function hzPeopleGoto(x, y, people) {
 	// 24, 45是定位图标的 针尖 位置。显示图片时，是以图片左上角为参考坐标。故需要对坐标进行偏移。
 	
 	if (p.css("display") == 'none') {
-		p.css({left: x-24, top: y-45});
-		p.toggle();
+		p.css({left: x-24, top: y-45}).toggle();
 	} else {
-		p.stop(true, true).animate({
-			left: (x - 24),
-			top: (y - 45)
-		});
+		p.stop(true, true).animate({left: x - 24, top: y - 45});
+	}
+
+	var pName = $('#'+people+'-t');
+	if (pName.css("display") == 'none') {
+		pName.css({left: x - pName.width()/2, top: y-64}).toggle();
+	} else {
+		pName.stop(true, true).animate({left: x - pName.width()/2, top: y - 64});
 	}
 }
 
@@ -394,6 +487,12 @@ function hzPeopleSetPosition(x, y, people) {
 	p.css({left: x-24, top: y-45});
 	if (p.css("display") == 'none') {
 		p.toggle();
+	}
+
+	var pName = $('#'+people+'-t');
+	pName.css({left: x - pName.width()/2, top: y - 64});
+	if (pName.css("display") == 'none') {
+		pName.toggle();
 	}
 }
 

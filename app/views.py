@@ -383,7 +383,7 @@ def hz_page_ace_blank():
 @app.route('/hz_ace_easyui', methods=['POST', 'GET'])
 def hz_page_ace_easyui():
     """ ace 框架 & JQuery EasyUI 测试页 """
-    return render_template('ace_eayui_test.html')
+    return render_template('ace_easyui_test.html')
 
 
 @app.route('/lbs/get_history_location', methods=['POST'])
