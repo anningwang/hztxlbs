@@ -44,6 +44,11 @@
 		{name: '前台',        x: 19244, y: 7456,  fontSize: 20}
 	];
 
+	// 地图移动变量
+	var mapMoveMousedownX, mapMoveMousedownY;
+	var currentX, currentY;
+
+
 	function HzPeople(options) {
 		this.id = options.id;
 		this.text = options.text;
@@ -70,6 +75,7 @@
 		this.mapH = 1769;           // 地图图片高度 px
 		this.userList = {};         // 用户列表 { userId: HzPeople }
 		this.hz_user_xy = [];
+		this.mouseMoveCallback = options.mouseMoveCallback;     // mouse 移动 之 坐标拾取 回调函数
 
 		this.zoomCallBack = [];     // func Array 缩放需要执行的临时函数
 
@@ -78,7 +84,12 @@
 		this.mapZoom(this.mapH * this.zoom, this.mapW * this.zoom);
 		
 		// 增加鼠标滚轮缩放地图功能
-		this.eventLayer.on('mousewheel', {_map: this}, this.addMousewheelEventPackage);
+		this.eventLayer.on('mousewheel', {_map: this}, this.doMouseWheel);
+
+		// 地图平移及坐标拾取
+		this.eventLayer.on('mousedown', {_map: this}, this.doMouseDown);
+		this.eventLayer.on('mousemove', {_map: this}, this.doGetCoord);
+		this.eventLayer.on('mouseout', {_map: this}, this.doMouseOut);
 	}
 
 	HzMap.prototype = {
@@ -132,7 +143,7 @@
 		mapZoom: function (height, width, left, top) {  // 缩放地图，并设置地图的位置（left, top）
 			var $each_map_layer = $('.each_map_layer');
 
-			var $svg_map_base = $('#svg_map_base');
+			var $svg_map_base = this.baseLayer;
 
 			var mapOldW = $svg_map_base.outerWidth() / 2;
 			var mapOldH = $svg_map_base.outerHeight() / 2;
@@ -168,9 +179,8 @@
 				top: this.top + 'px'
 			});
 
-			var mapLayer = $('#svg_image');
-			if (mapLayer.css('display') == 'none') {
-				mapLayer.toggle();
+			if (this.mapSvgLayer.css('display') == 'none') {
+				this.mapSvgLayer.toggle();
 			}
 
 			// 地图标识;
@@ -252,13 +262,9 @@
 			}
 		},
 
-		addMousewheelEventPackage: function (e, d) {
-			var map = e.data._map;
-			map.doMousewheelEvent(e, d);
-		},
-
-		doMousewheelEvent: function (event, delta) {
-			var mapSign = $('#svg_map_base');
+		doMouseWheel: function (event, delta) {
+			var map = event.data._map;
+			var mapSign = map.baseLayer;
 
 			// 设置缩放速度   比例缩放
 			var zoomSpeed = 0.05;
@@ -315,21 +321,103 @@
 				var mouseLeft = Math.round(currentMouseLeft - (currentMouseLeft / mapWidth * resultWidth));
 
 				// 计算svg偏离位置
-				this.top = mapTop + mouseTop;
-				this.left = mapLeft + mouseLeft;
+				map.top = mapTop + mouseTop;
+				map.left = mapLeft + mouseLeft;
 
 				// 保存缩放比例
-				this.zoom = resultWidth / this.mapW;
+				map.zoom = resultWidth / map.mapW;
 				//storage['hz_zoom'] = this.zoom;
 
 				console.log('resultHeight', resultHeight, 'resultWidth', resultWidth);
-				this.mapZoom(resultHeight, resultWidth, this.left, this.top);
+				map.mapZoom(resultHeight, resultWidth, map.left, map.top);
 			}
-		}
+		},
 
+		doMouseDown: function (e) {
+			var map = e.data._map;
+
+			mapMoveMousedownX = e.pageX;
+			mapMoveMousedownY = e.pageY;
+
+			currentX = parseInt(map.left);
+			currentY = parseInt(map.top);
+
+			map.eventLayer.off('mousemove', map.doGetCoord);
+			map.eventLayer.off('mouseout', map.doMouseOut);
+
+			$(document).on('mousemove', {_map: map}, map.doMapMove);
+			$(document).on('mouseup', {_map: map}, map.stopMapMove);
+			map.eventLayer.css('cursor', 'move');
+			return false;
+		},
+
+		doMapMove: function (e) {
+			var map = e.data._map;
+
+			currentX = e.pageX - mapMoveMousedownX + parseInt(map.left);
+			currentY = e.pageY - mapMoveMousedownY + parseInt(map.top);
+
+			map.baseLayer.css({
+				left: currentX + 'px',
+				top: currentY + 'px'
+			});
+		},
+
+		stopMapMove: function (e) {
+			var map = e.data._map;
+
+			map.left = currentX;
+			map.top = currentY;
+
+			map.eventLayer.on('mousemove', {_map: map}, map.doGetCoord);
+			map.eventLayer.on('mouseout', {_map: map}, map.doMouseOut);
+
+			$(document).off('mousemove', map.doMapMove);
+			$(document).off('mouseup', map.stopMapMove);
+
+			map.eventLayer.css('cursor', 'default');
+		},
+
+		// 鼠标移动之 坐标拾取 功能。
+		doGetCoord: function (e) {
+			var map = e.data._map;
+			var mapBase = map.baseLayer;
+
+			//svg图的最小 最大  X和Y
+			var mapMinX,mapMaxX,mapMinY,mapMaxY;
+			var mapOffset = mapBase.offset();
+			var mapOuterWidth = mapBase.outerWidth();
+			var mapOuterHeight = mapBase.outerHeight();
+
+			mapMinX = mapOffset.left;
+			mapMaxX = mapOffset.left + mapOuterWidth;
+			mapMinY = mapOffset.top;
+			mapMaxY = mapOffset.top + mapOuterHeight;
+
+			if(e.pageX > mapMinX && e.pageX < mapMaxX && e.pageY > mapMinY && e.pageY <  mapMaxY){
+				// 计算x y 数值
+				var mapMouseLeft = parseInt(mapBase.css('border-left-width'));
+				if(isNaN(mapMouseLeft)) mapMouseLeft = 0;
+				var mapMouseTop = parseInt(mapBase.css('border-top-width'));
+				if(isNaN(mapMouseTop)) mapMouseTop = 0;
+
+				mapMouseLeft = e.pageX - mapOffset.left - mapMouseLeft;
+				mapMouseLeft = map.coordScreenToMap(mapMouseLeft);
+				mapMouseTop = e.pageY - mapOffset.top - mapMouseTop;
+				mapMouseTop = map.coordScreenToMap(mapMouseTop);
+
+				if (map.mouseMoveCallback)  map.mouseMoveCallback(mapMouseLeft, mapMouseTop);
+			}else{
+				if (map.mouseMoveCallback)  map.mouseMoveCallback('', '');
+			}
+		},
+
+		doMouseOut: function (e) {
+			var map = e.data._map;
+			if (map.mouseMoveCallback)  map.mouseMoveCallback('', '');
+		}
 
 	};
 
 	w.HzMap = HzMap;
 })(window);
-
