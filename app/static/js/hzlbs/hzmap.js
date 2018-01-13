@@ -8,7 +8,7 @@
  */
 
 
-//var hzX = undefined, hzY = undefined;   // 地图在容器中的位置（距离左上角的距离，left, top）
+//var this.left = undefined, this.top = undefined;   // 地图在容器中的位置（距离左上角的距离，left, top）
 // var real_loc_to_pix = 0.0891;  // 物理坐标转像素的比例，比例转换计算公式: px = mm * real_loc_to_pix * zoom
 //var zoom = 0.486;       // 地图缩放级别
 //var margin = 0;         //外边距
@@ -61,16 +61,24 @@
 		this.roomLayer = this.addLayer(this.baseLayer, 'svg_sign');
 		this.userLayer = this.addLayer(this.baseLayer, 'svg_user_sign');
 		this.eventLayer = this.addLayer(this.baseLayer, 'svg_event');   // mouse event: mouseup, mousedown, mousemove
-		this.left = undefined;     // 地图在容器中的位置（距离左上角的距离，left, top）
+		this.left = undefined;      // 地图在容器中的位置（距离左上角的距离，left, top）
 		this.top = undefined;
-		this.fator = 0.0891;  // 物理坐标转像素的比例
-		(options.zoom !== undefined) ? this.zoom = options.zoom : 0.486;    // 地图缩放级别
-		this.mapW = 3477;       // 地图图片宽度 px
-		this.mapH = 1769;       // 地图图片高度 px
-		this.userList = {};     // 用户列表 { userId: HzPeople }
+		this.fator = 0.0891;        // 物理坐标转像素的比例
+		this.zoom = 0.486;          // 地图缩放级别
+		if (options.zoom !== undefined) this.zoom = options.zoom;
+		this.mapW = 3477;           // 地图图片宽度 px
+		this.mapH = 1769;           // 地图图片高度 px
+		this.userList = {};         // 用户列表 { userId: HzPeople }
 		this.hz_user_xy = [];
 
-		this.zoomCallBack = [];      // func Array 缩放需要执行的临时函数
+		this.zoomCallBack = [];     // func Array 缩放需要执行的临时函数
+
+		this.zoom -= 0.1;   // 缩小了2个级别 0.05一个级别
+		
+		this.mapZoom(this.mapH * this.zoom, this.mapW * this.zoom);
+		
+		// 增加鼠标滚轮缩放地图功能
+		this.addMouseWheel();
 	}
 
 	HzMap.prototype = {
@@ -86,15 +94,18 @@
 			return $('#'+id);
 		},
 
+		// 屏幕坐标转地图坐标(单位：mm)
 		coordScreenToMap : function (px) {
 			return Math.round(px / this.fator / this.zoom);
 		},
 
+		// 地图坐标(单位：mm)转屏幕坐标
 		coordMapToScreen: function (mm) {
 			return parseInt(mm * this.fator * this.zoom)
 		},
 
-		showRoomName: function () {     // 显示房间名称
+		// 显示房间名称
+		showRoomName: function () {
 			var roomLayer = this.roomLayer;
 			roomLayer.svg();
 			var svg = roomLayer.svg('get');
@@ -138,23 +149,23 @@
 			});
 
 			var hzCanvas = this.container;
-			if (left !== undefined) hzX = left;
-			else if(hzX === undefined)  hzX = (hzCanvas.width() - $svg_map_base.width()) / 2;
+			if (left !== undefined) this.left = left;
+			else if(this.left === undefined)  this.left = (hzCanvas.width() - $svg_map_base.width()) / 2;
 			else {
 				var mapNewW = $svg_map_base.outerWidth() / 2;
-				hzX +=  Math.round(mapOldW - mapNewW);
+				this.left +=  Math.round(mapOldW - mapNewW);
 			}
 
-			if (top !== undefined) hzY = top;
-			else if(hzY === undefined) hzY = (hzCanvas.height() - $svg_map_base.height()) / 2;
+			if (top !== undefined) this.top = top;
+			else if(this.top === undefined) this.top = (hzCanvas.height() - $svg_map_base.height()) / 2;
 			else {
 				var mapNewH = $svg_map_base.outerHeight() / 2;
-				hzY +=  Math.round(mapOldH - mapNewH);
+				this.top +=  Math.round(mapOldH - mapNewH);
 			}
 
 			$svg_map_base.css({
-				left: hzX + 'px',
-				top: hzY + 'px'
+				left: this.left + 'px',
+				top: this.top + 'px'
 			});
 
 			var mapLayer = $('#svg_image');
@@ -163,12 +174,12 @@
 			}
 
 			// 地图标识;
-			showRoomName();
+			this.showRoomName();
 
 			// 移动 人员 marker
-			for(var i = 0; i < hz_user_xy.length; i++) {
-				this.hzPeopleSetPosition(hz_user_xy[i][1] * real_loc_to_pix * zoom,
-					hz_user_xy[i][2] * real_loc_to_pix * zoom, hz_user_xy[i][0]);
+			for(var i = 0; i < this.hz_user_xy.length; i++) {
+				this.hzPeopleSetPosition(this.hz_user_xy[i][1] * real_loc_to_pix * zoom,
+					this.hz_user_xy[i][2] * real_loc_to_pix * zoom, this.hz_user_xy[i][0]);
 			}
 
 			// 地图缩放后的回调函数
@@ -202,7 +213,7 @@
 				});
 			}
 
-			this.setPeopleCoord(x, y, people);
+			// this.setPeopleCoord(x, y, people);
 		},
 
 		// 移动标签位置到指定坐标 (x, y) 为屏幕坐标，people 为标签id。 无动画移动标签。
@@ -222,26 +233,107 @@
 				});
 			}
 
-			this.setPeopleCoord(x, y, people);
+			// this.setPeopleCoord(x, y, people);
 		},
 
 		// 保存用户的当前位置坐标, 地图坐标，单位mm
 		setPeopleCoord: function (userId, x, y) {
 			var i;
-			for (i = 0; i < hz_user_xy.length; i++) {
-				if (hz_user_xy[i][0] === userId) {
-					hz_user_xy[i][1] = x;
-					hz_user_xy[i][2] = y;
+			for (i = 0; i < this.hz_user_xy.length; i++) {
+				if (this.hz_user_xy[i][0] === userId) {
+					this.hz_user_xy[i][1] = x;
+					this.hz_user_xy[i][2] = y;
 					break;
 				}
 			}
 
-			if (i === hz_user_xy.length) {  // not find, add new user & coord.
-				hz_user_xy[i] = [userId, x, y];
+			if (i === this.hz_user_xy.length) {  // not find, add new user & coord.
+				this.hz_user_xy[i] = [userId, x, y];
 			}
+		},
+
+		addMouseWheel: function () {
+			// 鼠标滚轮缩放svg图
+			this.eventLayer.ready(function () {
+				// 获取svg图对象
+				var mapSign =  $('#svg_map_base');
+				var $svg_event = $('#svg_event');
+
+				// 设置缩放速度   比例缩放
+				var zoomSpeed = 0.05;
+
+				// using the event helper
+				$svg_event.on('mousewheel', addMousewheelEvent);
+
+				function addMousewheelEvent(event, delta) {	// , deltaX, deltaY
+					//svg图的最小 最大  X和Y
+					var mapMinX, mapMaxX, mapMinY, mapMaxY;
+					var mapOffset = mapSign.offset();
+					var mapOuterWidth = mapSign.outerWidth();
+					var mapOuterHeight = mapSign.outerHeight();
+
+					mapMinX = mapOffset.left;
+					mapMaxX = mapOffset.left + mapOuterWidth;
+					mapMinY = mapOffset.top;
+					mapMaxY = mapOffset.top + mapOuterHeight;
+
+					if(event.pageX > mapMinX && event.pageX < mapMaxX && event.pageY > mapMinY && event.pageY < mapMaxY) {
+						// 取消默认事件
+						event.preventDefault();
+
+						// 计算速度
+						var mapHeight, mapWidth, mapTopBorder, mapLeftBorder, mapTop, mapLeft, speedTop, speedLeft;
+						mapHeight = mapSign.height();
+						mapWidth = mapSign.width();
+
+						mapTopBorder = parseInt(mapSign.css('border-top-width'));
+						mapLeftBorder = parseInt(mapSign.css('border-left-width'));
+
+						mapTop = parseInt(mapSign.css('top'));
+						mapLeft = parseInt(mapSign.css('left'));
+
+
+						// 计算缩放速度  单独的top  或  left
+
+						if(delta == 1) {
+							speedTop = parseInt(zoomSpeed * mapHeight);
+							console.log('speedTop', speedTop);
+							speedLeft = parseInt(zoomSpeed * mapWidth);
+						} else {
+							speedTop = -parseInt(zoomSpeed * mapHeight);
+							speedLeft = -parseInt(zoomSpeed * mapWidth);
+						}
+
+
+						// 更改后的高
+						var resultHeight = mapHeight + (speedTop * 2);
+						var resultWidth = mapWidth + (speedLeft * 2);
+
+
+						// 鼠标在图内距离
+						var currentMouseTop = event.pageY - mapMinY - mapTopBorder;
+						var currentMouseLeft = event.pageX - mapMinX - mapLeftBorder;
+						// 缩放后在图内的距离
+						var mouseTop = Math.round(currentMouseTop - (currentMouseTop / mapHeight * resultHeight));
+						var mouseLeft = Math.round(currentMouseLeft - (currentMouseLeft / mapWidth * resultWidth));
+
+						// 计算svg偏离位置
+						this.top = mapTop + mouseTop;
+						this.left = mapLeft + mouseLeft;
+
+						// 保存缩放比例
+						//this.zoom = resultWidth / this.mapW;
+						//storage['hz_zoom'] = this.zoom;
+
+						console.log('resultHeight', resultHeight, 'resultWidth', resultWidth);
+						this.mapZoom(resultHeight, resultWidth, this.left, this.top);
+					}
+				}
+			});
 		}
 
 	};
 
 	w.HzMap = HzMap;
 })(window);
+

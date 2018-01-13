@@ -386,6 +386,12 @@ def hz_page_ace_easyui():
     return render_template('ace_easyui_test.html')
 
 
+@app.route('/hz_map', methods=['POST', 'GET'])
+def hz_page_map():
+    """ 新版Hz 地图测试页 """
+    return render_template('hz_map.html')
+
+
 @app.route('/lbs/get_history_location', methods=['POST'])
 def get_history_location():
     """

@@ -1273,7 +1273,7 @@
 		socket.on('hz_position', function(msg) {
 			console.log('hz_position', msg);
 			for (var i=0; i<msg.length; i++){
-				hzPeopleGoto(coordMapToScreen(msg[i]['x'])-margin, coordMapToScreen(msg[i]['y'])-margin, msg[i]['userId']);
+				hzPeopleGoto(coordMapToScreen(msg[i]['x']), coordMapToScreen(msg[i]['y']), msg[i]['userId']);
 				setPeopleCoord(msg[i]['userId'], msg[i]['x'], msg[i]['y']);
 			}
 		});

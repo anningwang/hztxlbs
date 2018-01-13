@@ -11,7 +11,6 @@
 var hzX = undefined, hzY = undefined;   // 地图在容器中的位置（距离左上角的距离，left, top）
 var real_loc_to_pix = 0.0891;  // 物理坐标转像素的比例，比例转换计算公式: px = mm * real_loc_to_pix * zoom
 var zoom = 0.486;       // 地图缩放级别
-var margin = 0;         //外边距
 var map_w = 3477;       // px
 var map_h = 1769;       // 地图图片高度
 var hz_is_navigating = false;           // 是否曾经设置过导航，或正在导航中
@@ -132,7 +131,7 @@ $(function(){
 				zoom = resultWidth / map_w;
 				storage['hz_zoom'] = zoom;
 				
-				console.log('margin', margin, 'resultHeight', resultHeight, 'resultWidth', resultWidth);
+				console.log('resultHeight', resultHeight, 'resultWidth', resultWidth);
 				mapZoom(resultHeight, resultWidth, hzX, hzY);   // hzX, hzY 也可以不传递，由mapZoom函数自动计算
 			}
 		}
@@ -447,8 +446,7 @@ function mapZoom(height, width, left, top) {
 	
 	// 移动 人员 marker
 	for(var i = 0; i < hz_user_xy.length; i++) {
-		hzPeopleSetPosition(hz_user_xy[i][1] * real_loc_to_pix * zoom - margin,
-			hz_user_xy[i][2] * real_loc_to_pix * zoom - margin, hz_user_xy[i][0]);
+		hzPeopleSetPosition(coordMapToScreen(hz_user_xy[i][1]), coordMapToScreen(hz_user_xy[i][2]), hz_user_xy[i][0]);
 	}
 	
 	// 地图缩放后的回调函数

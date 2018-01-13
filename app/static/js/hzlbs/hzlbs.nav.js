@@ -41,8 +41,9 @@ $(function(){
 		'<li class=""><a href="/test"><i class="menu-icon fa fa-caret-right"></i>API接口测试</a><b class="arrow"></b></li>' +
 		'<li class=""><a href="/hz_ace_blank"><i class="menu-icon fa fa-caret-right"></i>ACE空白页</a><b class="arrow"></b></li>' +
 		'<li class=""><a href="/hz_ace_easyui"><i class="menu-icon fa fa-caret-right"></i>ACE与jqEasyUI</a><b class="arrow"></b></li>' +
+		'<li class=""><a href="/hz_map"><i class="menu-icon fa fa-caret-right"></i>新版地图</a><b class="arrow"></b></li>' +
 		'</ul></li>'
-
+		
 	);
 
 	$sign_position = $nav.find('[href="'+location.pathname+'"]').parent('li').addClass('active').parent('ul');
