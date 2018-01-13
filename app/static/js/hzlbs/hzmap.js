@@ -78,7 +78,7 @@
 		this.mapZoom(this.mapH * this.zoom, this.mapW * this.zoom);
 		
 		// 增加鼠标滚轮缩放地图功能
-		this.addMouseWheel();
+		this.eventLayer.on('mousewheel', {_map: this}, this.addMousewheelEventPackage);
 	}
 
 	HzMap.prototype = {
@@ -252,85 +252,81 @@
 			}
 		},
 
-		addMouseWheel: function () {
-			// 鼠标滚轮缩放svg图
-			this.eventLayer.ready(function () {
-				// 获取svg图对象
-				var mapSign =  $('#svg_map_base');
-				var $svg_event = $('#svg_event');
+		addMousewheelEventPackage: function (e, d) {
+			var map = e.data._map;
+			map.doMousewheelEvent(e, d);
+		},
 
-				// 设置缩放速度   比例缩放
-				var zoomSpeed = 0.05;
+		doMousewheelEvent: function (event, delta) {
+			var mapSign = $('#svg_map_base');
 
-				// using the event helper
-				$svg_event.on('mousewheel', addMousewheelEvent);
+			// 设置缩放速度   比例缩放
+			var zoomSpeed = 0.05;
 
-				function addMousewheelEvent(event, delta) {	// , deltaX, deltaY
-					//svg图的最小 最大  X和Y
-					var mapMinX, mapMaxX, mapMinY, mapMaxY;
-					var mapOffset = mapSign.offset();
-					var mapOuterWidth = mapSign.outerWidth();
-					var mapOuterHeight = mapSign.outerHeight();
+			//svg图的最小 最大  X和Y
+			var mapMinX, mapMaxX, mapMinY, mapMaxY;
+			var mapOffset = mapSign.offset();
+			var mapOuterWidth = mapSign.outerWidth();
+			var mapOuterHeight = mapSign.outerHeight();
 
-					mapMinX = mapOffset.left;
-					mapMaxX = mapOffset.left + mapOuterWidth;
-					mapMinY = mapOffset.top;
-					mapMaxY = mapOffset.top + mapOuterHeight;
+			mapMinX = mapOffset.left;
+			mapMaxX = mapOffset.left + mapOuterWidth;
+			mapMinY = mapOffset.top;
+			mapMaxY = mapOffset.top + mapOuterHeight;
 
-					if(event.pageX > mapMinX && event.pageX < mapMaxX && event.pageY > mapMinY && event.pageY < mapMaxY) {
-						// 取消默认事件
-						event.preventDefault();
+			if(event.pageX > mapMinX && event.pageX < mapMaxX && event.pageY > mapMinY && event.pageY < mapMaxY) {
+				// 取消默认事件
+				event.preventDefault();
 
-						// 计算速度
-						var mapHeight, mapWidth, mapTopBorder, mapLeftBorder, mapTop, mapLeft, speedTop, speedLeft;
-						mapHeight = mapSign.height();
-						mapWidth = mapSign.width();
+				// 计算速度
+				var mapHeight, mapWidth, mapTopBorder, mapLeftBorder, mapTop, mapLeft, speedTop, speedLeft;
+				mapHeight = mapSign.height();
+				mapWidth = mapSign.width();
 
-						mapTopBorder = parseInt(mapSign.css('border-top-width'));
-						mapLeftBorder = parseInt(mapSign.css('border-left-width'));
+				mapTopBorder = parseInt(mapSign.css('border-top-width'));
+				mapLeftBorder = parseInt(mapSign.css('border-left-width'));
 
-						mapTop = parseInt(mapSign.css('top'));
-						mapLeft = parseInt(mapSign.css('left'));
+				mapTop = parseInt(mapSign.css('top'));
+				mapLeft = parseInt(mapSign.css('left'));
 
 
-						// 计算缩放速度  单独的top  或  left
+				// 计算缩放速度  单独的top  或  left
 
-						if(delta == 1) {
-							speedTop = parseInt(zoomSpeed * mapHeight);
-							console.log('speedTop', speedTop);
-							speedLeft = parseInt(zoomSpeed * mapWidth);
-						} else {
-							speedTop = -parseInt(zoomSpeed * mapHeight);
-							speedLeft = -parseInt(zoomSpeed * mapWidth);
-						}
-
-
-						// 更改后的高
-						var resultHeight = mapHeight + (speedTop * 2);
-						var resultWidth = mapWidth + (speedLeft * 2);
-
-
-						// 鼠标在图内距离
-						var currentMouseTop = event.pageY - mapMinY - mapTopBorder;
-						var currentMouseLeft = event.pageX - mapMinX - mapLeftBorder;
-						// 缩放后在图内的距离
-						var mouseTop = Math.round(currentMouseTop - (currentMouseTop / mapHeight * resultHeight));
-						var mouseLeft = Math.round(currentMouseLeft - (currentMouseLeft / mapWidth * resultWidth));
-
-						// 计算svg偏离位置
-						this.top = mapTop + mouseTop;
-						this.left = mapLeft + mouseLeft;
-
-						// 保存缩放比例
-						//this.zoom = resultWidth / this.mapW;
-						//storage['hz_zoom'] = this.zoom;
-
-						console.log('resultHeight', resultHeight, 'resultWidth', resultWidth);
-						this.mapZoom(resultHeight, resultWidth, this.left, this.top);
-					}
+				if(delta == 1) {
+					speedTop = parseInt(zoomSpeed * mapHeight);
+					console.log('speedTop', speedTop);
+					speedLeft = parseInt(zoomSpeed * mapWidth);
+				} else {
+					speedTop = -parseInt(zoomSpeed * mapHeight);
+					speedLeft = -parseInt(zoomSpeed * mapWidth);
 				}
-			});
+
+
+				// 更改后的高
+				var resultHeight = mapHeight + (speedTop * 2);
+				var resultWidth = mapWidth + (speedLeft * 2);
+
+
+				// 鼠标在图内距离
+				var currentMouseTop = event.pageY - mapMinY - mapTopBorder;
+				var currentMouseLeft = event.pageX - mapMinX - mapLeftBorder;
+				// 缩放后在图内的距离
+				var mouseTop = Math.round(currentMouseTop - (currentMouseTop / mapHeight * resultHeight));
+				var mouseLeft = Math.round(currentMouseLeft - (currentMouseLeft / mapWidth * resultWidth));
+
+				// 计算svg偏离位置
+				this.top = mapTop + mouseTop;
+				this.left = mapLeft + mouseLeft;
+
+				// 保存缩放比例
+				this.zoom = resultWidth / this.mapW;
+				//storage['hz_zoom'] = this.zoom;
+
+				console.log('resultHeight', resultHeight, 'resultWidth', resultWidth);
+				this.mapZoom(resultHeight, resultWidth, this.left, this.top);
+			}
 		}
+
 
 	};
 
