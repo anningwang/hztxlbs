@@ -334,7 +334,7 @@ var storage = window.localStorage;
 
 				// 保存缩放比例
 				map.zoom = resultWidth / map.mapW;
-				storage['hz_zoom'] = this.zoom;
+				storage['hz_zoom'] = map.zoom;
 
 				console.log('resultHeight', resultHeight, 'resultWidth', resultWidth);
 				map.mapZoom(resultHeight, resultWidth, map.left, map.top);

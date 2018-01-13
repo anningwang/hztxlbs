@@ -28,7 +28,7 @@ if(storage){
 		hz_user_id = _userId;
 	}
 	var hz_zoom = storage['hz_zoom'];
-	if(typeof hz_zoom !== 'undefined') {    // 存在值
+	if(typeof hz_zoom !== 'undefined' && !isNaN(hz_zoom)) {    // 存在值
 		zoom = hz_zoom;
 	}
 	
