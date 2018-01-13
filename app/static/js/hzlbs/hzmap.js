@@ -14,7 +14,7 @@
 //var hz_destination = HZ_DESTINATION_MEETING_ROOM;     // 导航的目的地，默认 第一个 目的地
 //var hz_user_id = 0;   // 为HZ_USER_IDS 的索引-1， 0 表示 未选择用户
 //var HZ_USER_IDS = ['1918E00103AA', '1918E00103A9'];
-//var storage = window.localStorage;
+var storage = window.localStorage;
 
 (function(w) {
 
@@ -75,7 +75,7 @@
 
 		this.zoomCallBack = [];     // func Array 缩放需要执行的临时函数
 
-		this.zoom -= 0.1;   // 缩小了2个级别 0.05一个级别
+		this.zoom -= 0.1;           // 缩小了2个级别 0.05一个级别
 		
 		// 显示地图
 		this.mapZoom(this.mapH * this.zoom, this.mapW * this.zoom);
@@ -87,10 +87,13 @@
 		this.eventLayer.on('mousedown', {_map: this}, this.doMouseDown);
 		this.eventLayer.on('mousemove', {_map: this}, this.doGetCoord);
 		this.eventLayer.on('mouseout', {_map: this}, this.doMouseOut);
+
+		// 创建放大缩小按钮
+		this.createZoomCtrl();
 	}
 
 	HzMap.prototype = {
-		constructor:HzMap,
+		constructor:HzMap,  // 构造函数
 		
 		addLayer: function (parent, id) {
 			parent.append('<div id=' + id + ' class="each_map_layer" />');
@@ -331,7 +334,7 @@
 
 				// 保存缩放比例
 				map.zoom = resultWidth / map.mapW;
-				//storage['hz_zoom'] = this.zoom;
+				storage['hz_zoom'] = this.zoom;
 
 				console.log('resultHeight', resultHeight, 'resultWidth', resultWidth);
 				map.mapZoom(resultHeight, resultWidth, map.left, map.top);
@@ -420,6 +423,39 @@
 		doMouseOut: function (e) {
 			var map = e.data._map;
 			if (map.mouseMoveCallback)  map.mouseMoveCallback('', '');
+		},
+
+		// 使用 ACE 框架。创建地图 缩放 按钮
+		createZoomCtrl: function () {
+			this.container.append(
+				'<div  id="ctrl-panel" style="position:absolute; top:10px; left: 10px; z-index:1000;">' +
+				'<div class="btn-group btn-group-vertical btn-group-sm" style="background:#FFF; border:1px solid #CCC;">' +
+				'<div style="margin: 5px 5px;">' +
+				'<button type="button" class="btn btn-inverse btn-sm" id="btn-hz-zoomIn"><i class="ace-icon fa fa-plus align-middle"></i></button>' +
+				'</div>' +
+				'<div style="margin: 5px 5px;">'+
+				'<button type="button" class="btn btn-inverse btn-sm" id="btn-hz-zoomOut"><i class="ace-icon fa fa-minus align-middle"></i></button>'+
+				'</div>'+
+				'</div>'+
+				'</div>'
+			);
+			
+			$('#btn-hz-zoomIn').on('click', {_map: this}, this.hzZoomIn);
+			$('#btn-hz-zoomOut').on('click',{_map: this}, this.hzZoomOut);
+		},
+		// 缩小
+		hzZoomOut: function (e) {
+			var map = e.data._map;
+			map.zoom = parseFloat(map.zoom) - 0.05;
+			storage['hz_zoom'] = map.zoom;
+			map.mapZoom(map.zoom * map.mapH, map.zoom * map.mapW);
+		},
+		// 放大
+		hzZoomIn: function (e) {
+			var map = e.data._map;
+			map.zoom = parseFloat(map.zoom) + 0.05;
+			storage['hz_zoom'] = map.zoom;
+			map.mapZoom(map.zoom * map.mapH, map.zoom * map.mapW);
 		}
 
 	};
