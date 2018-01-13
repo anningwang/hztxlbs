@@ -148,9 +148,19 @@
 
 <script>
     $(function(){
-        var hmap = new HzMap({
+        var map = new HzMap({
             container: $('#myCanvas')
+        });
+        console.log(map);
 
+
+        var socket = io.connect(hz_connStr);
+        // 标签实时位置
+        socket.on('hz_position', function(msg) {
+            console.log('hz_position', msg);
+            for (var i=0; i<msg.length; i++){
+                map.hzPeopleGoto(msg[i]['x'], msg[i]['y'], msg[i]['userId']);
+            }
         });
 
     });

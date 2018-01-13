@@ -8,20 +8,12 @@
  */
 
 
-//var this.left = undefined, this.top = undefined;   // 地图在容器中的位置（距离左上角的距离，left, top）
-// var real_loc_to_pix = 0.0891;  // 物理坐标转像素的比例，比例转换计算公式: px = mm * real_loc_to_pix * zoom
-//var zoom = 0.486;       // 地图缩放级别
-//var margin = 0;         //外边距
-//var map_w = 3477;       // px
-//var map_h = 1769;       // 地图图片高度
 
 //var hz_is_navigating = false;           // 是否曾经设置过导航，或正在导航中
 //var HZ_DESTINATION_MEETING_ROOM = 27;    // 办公室编号
 //var hz_destination = HZ_DESTINATION_MEETING_ROOM;     // 导航的目的地，默认 第一个 目的地
-
 //var hz_user_id = 0;   // 为HZ_USER_IDS 的索引-1， 0 表示 未选择用户
 //var HZ_USER_IDS = ['1918E00103AA', '1918E00103A9'];
-//var hz_user_xy = [];   // 用户数据  每项为一个用户，[['1918E00103AA',x,y], ...]
 //var storage = window.localStorage;
 
 (function(w) {
@@ -49,11 +41,15 @@
 	var currentX, currentY;
 
 
-	function HzPeople(options) {
+	function HzPeople(map, options) {
 		this.id = options.id;
 		this.text = options.text;
 		this.x = options.x;
 		this.y = options.y;
+		this.map = map;
+
+		map.userLayer.append('<img src="/static/img/people.png" style="position:absolute;display: none" id='+ options.id + ' />');
+		map.userLayer.append('<div id="' + options.id + '-t" class="hz-div-people-txt" style="position:absolute;display: none">'+ options.text + '</div>');
 	}
 
 
@@ -74,13 +70,14 @@
 		this.mapW = 3477;           // 地图图片宽度 px
 		this.mapH = 1769;           // 地图图片高度 px
 		this.userList = {};         // 用户列表 { userId: HzPeople }
-		this.hz_user_xy = [];
+		this.hz_user_xy = [];       // 用户数据  每项为一个用户，[['1918E00103AA',x,y], ...]
 		this.mouseMoveCallback = options.mouseMoveCallback;     // mouse 移动 之 坐标拾取 回调函数
 
 		this.zoomCallBack = [];     // func Array 缩放需要执行的临时函数
 
 		this.zoom -= 0.1;   // 缩小了2个级别 0.05一个级别
 		
+		// 显示地图
 		this.mapZoom(this.mapH * this.zoom, this.mapW * this.zoom);
 		
 		// 增加鼠标滚轮缩放地图功能
@@ -103,6 +100,12 @@
 		addMapSvg: function (parent, id, filepath) {
 			parent.append('<img src="' + filepath +'" id=' + id + ' class="each_map_layer" />');
 			return $('#'+id);
+		},
+
+		addPeople: function (options) {
+			if (options && !this.userList.hasOwnProperty(options.id)) {     // 用户不存在
+				this.userLayer[options.id] = new HzPeople(this, options);
+			}
 		},
 
 		// 屏幕坐标转地图坐标(单位：mm)
@@ -188,8 +191,7 @@
 
 			// 移动 人员 marker
 			for(var i = 0; i < this.hz_user_xy.length; i++) {
-				this.hzPeopleSetPosition(this.hz_user_xy[i][1] * real_loc_to_pix * zoom,
-					this.hz_user_xy[i][2] * real_loc_to_pix * zoom, this.hz_user_xy[i][0]);
+				this.hzPeopleSetPosition(this.hz_user_xy[i][1], this.hz_user_xy[i][2], this.hz_user_xy[i][0]);
 			}
 
 			// 地图缩放后的回调函数
@@ -198,8 +200,13 @@
 			}
 		},
 
-		// 移动标签位置到指定屏幕坐标 (x, y)，people 为标签id。移动标签，有动画。
+		// 移动标签位置到指定地图坐标 (x, y)，people 为标签id。移动标签，有动画。
 		hzPeopleGoto: function (x, y, people) {
+			this.addPeople({id: people, x: x, y: y, text: people});
+			this.setPeopleCoord(x, y, people);
+
+			x = this.coordMapToScreen(x);
+			y = this.coordMapToScreen(y);
 			people = people || '1918E00103AA'; // 设置默认参数
 			var p = $('#'+people);
 
@@ -210,44 +217,42 @@
 				p.toggle();
 			} else {
 				p.stop(true, true).animate({
-					left: (x - 24),
-					top: (y - 45)
+					left: x - 24,
+					top: y - 45
 				});
 			}
-
-			if (people == '1918E00103AA') {
-				var pName = $('#'+people+'-t');
+			
+			var pName = $('#'+people+'-t');
+			if (pName.css("display") == 'none') {
+				pName.css({left: x - pName.width()/2, top: y-64});
+				pName.toggle();
+			} else {
 				pName.stop(true, true).animate({
-					left: (x - pName.width()/2),
-					top: (y - 64)
+					left: x - pName.width()/2,
+					top: y - 64
 				});
 			}
-
-			// this.setPeopleCoord(x, y, people);
 		},
 
-		// 移动标签位置到指定坐标 (x, y) 为屏幕坐标，people 为标签id。 无动画移动标签。
+		// 移动标签位置到指定地图坐标 (x, y) ，people 为标签id。 无动画移动标签。
 		hzPeopleSetPosition: function (x, y, people) {
+			this.setPeopleCoord(x, y, people);
+
+			x = this.coordMapToScreen(x);
+			y = this.coordMapToScreen(y);
 			people = people || '1918E00103AA'; // 设置默认参数
 			var p = $('#'+people);
 			p.css({left: x-24, top: y-45});
-			if (p.css("display") == 'none') {
-				p.toggle();
-			}
-
-			if (people == '1918E00103AA') {
-				var pName = $('#'+people+'-t');
-				pName.css({
-					left: (x - pName.width()/2),
-					top: (y - 64)
-				});
-			}
-
-			// this.setPeopleCoord(x, y, people);
+			
+			var pName = $('#'+people+'-t');
+			pName.css({
+				left: (x - pName.width()/2),
+				top: (y - 64)
+			});
 		},
 
 		// 保存用户的当前位置坐标, 地图坐标，单位mm
-		setPeopleCoord: function (userId, x, y) {
+		setPeopleCoord: function (x, y, userId) {
 			var i;
 			for (i = 0; i < this.hz_user_xy.length; i++) {
 				if (this.hz_user_xy[i][0] === userId) {
