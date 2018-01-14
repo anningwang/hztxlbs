@@ -15,7 +15,7 @@
    width="3477"
    height="1769"
    viewBox="0 0 3477 1769"
-   sodipodi:docname="floor3_inkscape.svg"
+   sodipodi:docname="floor3_Inkscape.svg"
    inkscape:version="0.92.1 r15371"
    inkscape:export-filename="D:\Softwares\GitHub_file\hztxlbs\app\static\img\floor3_inkscape.svg.png"
    inkscape:export-xdpi="96"
@@ -56,9 +56,9 @@
      inkscape:window-height="988"
      id="namedview3692"
      showgrid="false"
-     inkscape:zoom="0.70578306"
-     inkscape:cx="2743.8978"
-     inkscape:cy="1175.5152"
+     inkscape:zoom="1"
+     inkscape:cx="956.09092"
+     inkscape:cy="936.10311"
      inkscape:window-x="1672"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
@@ -142,13 +142,6 @@
      height="44"
      x="597.25079"
      y="187"
-     style="opacity:1;fill:#333333;stroke-width:0.76283205" />
-  <rect
-     id="arc2-3"
-     width="661"
-     height="44"
-     x="597.25079"
-     y="891"
      style="opacity:1;fill:#333333;stroke-width:0.76283205" />
   <rect
      id="arc3-4"
@@ -1116,4 +1109,38 @@
          x="548.31616"
          y="92.867737"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:53.33333206px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'" /></flowRegion><flowPara
-       id="flowPara416-0-6-4-28">34</flowPara></flowRoot></svg>
+       id="flowPara416-0-6-4-28">34</flowPara></flowRoot>  <rect
+     id="hz-34-8"
+     width="44"
+     height="44"
+     x="917.25079"
+     y="891"
+     style="opacity:0.5;fill:#f4d7d7;stroke-width:0.19681332" />
+  <flowRoot
+     xml:space="preserve"
+     id="flowRoot410-58-9"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:53.33333206px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+     transform="translate(374.92089,719.23144)"><flowRegion
+       id="flowRegion412-6-81"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:53.33333206px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'"><rect
+         id="rect414-3-3"
+         width="93.551567"
+         height="70.163673"
+         x="548.31616"
+         y="92.867737"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:53.33333206px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold'" /></flowRegion><flowPara
+       id="flowPara416-3-73">35</flowPara></flowRoot>  <rect
+     id="pathmanager-1-3"
+     width="320"
+     height="44"
+     x="597.25079"
+     y="891"
+     style="opacity:1;fill:#333333;stroke-width:0.53076613" />
+  <rect
+     id="pathmanager-1-3-2"
+     width="297"
+     height="44"
+     x="961.25079"
+     y="891"
+     style="opacity:1;fill:#333333;stroke-width:0.51133609" />
+</svg>
