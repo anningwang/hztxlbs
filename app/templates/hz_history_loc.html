@@ -200,8 +200,7 @@
 		socket.on('hz_position', function(msg) {
 			console.log('hz_position', msg);
 			for (var i=0; i<msg.length; i++){
-				hzPeopleGoto(coordMapToScreen(msg[i]['x']), coordMapToScreen(msg[i]['y']), msg[i]['userId']);
-				setPeopleCoord(msg[i]['userId'], msg[i]['x'], msg[i]['y']);
+				hzPeopleGoto(msg[i]['x'], msg[i]['y'], msg[i]['userId']);
 			}
 		});
 
@@ -220,6 +219,7 @@
 		// 清除历史轨迹
 		$('#btnClearHisLoc').click(function () {
 			hisLocData = undefined;
+			delZoomCallback(draw_his_loc);
 
 			var hisLayer = $('#svg_path_history');
 			hisLayer.svg();
@@ -305,6 +305,7 @@
 
 				if(data.errorCode == 0){
 					hisLocData = data.data;
+					addZoomCallback(draw_his_loc);
 					var isDraw = drawHisLocation(data.data);
 					if (!isDraw) {
 						alert('该时间段没有数据!');
@@ -322,8 +323,6 @@
 		function draw_his_loc() {
 			drawHisLocation(hisLocData);
 		}
-
-		zoomCallBack.push(draw_his_loc);
 
 		// 画历史轨迹
 		function drawHisLocation(data){

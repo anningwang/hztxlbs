@@ -446,7 +446,7 @@ function mapZoom(height, width, left, top) {
 	
 	// 移动 人员 marker
 	for(var i = 0; i < hz_user_xy.length; i++) {
-		hzPeopleSetPosition(coordMapToScreen(hz_user_xy[i][1]), coordMapToScreen(hz_user_xy[i][2]), hz_user_xy[i][0]);
+		hzPeopleSetPosition(hz_user_xy[i][1], hz_user_xy[i][2], hz_user_xy[i][0]);
 	}
 	
 	// 地图缩放后的回调函数
@@ -457,8 +457,13 @@ function mapZoom(height, width, left, top) {
 }
 
 
-// 移动标签位置到指定坐标 (x, y) 为屏幕坐标，people 为标签id。移动标签，有动画。
+// 移动标签位置到指定坐标 (x, y) 为地图坐标，people 为标签id。移动标签，有动画。
 function hzPeopleGoto(x, y, people) {
+	setPeopleCoord(x, y, people);
+	
+	x = coordMapToScreen(x);    // 地图坐标转屏幕坐标
+	y = coordMapToScreen(y);
+	
 	people = people || '1918E00103AA'; // 设置默认参数
 	var p = $('#'+people);
 	
@@ -478,8 +483,13 @@ function hzPeopleGoto(x, y, people) {
 	}
 }
 
-// 移动标签位置到指定坐标 (x, y) 为屏幕坐标，people 为标签id。 无动画移动标签。
+// 移动标签位置到指定坐标 (x, y) 为地图坐标，people 为标签id。 无动画移动标签。
 function hzPeopleSetPosition(x, y, people) {
+	//setPeopleCoord(x, y, people);
+	
+	x = coordMapToScreen(x);    // 地图坐标转屏幕坐标
+	y = coordMapToScreen(y);
+	
 	people = people || '1918E00103AA'; // 设置默认参数
 	var p = $('#'+people);
 	p.css({left: x-24, top: y-45});
@@ -503,7 +513,7 @@ function hzClearNavPath() {
 
 
 // 保存用户的当前位置坐标, 地图坐标，单位mm
-function setPeopleCoord(userId, x, y) {
+function setPeopleCoord(x, y, userId) {
 	var i;
 	for (i = 0; i < hz_user_xy.length; i++) {
 		if (hz_user_xy[i][0] === userId) {
@@ -515,5 +525,21 @@ function setPeopleCoord(userId, x, y) {
 	
 	if (i === hz_user_xy.length) {  // not find, add new user & coord.
 		hz_user_xy[i] = [userId, x, y];
+	}
+}
+
+// 增加缩放地图的回调函数
+function addZoomCallback(func) {
+	zoomCallBack.push(func);
+
+}
+
+// 删除缩放地图的回调函数
+function delZoomCallback(func) {
+	for(var i=0; i< zoomCallBack.length; i++){
+		if (zoomCallBack[i] === func){
+			zoomCallBack.splice(i, 1);
+			break;
+		}
 	}
 }

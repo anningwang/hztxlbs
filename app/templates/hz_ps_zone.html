@@ -1212,17 +1212,13 @@
 			console.log('showPsZone send data=',data);
 			ps_zone_data = data.data.rows;
 			drawPsZone(ps_zone_data);
-			zoomCallBack.push(draw_ps_zone_fn);
+			addZoomCallback(draw_ps_zone_fn);
 		}
 
 		function clearPsZone (){
 			ps_zone_data = [];
-			for(var i=0; i< zoomCallBack.length; i++){
-				if (zoomCallBack[i] === draw_ps_zone_fn){
-					zoomCallBack.splice(i, 1);
-					break;
-				}
-			}
+			delZoomCallback(draw_ps_zone_fn);
+
 			var draw_path = $('#svg-people-stat-zone');
 			var svg = draw_path.svg('get');
 			svg.clear();
@@ -1273,8 +1269,7 @@
 		socket.on('hz_position', function(msg) {
 			console.log('hz_position', msg);
 			for (var i=0; i<msg.length; i++){
-				hzPeopleGoto(coordMapToScreen(msg[i]['x']), coordMapToScreen(msg[i]['y']), msg[i]['userId']);
-				setPeopleCoord(msg[i]['userId'], msg[i]['x'], msg[i]['y']);
+				hzPeopleGoto(msg[i]['x'], msg[i]['y'], msg[i]['userId']);
 			}
 		});
 

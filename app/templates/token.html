@@ -201,8 +201,7 @@
         socket.on('hz_position', function(msg) {
             console.log('hz_position', msg);
             for (var i=0; i<msg.length; i++){
-                hzPeopleGoto(coordMapToScreen(msg[i]['x']), coordMapToScreen(msg[i]['y']), msg[i]['userId']);
-                setPeopleCoord(msg[i]['userId'], msg[i]['x'], msg[i]['y']);
+                hzPeopleGoto(msg[i]['x'], msg[i]['y'], msg[i]['userId']);
             }
         });
 
@@ -215,7 +214,6 @@
             drawNavPath();
         });
 
-        zoomCallBack.push(drawNavPath);
         function drawNavPath() {
             if (!pathData) return;
 
@@ -228,7 +226,8 @@
                 pt_path[m+1] = [parseInt((msg.path[m].x+44/2-2) * zoom), parseInt((msg.path[m].y+44/2-2) * zoom)];
             }
 
-            hzPeopleSetPosition(pt_path[pt_path.length-1][0], pt_path[pt_path.length-1][1], 'destination');
+            hzPeopleSetPosition(coordScreenToMap(pt_path[pt_path.length-1][0]),
+                    coordScreenToMap(pt_path[pt_path.length-1][1]), 'destination');
             $('#destination').show();
 
             var pathLayer = $('#svg_path');
@@ -250,6 +249,7 @@
 
             socket.emit('hz_navigating',
                     {'location': hz_destination, 'userId':HZ_USER_IDS[hz_user_id-1] });
+            addZoomCallback(drawNavPath);
         });
 
         /// 停止导航
@@ -271,6 +271,7 @@
             }
 
             pathData = undefined;
+            delZoomCallback(drawNavPath);
         }
 
     });

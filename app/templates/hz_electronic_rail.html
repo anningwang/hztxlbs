@@ -1129,17 +1129,13 @@
 			var data = ajaxRequest(url, txData);
 			er_data = data.data;
 			drawElectronicRail(er_data);
-			zoomCallBack.push(draw_et_fn);
+			addZoomCallback(draw_et_fn);
 		}
 
 		function clearElectronicRail (){
 			er_data = [];
-			for(var i=0; i< zoomCallBack.length; i++){
-				if (zoomCallBack[i] === draw_et_fn){
-					zoomCallBack.splice(i, 1);
-					break;
-				}
-			}
+			delZoomCallback(draw_et_fn);
+
 			var erBoard = $('#svg-electronic-rail');
 			erBoard.svg();
 			var svg = erBoard.svg('get');
@@ -1192,8 +1188,7 @@
 		socket.on('hz_position', function(msg) {
 			console.log('hz_position', msg);
 			for (var i=0; i<msg.length; i++){
-				hzPeopleGoto(coordMapToScreen(msg[i]['x']), coordMapToScreen(msg[i]['y']), msg[i]['userId']);
-				setPeopleCoord(msg[i]['userId'], msg[i]['x'], msg[i]['y']);
+				hzPeopleGoto(msg[i]['x'], msg[i]['y'], msg[i]['userId']);
 			}
 		});
 

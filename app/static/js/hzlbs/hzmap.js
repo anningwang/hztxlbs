@@ -440,18 +440,18 @@ var storage = window.localStorage;
 				'</div>'
 			);
 			
-			$('#btn-hz-zoomIn').on('click', {_map: this}, this.hzZoomIn);
-			$('#btn-hz-zoomOut').on('click',{_map: this}, this.hzZoomOut);
+			$('#btn-hz-zoomIn').on('click', {_map: this}, this._zoomIn);
+			$('#btn-hz-zoomOut').on('click',{_map: this}, this._zoomOut);
 		},
 		// 缩小
-		hzZoomOut: function (e) {
+		_zoomOut: function (e) {
 			var map = e.data._map;
 			map.zoom = parseFloat(map.zoom) - 0.05;
 			storage['hz_zoom'] = map.zoom;
 			map.mapZoom(map.zoom * map.mapH, map.zoom * map.mapW);
 		},
 		// 放大
-		hzZoomIn: function (e) {
+		_zoomIn: function (e) {
 			var map = e.data._map;
 			map.zoom = parseFloat(map.zoom) + 0.05;
 			storage['hz_zoom'] = map.zoom;
