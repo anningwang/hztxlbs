@@ -42,8 +42,10 @@ if(storage){
 }
 
 var _mouseMoveCallback = undefined;     // 函数指针，鼠标移动回调函数指针
-
-var	zoomCallBack = [];      // func Array 缩放需要执行的临时函数
+var	_zoomCallback = [];                 // func Array 缩放需要执行的临时函数
+var _picOffsetLeft = 26;                // 人物marker 图片针尖的偏移量：左偏移
+var _picOffsetTop = 45;                 // 人物marker 图片针尖的偏移量：上偏移
+var _textOffsetTop = 64;                // 文字marker上部偏移量。显示在人物marker的上方
 
 $(function(){
 	createZoomCtrl();
@@ -450,8 +452,8 @@ function mapZoom(height, width, left, top) {
 	}
 	
 	// 地图缩放后的回调函数
-	for(var j = 0; j < zoomCallBack.length; j++) {
-		zoomCallBack[j]();
+	for(var j = 0; j < _zoomCallback.length; j++) {
+		_zoomCallback[j]();
 	}
 	
 }
@@ -466,20 +468,19 @@ function hzPeopleGoto(x, y, people) {
 	
 	people = people || '1918E00103AA'; // 设置默认参数
 	var p = $('#'+people);
-	
-	// 24, 45是定位图标的 针尖 位置。显示图片时，是以图片左上角为参考坐标。故需要对坐标进行偏移。
-	
+
+	// _picOffsetLeft, _picOffsetTop 是定位图标的 针尖 位置。显示图片时，是以图片左上角为参考坐标。故需要对坐标进行偏移。
 	if (p.css("display") == 'none') {
-		p.css({left: x-24, top: y-45}).toggle();
+		p.css({left: x - _picOffsetLeft, top: y - _picOffsetTop}).toggle();
 	} else {
-		p.stop(true, true).animate({left: x - 24, top: y - 45});
+		p.stop(true, true).animate({left: x - _picOffsetLeft, top: y - _picOffsetTop});
 	}
 
 	var pName = $('#'+people+'-t');
 	if (pName.css("display") == 'none') {
-		pName.css({left: x - pName.width()/2, top: y-64}).toggle();
+		pName.css({left: x - pName.width()/2, top: y - _textOffsetTop}).toggle();
 	} else {
-		pName.stop(true, true).animate({left: x - pName.width()/2, top: y - 64});
+		pName.stop(true, true).animate({left: x - pName.width()/2, top: y - _textOffsetTop});
 	}
 }
 
@@ -492,13 +493,13 @@ function hzPeopleSetPosition(x, y, people) {
 	
 	people = people || '1918E00103AA'; // 设置默认参数
 	var p = $('#'+people);
-	p.css({left: x-24, top: y-45});
+	p.css({left: x - _picOffsetLeft, top: y - _picOffsetTop});
 	if (p.css("display") == 'none') {
 		p.toggle();
 	}
 
 	var pName = $('#'+people+'-t');
-	pName.css({left: x - pName.width()/2, top: y - 64});
+	pName.css({left: x - pName.width()/2, top: y - _textOffsetTop});
 	if (pName.css("display") == 'none') {
 		pName.toggle();
 	}
@@ -530,15 +531,15 @@ function setPeopleCoord(x, y, userId) {
 
 // 增加缩放地图的回调函数
 function addZoomCallback(func) {
-	zoomCallBack.push(func);
+	_zoomCallback.push(func);
 
 }
 
 // 删除缩放地图的回调函数
 function delZoomCallback(func) {
-	for(var i=0; i< zoomCallBack.length; i++){
-		if (zoomCallBack[i] === func){
-			zoomCallBack.splice(i, 1);
+	for(var i=0; i< _zoomCallback.length; i++){
+		if (_zoomCallback[i] === func){
+			_zoomCallback.splice(i, 1);
 			break;
 		}
 	}
