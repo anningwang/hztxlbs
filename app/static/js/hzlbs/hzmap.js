@@ -40,6 +40,10 @@ var storage = window.localStorage;
 	var mapMoveMousedownX, mapMoveMousedownY;
 	var currentX, currentY;
 
+	var _picOffsetLeft = 26;                // 人物marker 图片针尖的偏移量：左偏移
+	var _picOffsetTop = 45;                 // 人物marker 图片针尖的偏移量：上偏移
+	var _textOffsetTop = 64;                // 文字marker上部偏移量。显示在人物marker的上方
+
 
 	function HzPeople(map, options) {
 		this.id = options.id;
@@ -50,7 +54,67 @@ var storage = window.localStorage;
 
 		map.userLayer.append('<img src="/static/img/people.png" style="position:absolute;display: none" id='+ options.id + ' />');
 		map.userLayer.append('<div id="' + options.id + '-t" class="hz-div-people-txt" style="position:absolute;display: none">'+ options.text + '</div>');
+
+		this.imgContainer = $('#'+options.id);
+		this.textContainer = $('#'+options.id + '-t');
+
+		this.render();
 	}
+
+	HzPeople.prototype = {
+		constructor: HzPeople,  // 构造函数
+
+		getId: function () {
+			return this.id;
+		},
+
+		setText: function (text) {
+			this.text = text;
+			this.textContainer.text(text);
+		},
+
+		setPosition: function (x, y) {  // x,y 为 地图坐标
+			this.x = x;
+			this.y = y;
+
+			this.render();
+		},
+
+		render: function () {
+			var coord = {
+				x: 	this.map.coordMapToScreen(this.x),
+				y: 	this.map.coordMapToScreen(this.y)
+			};
+
+			var p = this.imgContainer;
+			p.css({left: coord.x - _picOffsetLeft, top: coord.y - _picOffsetTop});
+			if (p.css("display") == 'none') {
+				p.toggle();
+			}
+
+			var pName = this.textContainer;
+			pName.css({left: coord.x - pName.width()/2, top: coord.y - _textOffsetTop});
+			if (pName.css("display") == 'none') {
+				pName.toggle();
+			}
+		},
+
+		moveTo: function (x, y) { // x,y 为 地图坐标
+			this.x = x;
+			this.y = y;
+
+			var coord = {
+				x: 	this.map.coordMapToScreen(this.x),
+				y: 	this.map.coordMapToScreen(this.y)
+			};
+
+			var p = this.imgContainer;
+			p.stop(true, true).animate({left: coord.x - _picOffsetLeft, top: coord.y - _picOffsetTop});
+
+			var pName = this.textContainer;
+			pName.stop(true, true).animate({left: coord.x - pName.width()/2, top: coord.y - _textOffsetTop});
+		}
+	};
 
 
 	function HzMap(options) {
@@ -70,7 +134,6 @@ var storage = window.localStorage;
 		this.mapW = 3477;           // 地图图片宽度 px
 		this.mapH = 1769;           // 地图图片高度 px
 		this.userList = {};         // 用户列表 { userId: HzPeople }
-		this.hz_user_xy = [];       // 用户数据  每项为一个用户，[['1918E00103AA',x,y], ...]
 		this.mouseMoveCallback = options.mouseMoveCallback;     // mouse 移动 之 坐标拾取 回调函数
 
 		this.zoomCallBack = [];     // func Array 缩放需要执行的临时函数
@@ -107,8 +170,23 @@ var storage = window.localStorage;
 
 		addPeople: function (options) {
 			if (options && !this.userList.hasOwnProperty(options.id)) {     // 用户不存在
-				this.userLayer[options.id] = new HzPeople(this, options);
+				this.userList[options.id] = new HzPeople(this, options);
+				return true;
 			}
+			return false;
+		},
+
+		// 根据用户ID查询 HzPeople 对象
+		getPeople: function (userId) {
+			for(var people in this.userList){
+				if (this.userList.hasOwnProperty(people)) {
+					if (people === userId) {
+						return this.userList[people];
+					}
+				}
+			}
+
+			return null;
 		},
 
 		// 屏幕坐标转地图坐标(单位：mm)
@@ -126,11 +204,6 @@ var storage = window.localStorage;
 			var roomLayer = this.roomLayer;
 			roomLayer.svg();
 			var svg = roomLayer.svg('get');
-
-			if(!svg) {
-				console.log('showRoomName svg param is null, svg=', svg );
-				return false;
-			}
 			svg.clear();
 
 			for(var i = 0; i < roomNameCoord.length; i++) {
@@ -193,9 +266,13 @@ var storage = window.localStorage;
 			this.showRoomName();
 
 			// 移动 人员 marker
-			for(var i = 0; i < this.hz_user_xy.length; i++) {
-				this.hzPeopleSetPosition(this.hz_user_xy[i][1], this.hz_user_xy[i][2], this.hz_user_xy[i][0]);
+			for(var userId in this.userList) {
+				if (!this.userList.hasOwnProperty(userId))
+					continue;
+				var people = this.userList[userId];
+				people.render();
 			}
+
 
 			// 地图缩放后的回调函数
 			for(var j = 0; j < this.zoomCallBack.length; j++) {
@@ -205,68 +282,11 @@ var storage = window.localStorage;
 
 		// 移动标签位置到指定地图坐标 (x, y)，people 为标签id。移动标签，有动画。
 		hzPeopleGoto: function (x, y, people) {
-			this.addPeople({id: people, x: x, y: y, text: people});
-			this.setPeopleCoord(x, y, people);
-
-			x = this.coordMapToScreen(x);
-			y = this.coordMapToScreen(y);
-			people = people || '1918E00103AA'; // 设置默认参数
-			var p = $('#'+people);
-
-			// 24, 45是定位图标的 针尖 位置。显示图片时，是以图片左上角为参考坐标。故需要对坐标进行偏移。
-
-			if (p.css("display") == 'none') {
-				p.css({left: x-24, top: y-45});
-				p.toggle();
+			var hzPeople = this.getPeople(people);
+			if (hzPeople){
+				hzPeople.moveTo(x, y);
 			} else {
-				p.stop(true, true).animate({
-					left: x - 24,
-					top: y - 45
-				});
-			}
-			
-			var pName = $('#'+people+'-t');
-			if (pName.css("display") == 'none') {
-				pName.css({left: x - pName.width()/2, top: y-64});
-				pName.toggle();
-			} else {
-				pName.stop(true, true).animate({
-					left: x - pName.width()/2,
-					top: y - 64
-				});
-			}
-		},
-
-		// 移动标签位置到指定地图坐标 (x, y) ，people 为标签id。 无动画移动标签。
-		hzPeopleSetPosition: function (x, y, people) {
-			this.setPeopleCoord(x, y, people);
-
-			x = this.coordMapToScreen(x);
-			y = this.coordMapToScreen(y);
-			people = people || '1918E00103AA'; // 设置默认参数
-			var p = $('#'+people);
-			p.css({left: x-24, top: y-45});
-			
-			var pName = $('#'+people+'-t');
-			pName.css({
-				left: (x - pName.width()/2),
-				top: (y - 64)
-			});
-		},
-
-		// 保存用户的当前位置坐标, 地图坐标，单位mm
-		setPeopleCoord: function (x, y, userId) {
-			var i;
-			for (i = 0; i < this.hz_user_xy.length; i++) {
-				if (this.hz_user_xy[i][0] === userId) {
-					this.hz_user_xy[i][1] = x;
-					this.hz_user_xy[i][2] = y;
-					break;
-				}
-			}
-
-			if (i === this.hz_user_xy.length) {  // not find, add new user & coord.
-				this.hz_user_xy[i] = [userId, x, y];
+				this.addPeople({id: people, x: x, y: y, text: people});
 			}
 		},
 
