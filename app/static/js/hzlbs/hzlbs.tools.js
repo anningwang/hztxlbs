@@ -15,19 +15,18 @@ var hz_namespace = '/HeZhong';
 var hz_connStr = location.protocol + '//' + document.domain + ':' + location.port + hz_namespace;
 
 
-// 初始化对象
+/**
+ * 添加格式
+ * 1. (函数)                    add(fn)
+ * 2. (对象,函数)               add(obj, fn)
+ * 3. (函数,参数)               add(fn, param)
+ * 4. (对象,函数,参数)          add(obj,fn,[param1,param2])
+ */
 function Init(){
     // 存运行函数的清除方法
     this.stopFn = [];
 }
 
-/**
- * 添加格式
- * 1. (函数)
- * 2. (对象,函数)
- * 3. (函数,参数)
- * 4. (对象,函数,参数)    (obj,fn,[param1,param2])
- */
 Init.prototype.add = function(){
     var args = [].slice.call(arguments);
     this.stopFn.push(args);
@@ -38,51 +37,48 @@ Init.prototype.empty = function(){
 };
 
 Init.prototype.run = function(){
-    var current_item;
-    while(current_item = this.stopFn.pop()){
-        this.distribution(current_item);
+    var param;
+    while(param = this.stopFn.pop()){
+        this.distribution(param);
     }
 };
 
 Init.prototype.distribution = function(param){
-    var param_length = param.length;
-    switch (param_length){
-        case 0:
-            param();
-            break;
+    switch (param.length){
         case 1:
-            param[0]();
+            param[0].call(null);
             break;
         case 2:
-            this.stopFn_param_2(param[0],param[1]);
+            if(typeof param[0] === 'function') {
+                this.func_param(param[0],param[1]);
+            } else {
+                this.obj_func(param[0],param[1]);
+            }
             break;
         case 3:
-            this.stopFn_param_3(param[0],param[1],param[2]);
+            this.obj_func_param(param[0],param[1],param[2]);
             break;
     }
 };
 
-Init.prototype.stopFn_param_2 = function(param1,param2){
-    console.log('param1',param2);
-    if(typeof param1 === 'function'){
-        if(param2 instanceof Array)
-        {
-            param1.apply(window,param2);
-            console.log('stopFn_param_2',window);
-        }else{
-            param1.apply(window,[param2]);
-        }
+Init.prototype.func_param = function(func,param) {
+    if(param instanceof Array) {
+        func.apply(window,param);
     }else{
-        param2.apply(param1);
+        func.apply(window,[param]);
     }
 };
 
-Init.prototype.stopFn_param_3 = function(param1,param2,param3){
-    if(param3 instanceof Array)
-    {
-        param2.apply(param1,param3);
+Init.prototype.obj_func = function(obj,func) {
+    func.apply(obj);
+};
+
+
+Init.prototype.obj_func_param = function(obj,func,param){
+    if(param instanceof Array) {
+        func.apply(obj,param);
     }else{
-        param2.apply(param1,[param3]);
+        func.apply(obj,[param]);
     }
 };
 

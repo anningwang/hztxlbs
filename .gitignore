@@ -2,6 +2,7 @@
 *.pyo
 app.db
 search.db
+test.db
 flask
 *.mo
 

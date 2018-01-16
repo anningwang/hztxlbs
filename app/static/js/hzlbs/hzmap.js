@@ -19,7 +19,7 @@ var storage = window.localStorage;
 (function(w) {
 
 	// 房间名称所在坐标
-	var roomNameCoord = [
+	var _roomNameCoord = [
 		{name: '会议室',      x: 2067,  y: 3563,  fontSize: 20},
 		{name: '副总办公室',  x: 2067,  y: 8981,  fontSize: 20},
 		{name: '总裁室',      x: 2067,  y: 15609, fontSize: 20},
@@ -37,13 +37,16 @@ var storage = window.localStorage;
 	];
 
 	// 地图移动变量
-	var mapMoveMousedownX, mapMoveMousedownY;
-	var currentX, currentY;
+	var _oldX, _oldY;
+	var _curX, _curY;
 
 	var _picOffsetLeft = 26;                // 人物marker 图片针尖的偏移量：左偏移
 	var _picOffsetTop = 45;                 // 人物marker 图片针尖的偏移量：上偏移
 	var _textOffsetTop = 64;                // 文字marker上部偏移量。显示在人物marker的上方
 
+	//-------------------------------------------------------------------------
+	// begin of HzPeople
+	//-------------------------------------------------------------------------
 	function HzPeople(map, options) {
 		this.id = options.id;
 		this.text = options.text;
@@ -121,7 +124,14 @@ var storage = window.localStorage;
 		}
 	};
 
+	//-------------------------------------------------------------------------
+	// end of HzPeople
+	//-------------------------------------------------------------------------
 
+
+	//-------------------------------------------------------------------------
+	// begin of HzMap
+	//-------------------------------------------------------------------------
 	function HzMap(options) {
 		this.container = options.container;     // JQuery 对象
 		this.baseLayer = this.addLayer(this.container, 'svg_map_base');
@@ -221,18 +231,17 @@ var storage = window.localStorage;
 
 		// 显示房间名称
 		showRoomName: function () {
-			var roomLayer = this.roomLayer;
-			roomLayer.svg();
-			var svg = roomLayer.svg('get');
+			this.roomLayer.svg();
+			var svg = this.roomLayer.svg('get');
 			svg.clear();
 
-			for(var i = 0; i < roomNameCoord.length; i++) {
-				var str = 'translate(' + this.coordMapToScreen(roomNameCoord[i].x) + ',' + this.coordMapToScreen(roomNameCoord[i].y) + ')';
+			for(var i = 0; i < _roomNameCoord.length; i++) {
+				var str = 'translate(' + this.coordMapToScreen(_roomNameCoord[i].x) + ',' + this.coordMapToScreen(_roomNameCoord[i].y) + ')';
 				var g1 = svg.group({
 					transform: str
 				});
-				svg.text(g1, 0, 0, roomNameCoord[i].name, {
-					fontSize: roomNameCoord[i].fontSize,
+				svg.text(g1, 0, 0, _roomNameCoord[i].name, {
+					fontSize: _roomNameCoord[i].fontSize,
 					fontFamily: 'Verdana',
 					fill: 'blue'
 				});
@@ -240,15 +249,12 @@ var storage = window.localStorage;
 		},
 
 		mapZoom: function (height, width, left, top) {  // 缩放地图，并设置地图的位置（left, top）
-			var $each_map_layer = $('.each_map_layer');
-
-			var $svg_map_base = this.baseLayer;
-
-			var mapOldW = $svg_map_base.outerWidth() / 2;
-			var mapOldH = $svg_map_base.outerHeight() / 2;
+			var base = this.baseLayer;
+			var mapOldW = base.outerWidth() / 2;
+			var mapOldH = base.outerHeight() / 2;
 
 			// 缩放 div 中 svg 的 宽和高
-			$each_map_layer.each(function () {
+			$('.each_map_layer').each(function () {
 				$(this).css({height: height+'px', width: width+'px'});
 
 				var divSvg = $(this).find('svg');
@@ -258,22 +264,22 @@ var storage = window.localStorage;
 				}
 			});
 
-			var hzCanvas = this.container;
+			var canvas = this.container;
 			if (left !== undefined) this.left = left;
-			else if(this.left === undefined)  this.left = (hzCanvas.width() - $svg_map_base.width()) / 2;
+			else if(this.left === undefined)  this.left = (canvas.width() - base.width()) / 2;
 			else {
-				var mapNewW = $svg_map_base.outerWidth() / 2;
+				var mapNewW = base.outerWidth() / 2;
 				this.left +=  Math.round(mapOldW - mapNewW);
 			}
 
 			if (top !== undefined) this.top = top;
-			else if(this.top === undefined) this.top = (hzCanvas.height() - $svg_map_base.height()) / 2;
+			else if(this.top === undefined) this.top = (canvas.height() - base.height()) / 2;
 			else {
-				var mapNewH = $svg_map_base.outerHeight() / 2;
+				var mapNewH = base.outerHeight() / 2;
 				this.top +=  Math.round(mapOldH - mapNewH);
 			}
 
-			$svg_map_base.css({
+			base.css({
 				left: this.left + 'px',
 				top: this.top + 'px'
 			});
@@ -311,16 +317,16 @@ var storage = window.localStorage;
 
 		doMouseWheel: function (event, delta) {
 			var map = event.data._map;
-			var mapSign = map.baseLayer;
+			var base = map.baseLayer;
 
 			// 设置缩放速度   比例缩放
 			var zoomSpeed = 0.05;
 
 			//svg图的最小 最大  X和Y
 			var mapMinX, mapMaxX, mapMinY, mapMaxY;
-			var mapOffset = mapSign.offset();
-			var mapOuterWidth = mapSign.outerWidth();
-			var mapOuterHeight = mapSign.outerHeight();
+			var mapOffset = base.offset();
+			var mapOuterWidth = base.outerWidth();
+			var mapOuterHeight = base.outerHeight();
 
 			mapMinX = mapOffset.left;
 			mapMaxX = mapOffset.left + mapOuterWidth;
@@ -333,14 +339,14 @@ var storage = window.localStorage;
 
 				// 计算速度
 				var mapHeight, mapWidth, mapTopBorder, mapLeftBorder, mapTop, mapLeft, speedTop, speedLeft;
-				mapHeight = mapSign.height();
-				mapWidth = mapSign.width();
+				mapHeight = base.height();
+				mapWidth = base.width();
 
-				mapTopBorder = parseInt(mapSign.css('border-top-width'));
-				mapLeftBorder = parseInt(mapSign.css('border-left-width'));
+				mapTopBorder = parseInt(base.css('border-top-width'));
+				mapLeftBorder = parseInt(base.css('border-left-width'));
 
-				mapTop = parseInt(mapSign.css('top'));
-				mapLeft = parseInt(mapSign.css('left'));
+				mapTop = parseInt(base.css('top'));
+				mapLeft = parseInt(base.css('left'));
 
 
 				// 计算缩放速度  单独的top  或  left
@@ -383,11 +389,11 @@ var storage = window.localStorage;
 		doMouseDown: function (e) {
 			var map = e.data._map;
 
-			mapMoveMousedownX = e.pageX;
-			mapMoveMousedownY = e.pageY;
+			_oldX = e.pageX;
+			_oldY = e.pageY;
 
-			currentX = parseInt(map.left);
-			currentY = parseInt(map.top);
+			_curX = parseInt(map.left);
+			_curY = parseInt(map.top);
 
 			map.eventLayer.off('mousemove', map.doGetCoord);
 			map.eventLayer.off('mouseout', map.doMouseOut);
@@ -401,20 +407,20 @@ var storage = window.localStorage;
 		doMapMove: function (e) {
 			var map = e.data._map;
 
-			currentX = e.pageX - mapMoveMousedownX + parseInt(map.left);
-			currentY = e.pageY - mapMoveMousedownY + parseInt(map.top);
+			_curX = e.pageX - _oldX + parseInt(map.left);
+			_curY = e.pageY - _oldY + parseInt(map.top);
 
 			map.baseLayer.css({
-				left: currentX + 'px',
-				top: currentY + 'px'
+				left: _curX + 'px',
+				top: _curY + 'px'
 			});
 		},
 
 		stopMapMove: function (e) {
 			var map = e.data._map;
 
-			map.left = currentX;
-			map.top = currentY;
+			map.left = _curX;
+			map.top = _curY;
 
 			map.eventLayer.on('mousemove', {_map: map}, map.doGetCoord);
 			map.eventLayer.on('mouseout', {_map: map}, map.doMouseOut);
@@ -531,6 +537,8 @@ var storage = window.localStorage;
 			var msg = this.pathData;
 			var pt_path = [];
 			pt_path[0] = [this.coordMapToScreen(msg.x), this.coordMapToScreen(msg.y)];
+			var people = this.getPeople(msg.userId);
+			if(people){ people.renderer(); }
 			
 			// 44px 为 地图上的路线宽度
 			for(var m = 0; m< msg.path.length; m++){
@@ -577,9 +585,10 @@ var storage = window.localStorage;
 				}
 			}
 		}
-		
-
 	};
+	//-------------------------------------------------------------------------
+	// end of HzMap
+	//-------------------------------------------------------------------------
 
 	w.HzMap = HzMap;
 })(window);

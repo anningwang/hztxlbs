@@ -220,6 +220,7 @@
             var msg = pathData;
             var pt_path = [];
             pt_path[0] = [coordMapToScreen(msg.x), coordMapToScreen(msg.y)];
+            hzPeopleSetPosition(msg.x, msg.y, msg.userId);
 
             // 44px 为 地图上的路线宽度
             for(var m = 0; m< msg.path.length; m++){
