@@ -44,3 +44,18 @@
 #svg_map_base 				{	z-index:400;	}
 
 .each_map_layer{ position:absolute;}
+
+
+#hz-divCoordView {
+	position:absolute;
+	// position: fixed;
+	bottom: 10px;
+	left: 10px;
+	padding: 8px;
+	color: #fff;
+	background-color: #555;
+	opacity: 0.7;
+	font-family: 华文细黑,Verdana,sans-serif;
+
+	z-index:1000;
+}

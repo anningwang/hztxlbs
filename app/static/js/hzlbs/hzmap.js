@@ -160,6 +160,9 @@ var storage = window.localStorage;
 		// 创建放大缩小按钮
 		this.createZoomCtrl();
 
+		if(options.coordView)
+			this.createCoordView();
+
 		// 标签实时位置
 		var map = this;
 		this._socket = io.connect(hz_connStr);
@@ -250,8 +253,8 @@ var storage = window.localStorage;
 
 				var divSvg = $(this).find('svg');
 				if(divSvg) {
-					divSvg.width($(this).width() + 10);
-					divSvg.height($(this).height() + 10);
+					divSvg.width($(this).width());
+					divSvg.height($(this).height());
 				}
 			});
 
@@ -451,14 +454,17 @@ var storage = window.localStorage;
 				mapMouseTop = map.coordScreenToMap(mapMouseTop);
 
 				if (map.mouseMoveCallback)  map.mouseMoveCallback(mapMouseLeft, mapMouseTop);
+				map.coordView.text('x=' + mapMouseLeft + ' y=' + mapMouseTop);
 			}else{
 				if (map.mouseMoveCallback)  map.mouseMoveCallback('', '');
+				map.coordView.text('坐标拾取');
 			}
 		},
 
 		doMouseOut: function (e) {
 			var map = e.data._map;
 			if (map.mouseMoveCallback)  map.mouseMoveCallback('', '');
+			map.coordView.text('坐标拾取');
 		},
 
 		// 使用 ACE 框架。创建地图 缩放 按钮
@@ -492,6 +498,12 @@ var storage = window.localStorage;
 			map.zoom = parseFloat(map.zoom) + 0.05;
 			storage['hz_zoom'] = map.zoom;
 			map.mapZoom(map.zoom * map.mapH, map.zoom * map.mapW);
+		},
+
+		// 创建坐标拾取显示区
+		createCoordView: function () {
+			this.container.append('<div id="hz-divCoordView">坐标拾取</div>');
+			this.coordView =  $('#hz-divCoordView');
 		},
 
 		
