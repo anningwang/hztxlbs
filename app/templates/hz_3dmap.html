@@ -192,6 +192,7 @@
             // 默认比例尺级别  内部创建的1-29级的比例尺级别
             defaultMapScaleLevel: 22
         });
+        console.log(map);
 
         // 打开Fengmap服务器的地图数据和主题
         map.openMapById(fmapID);
@@ -218,7 +219,7 @@
         // 放大、缩小控件
         // map为FMMap对象，初始化需在地图加载后完成。
         var zoomControl = new fengmap.zoomControl(map, ctlOpt1);
-        // console.log('zoomControl', zoomControl);
+        console.log('zoomControl', zoomControl);
 
         // 地图加载完成回掉方法
         map.on('loadComplete',function() {
@@ -236,7 +237,7 @@
                     // console.log(type,value);
                 }
             });
-            //console.log('toolControl', toolControl);
+            console.log('toolControl', toolControl);
 
 
             var socket = io.connect(hz_connStr);

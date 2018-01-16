@@ -44,21 +44,21 @@ var storage = window.localStorage;
 	var _picOffsetTop = 45;                 // 人物marker 图片针尖的偏移量：上偏移
 	var _textOffsetTop = 64;                // 文字marker上部偏移量。显示在人物marker的上方
 
-
 	function HzPeople(map, options) {
 		this.id = options.id;
 		this.text = options.text;
 		this.x = options.x;
 		this.y = options.y;
 		this.map = map;
+		this.img = options.img || '/static/img/people.png';
 
-		map.userLayer.append('<img src="/static/img/people.png" style="position:absolute;display: none" id='+ options.id + ' />');
+		map.userLayer.append('<img src="'+ this.img +'" style="position:absolute;display: none" id='+ options.id + ' />');
 		map.userLayer.append('<div id="' + options.id + '-t" class="hz-div-people-txt" style="position:absolute;display: none">'+ options.text + '</div>');
 
 		this.imgContainer = $('#'+options.id);
 		this.textContainer = $('#'+options.id + '-t');
 
-		this.render();
+		this.renderer();
 	}
 
 	HzPeople.prototype = {
@@ -77,10 +77,10 @@ var storage = window.localStorage;
 			this.x = x;
 			this.y = y;
 
-			this.render();
+			this.renderer();
 		},
 
-		render: function () {
+		renderer: function () {
 			var coord = {
 				x: 	this.map.coordMapToScreen(this.x),
 				y: 	this.map.coordMapToScreen(this.y)
@@ -113,6 +113,11 @@ var storage = window.localStorage;
 
 			var pName = this.textContainer;
 			pName.stop(true, true).animate({left: coord.x - pName.width()/2, top: coord.y - _textOffsetTop});
+		},
+		
+		destroy: function () {
+			this.imgContainer.remove();
+			this.textContainer.remove();
 		}
 	};
 
@@ -136,9 +141,10 @@ var storage = window.localStorage;
 		this.userList = {};         // 用户列表 { userId: HzPeople }
 		this.mouseMoveCallback = options.mouseMoveCallback;     // mouse 移动 之 坐标拾取 回调函数
 
-		this.zoomCallBack = [];     // func Array 缩放需要执行的临时函数
+		this.zoomCallback = [];     // func Array 缩放需要执行的临时函数
 
 		this.zoom -= 0.1;           // 缩小了2个级别 0.05一个级别
+		this.pathData = undefined;  // 导航路径信息（为地图缩放使用）
 		
 		// 显示地图
 		this.mapZoom(this.mapH * this.zoom, this.mapW * this.zoom);
@@ -153,6 +159,16 @@ var storage = window.localStorage;
 
 		// 创建放大缩小按钮
 		this.createZoomCtrl();
+
+		// 标签实时位置
+		var map = this;
+		this._socket = io.connect(hz_connStr);
+		this._socket.on('hz_position', function(msg) {
+			console.log('hz_position', msg);
+			for (var i=0; i<msg.length; i++){
+				map.peopleMoveTo(msg[i]['x'], msg[i]['y'], msg[i]['userId']);
+			}
+		});
 	}
 
 	HzMap.prototype = {
@@ -175,18 +191,19 @@ var storage = window.localStorage;
 			}
 			return false;
 		},
+		
+		// 删除用户marker
+		delPeople: function (userId) {
+			var people = this.userList[userId];
+			if(people){
+				people.destroy();
+				delete this.userList[userId]
+			}
+		},
 
 		// 根据用户ID查询 HzPeople 对象
 		getPeople: function (userId) {
-			for(var people in this.userList){
-				if (this.userList.hasOwnProperty(people)) {
-					if (people === userId) {
-						return this.userList[people];
-					}
-				}
-			}
-
-			return null;
+			return this.userList[userId];
 		},
 
 		// 屏幕坐标转地图坐标(单位：mm)
@@ -270,18 +287,17 @@ var storage = window.localStorage;
 				if (!this.userList.hasOwnProperty(userId))
 					continue;
 				var people = this.userList[userId];
-				people.render();
+				people.renderer();
 			}
 
-
 			// 地图缩放后的回调函数
-			for(var j = 0; j < this.zoomCallBack.length; j++) {
-				this.zoomCallBack[j]();
+			for(var j = 0; j < this.zoomCallback.length; j++) {
+				this.zoomCallback[j].apply(this);
 			}
 		},
 
 		// 移动标签位置到指定地图坐标 (x, y)，people 为标签id。移动标签，有动画。
-		hzPeopleGoto: function (x, y, people) {
+		peopleMoveTo: function (x, y, people) {
 			var hzPeople = this.getPeople(people);
 			if (hzPeople){
 				hzPeople.moveTo(x, y);
@@ -460,23 +476,96 @@ var storage = window.localStorage;
 				'</div>'
 			);
 			
-			$('#btn-hz-zoomIn').on('click', {_map: this}, this._zoomIn);
-			$('#btn-hz-zoomOut').on('click',{_map: this}, this._zoomOut);
+			$('#btn-hz-zoomIn').on('click', {_map: this}, this.zoomIn);
+			$('#btn-hz-zoomOut').on('click',{_map: this}, this.zoomOut);
 		},
 		// 缩小
-		_zoomOut: function (e) {
+		zoomOut: function (e) {
 			var map = e.data._map;
 			map.zoom = parseFloat(map.zoom) - 0.05;
 			storage['hz_zoom'] = map.zoom;
 			map.mapZoom(map.zoom * map.mapH, map.zoom * map.mapW);
 		},
 		// 放大
-		_zoomIn: function (e) {
+		zoomIn: function (e) {
 			var map = e.data._map;
 			map.zoom = parseFloat(map.zoom) + 0.05;
 			storage['hz_zoom'] = map.zoom;
 			map.mapZoom(map.zoom * map.mapH, map.zoom * map.mapW);
+		},
+
+		
+		// 开始导航
+		startNavigation: function (options) {
+			this._socket.emit('hz_navigating',
+				{'location': options.location, 'userId': options.userId });
+
+			var map = this;
+			// 导航路径
+			this._socket.on('hz_path', function (msg) {
+				console.log('hz_path', msg);
+				map.pathData = msg;
+				
+				map.drawNavPath();
+			});
+
+			this.addZoomCallback(this.drawNavPath);
+		},
+
+		// 画导航路径
+		drawNavPath: function () {
+			if (!this.pathData) return;
+			
+			var msg = this.pathData;
+			var pt_path = [];
+			pt_path[0] = [this.coordMapToScreen(msg.x), this.coordMapToScreen(msg.y)];
+			
+			// 44px 为 地图上的路线宽度
+			for(var m = 0; m< msg.path.length; m++){
+				pt_path[m+1] = [parseInt((msg.path[m].x+44/2-2) * this.zoom), parseInt((msg.path[m].y+44/2-2) * this.zoom)];
+			}
+
+			this.addPeople({
+				id: 'destination',
+				x: this.coordScreenToMap(pt_path[pt_path.length-1][0]),
+				y: this.coordScreenToMap(pt_path[pt_path.length-1][1]),
+				text: '',
+				img: '/static/img/dest.png'
+			});
+
+			var pathLayer = this.pathLayer;
+			pathLayer.svg();
+			var svg = pathLayer.svg('get');
+			
+			svg.clear();
+			svg.polyline(pt_path, {fill: 'none', stroke: 'blue', strokeWidth: 4});
+		},
+
+		// 停止导航
+		stopNavigation: function () {
+			this._socket.emit('hz_stop_navigating');
+			var svg = this.pathLayer.svg('get');
+			if (svg) svg.clear();
+			this.pathData = undefined;
+			this.delZoomCallback(this.drawNavPath);
+			this.delPeople('destination');
+		},
+
+		// 增加缩放地图的回调函数
+		addZoomCallback: function (func) {
+			this.zoomCallback.push(func);
+		},
+
+		// 删除缩放地图的回调函数
+		delZoomCallback: function (func) {
+			for(var i=0; i< this.zoomCallback.length; i++){
+				if (this.zoomCallback[i] === func){
+					this.zoomCallback.splice(i, 1);
+					break;
+				}
+			}
 		}
+		
 
 	};
 

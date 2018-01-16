@@ -121,6 +121,11 @@
                     <div class="col-xs-12">
                         <!-- PAGE CONTENT BEGINS -->
 
+                        <button class="navigation btn btn-success btn-sm" id="btnBeginNav">开始导航</button>
+                        <button id="btnStopNav"  class="btn btn-danger btn-sm">结束导航</button>
+
+                        <div style="margin-top: 5px"></div>
+
                         <div id="myCanvas"></div>
 
                         <!-- PAGE CONTENT ENDS -->
@@ -154,13 +159,16 @@
         console.log(map);
 
 
-        var socket = io.connect(hz_connStr);
-        // 标签实时位置
-        socket.on('hz_position', function(msg) {
-            console.log('hz_position', msg);
-            for (var i=0; i<msg.length; i++){
-                map.hzPeopleGoto(msg[i]['x'], msg[i]['y'], msg[i]['userId']);
-            }
+        $('#btnBeginNav').click(function () {
+            map.startNavigation({
+                location: 27,
+                userId: '1918E00103AA'
+            });
+        });
+
+
+        $('#btnStopNav').click(function () {
+            map.stopNavigation();
         });
 
     });
