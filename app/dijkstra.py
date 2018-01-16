@@ -104,11 +104,12 @@ def distance(x1, y1, x2, y2,):
 
 
 def get_nearest_vertex(px, py):
+    """ 获取距离地图坐标（px,py）单位mm 最近的 顶点名称 """
     ret_vertex = -1     # -1 表示失败。>=0 ，则为合法顶点
     dd = INT_MAX
     # print "len(hz_vertex)=", len(hz_vertex), hz_vertex
-    # 去除12个房间内的坐标点
-    for v in range(vertex_num - 12):
+
+    for v in range(vertex_num):
         d1 = distance(px, py, float(hz_vertex[v]['x'])/GEO_SCALE, float(hz_vertex[v]['y'])/GEO_SCALE)
         if d1 < dd:
             dd = d1
