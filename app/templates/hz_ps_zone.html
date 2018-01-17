@@ -14,12 +14,15 @@
 	<link rel="stylesheet" href="/static/ace/assets/css/ace-rtl.css" />
 	<link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css">
 	<link rel="stylesheet" href="/static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" />
+	<link rel="stylesheet" href="/static/js/jbox/Skins2/Metro/jbox.css" />
 
 	<script src="/static/js/jquery.min.js"></script>
 	<script src="/static/ace/assets/js/ace-extra.js"></script>
 	<script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script>
 	<script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script>
 	<script src="/static/js/jquery.mousewheel.js"></script>
+	<script src="/static/js/jbox/jquery.jBox-2.3.min.js"></script>
+	<script src="/static/js/hzlbs/hzdialog.js"></script>
 
 	<link rel="stylesheet" href="/static/css/hzmap.css" />
 	<script src="/static/js/hzlbs/hzlbs.nav.js"></script>
@@ -458,7 +461,7 @@
 
 		$('#btnAddPsZoneDefault').click(function(){
 			var result = ajaxJsonRequest('/lbs/people_stat_cfg_add_default', {});
-			alert(result.msg);
+			hzInfo(result.msg);
 			showPsZone();
 		});
 
@@ -474,16 +477,16 @@
 
 			console.log('psZoneChange_points', psZoneChange_points);
 			if(psZoneId == 'undefined') {
-				alert('该盘点区域不能修改!');
+				hzInfo('该盘点区域不能修改!');
 				return false;
 			}
 
 			if(psZoneId == 0) {
-				alert('请选择盘点区域!');
+				hzInfo('请选择盘点区域!');
 				return false;
 			}
 			if(psZoneChange.points.length > 0 && psZoneChange.points[0] != psZoneChange.points[psZoneChange.points.length - 1]) {
-				alert('您没有画图');
+				hzInfo('您没有画图');
 				return false;
 			}
 
@@ -523,7 +526,7 @@
 				$('#btnDrawChangePsZone').click();
 				showPsZone();
 			}
-			alert(result.msg);
+			hzInfo(result.msg);
 			return false;
 		});
 
@@ -1071,7 +1074,7 @@
 
 			submitHandler: function (form) {
 				if(psZoneAdd.points[0] == undefined || psZoneAdd.points[0] != psZoneAdd.points[psZoneAdd.points.length - 1]) {
-					alert('您没有画图');
+					hzInfo('您没有画图');
 					return;
 				}
 
@@ -1107,7 +1110,7 @@
 					query_electronic();
 					showPsZone();
 				}
-				alert(result.msg);
+				hzInfo(result.msg);
 
 			},
 			invalidHandler: function (form) {}
@@ -1162,7 +1165,7 @@
 			global_init.run();
 
 			if(items == undefined){
-				alert('请选择要删除的盘点区域!');
+				hzInfo('请选择要删除的盘点区域!');
 				return false;
 			}
 			var ids = [];
@@ -1179,7 +1182,7 @@
 			};
 			console.log('enclosure_item_button send data:',data);
 			var result = ajaxJsonRequest(url,data);
-			alert(result.msg);
+			hzInfo(result.msg);
 
 			if(result.errorCode == 0)
 			{
