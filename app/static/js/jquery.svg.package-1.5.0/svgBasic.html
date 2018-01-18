@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-<title>jQuery SVG Basics</title>
-<link rel="stylesheet" href="jquery.svg.css">
-<style>
-#svgbasics { width: 400px; height: 300px; border: 1px solid #484; }
-</style>
-<script src="../jquery.min.js"></script>
-<script src="jquery.svg.js"></script>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<title>jQuery SVG Basics</title>
+	<link rel="stylesheet" href="jquery.svg.css">
+	<style>
+		#svgbasics { width: 400px; height: 300px; border: 1px solid #484; }
+	</style>
+	<script src="../jquery.min.js"></script>
+	<script src="jquery.svg.js"></script>
+	<script src="jquery.svganim.js"></script>
 <script>
 $(function() {
 	$('#svgbasics').svg({onLoad: drawInitial});
@@ -37,6 +38,42 @@ function drawShape() {
 	if (shape == 'rect') {
 		svg.rect(random(300), random(200), random(100) + 100, random(100) + 100,
 			{fill: colours[random(9)], stroke: colours[random(9)], strokeWidth: random(5) + 1});
+
+
+		// --------------------------------------------------------------------
+		// test by WXG begin
+		svg.title('SVG Demo');
+
+		var defs = svg.defs('myDefs');
+		svg.marker(defs, 'myMarker', 0, 0, 20, 20);
+		var marker = svg.marker(defs, 'arrow', 6, 6, 12, 12);
+		var pathArrow = svg.createPath();
+		svg.path(marker, pathArrow.move(2,2)
+				.line(10,6)
+				.line(2,10)
+				.line(6,6)
+				.line(2,2), {fill: 'blue'}
+		);
+
+		var path = svg.createPath();
+		//path.move([[50, 100], [70, 120], [90, 100]]);
+		//path.curveC(200, 100, 300, 0, 400, 100);
+
+		svg.path(path.move(50, 90).
+				curveC(0, 90, 0, 30, 50, 30).line(150, 30).
+				curveC(200, 30, 200, 90, 150, 90).close(),
+				{fill: 'none', stroke: '#D90000', strokeWidth: 2,
+					markerStart:"url(#arrow)", markerMid:"url(#arrow)", markerEnd:"url(#arrow)"});
+
+		/*
+		var myrect = svg.rect(25, 25, 150, '25%', 10, 10,
+				{fill: 'none', stroke: 'blue', strokeWidth: 3,
+					transform: 'rotate(0, 100, 75)'});
+		$(myrect).animate({svgWidth: 200, svgHeight: '50%',
+			svgStrokeWidth: '+=7', svgStroke: 'aqua'}, 2000);
+		*/
+		// --------------------------------------------------------------------
+
 	}
 	else if (shape == 'line') {
 		svg.line(random(400), random(300), random(400), random(300),

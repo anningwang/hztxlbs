@@ -2,12 +2,14 @@
  * 和仲通讯 版权所有 2016-2018
  * 版本号：v0.3
  * 地图公用函数定义
+ * 
+ * Requires: socket.io.min.js
+ *           jquery.gritter.js & jquery.gritter.css
  */
 
 'use strict';
 
 
-// need socket.io.min.js
 var hz_namespace = '/HeZhong';
 // Connect to the Socket.IO server.
 // The connection URL has the following format:
@@ -39,11 +41,11 @@ Init.prototype.empty = function(){
 Init.prototype.run = function(){
     var param;
     while(param = this.stopFn.pop()){
-        this.distribution(param);
+        this.dispatch(param);
     }
 };
 
-Init.prototype.distribution = function(param){
+Init.prototype.dispatch = function(param){
     switch (param.length){
         case 1:
             param[0].call(null);
@@ -134,10 +136,10 @@ function gritter_alert(title, text) {
 }
 
 
-var _locOrigin = {'x':0,'y':0};          // 定位坐标原点
-var _locRange = {'x':39023,'y':19854};   // 定位范围
 
 // 坐标转换 简化公式
+var _locOrigin = {'x':0,'y':0};          // 定位坐标原点
+var _locRange = {'x':39023,'y':19854};   // 定位范围
 var _mapOrigin = {'x':12531716.588,'y':3101784.7414};
 var _mapRange = {'x':12531761.921,'y':3101761.9051};
 function hzPlaneCoordToFMap(coord) {

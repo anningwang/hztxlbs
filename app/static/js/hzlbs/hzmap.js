@@ -542,7 +542,7 @@ var storage = window.localStorage;
 			
 			// 44px 为 地图上的路线宽度
 			for(var m = 0; m< msg.path.length; m++){
-				pt_path[m+1] = [parseInt((msg.path[m].x+44/2-2) * this.zoom), parseInt((msg.path[m].y+44/2-2) * this.zoom)];
+				pt_path[m+1] = [parseInt((msg.path[m].x+22-2) * this.zoom), parseInt((msg.path[m].y+22-2) * this.zoom)];
 			}
 
 			this.addPeople({
@@ -558,7 +558,29 @@ var storage = window.localStorage;
 			var svg = pathLayer.svg('get');
 			
 			svg.clear();
-			svg.polyline(pt_path, {fill: 'none', stroke: 'blue', strokeWidth: 4});
+			var penColor = '#33cc61';
+			svg.polyline(pt_path, {fill: 'none', stroke: penColor, strokeWidth: 7});
+
+			// ----------------------------------------------------------------
+			// 画箭头
+			var defs = svg.defs('myDefs');
+			var marker = svg.marker(defs, 'arrow', 6, 6, 12, 12);
+			var arrow = svg.createPath();
+			svg.path(marker, arrow.move(2,2)
+				.line(10,6)
+				.line(2,10)
+				.line(6,6)
+				.line(2,2), {fill: 'white'}
+			);
+			var path = svg.createPath();
+			path.move(pt_path[0][0], pt_path[0][1]);
+			for(var i = 1; i< pt_path.length; i++) {
+				path.line(pt_path[i][0], pt_path[i][1]);
+			}
+			svg.path(path,
+				{fill: 'none', stroke: penColor, strokeWidth: 1,
+					markerStart:"url(#arrow)", markerMid:"url(#arrow)", markerEnd:"url(#arrow)"});
+			// ----------------------------------------------------------------
 		},
 
 		// 停止导航
