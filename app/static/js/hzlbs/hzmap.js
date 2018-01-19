@@ -584,73 +584,50 @@ var storage = window.localStorage;
 			if (path.length > 0) {
 				pt = path[0];
 			}
-			var dist, inc = 50, num, j, restDist = 0, point, sign, diff, svgPath;
+			var dist = 50, restDist = 0, ret;
 			for(var i=1; i< path.length; i++) {
 				if(path[i][0] == pt[0]) {   // 沿 Y 轴的直线
 					if (i+1 < path.length && path[i+1][0] == pt[0])
 						continue;
-
-					dist = Math.abs(path[i][1] - pt[1]);
-					sign = path[i][1] - pt[1] > 0 ? 1: -1;
-					num = (dist + restDist) / inc;
-					for(j = 1; j < num; j++) {
-						if (j == 1) {
-							svgPath = svg.createPath();
-							svgPath.move(pt[0], pt[1]);
-							diff = (inc - restDist) * sign;
-							pt = [pt[0], pt[1]+diff];
-						} else {
-							pt = [pt[0], pt[1]+inc*sign];
-						}
-						svgPath.line(pt[0], pt[1]);
-					}
-					if (j > 1)
-						retPath.push(svgPath);
-					restDist = (dist + restDist) - (j - 1) * inc;
 				} else if(path[i][1] == pt[1]) {    // 沿 X 轴的直线
 					if (i+1 < path.length && path[i+1][1] == pt[1])
 						continue;
-
-					dist = Math.abs(path[i][0] - pt[0]);
-					sign = path[i][0] - pt[0] > 0 ? 1: -1;
-					num = (dist + restDist) / inc;
-					for(j = 1; j < num; j++) {
-						if (j == 1) {
-							svgPath = svg.createPath();
-							svgPath.move(pt[0], pt[1]);
-							diff = (inc - restDist) * sign;
-							pt = [pt[0]+diff, pt[1]];
-						} else {
-							pt = [pt[0]+inc*sign, pt[1]];
-						}
-						svgPath.line(pt[0], pt[1]);
-					}
-					if (j > 1)
-						retPath.push(svgPath);
-					restDist = (dist + restDist) - (j - 1) * inc;
 				} else {    // 斜线
-					var k = this.skew(pt[0], pt[1], path[i][0], path[i][1]);
-					dist = this.distance(pt[0], pt[1], path[i][0], path[i][1]);
-					num = (dist + restDist) / inc;
-					for(j = 1; j < num; j++) {
-						if (j == 1) {
-							svgPath = svg.createPath();
-							svgPath.move(pt[0], pt[1]);
-							point = this.getPoint(pt[0], pt[1], k, inc - restDist, path[i][0]-pt[0] > 0);
-						} else {
-							point = this.getPoint(pt[0], pt[1], k, inc, path[i][0]-pt[0] > 0);
-						}
-						pt = [point.x, point.y];
-						svgPath.line(pt[0], pt[1]);
-					}
-					if (j > 1)
-						retPath.push(svgPath);
-					restDist = (dist + restDist) - (j - 1) * inc;
+					// 过滤 斜率相同点的代码待实现。
 				}
+
+				ret = this.genSVGPath({x: pt[0], y: pt[1]}, {x: path[i][0], y: path[i][1]}, dist, restDist, svg);
+				if(ret.svgPath) { retPath.push(ret.svgPath); }
+				restDist = ret.restDist;
 
 				pt = path[i];
 			}
 			return retPath;
+		},
+
+		genSVGPath: function (p1, p2, d, restDist, svg) {
+			var k = this.skew(p1.x, p1.y, p2.x, p2.y);
+			var dist = this.distance(p1.x, p1.y, p2.x, p2.y);
+			var num = (dist + restDist) / d;
+			var data = { svgPath: undefined, restDist: 0};
+			var j, svgPath, point, pt = [p1.x, p1.y], direction;
+			if (p2.x !== p1.x)  direction = p2.x-p1.x > 0;
+			else direction = p2.y-p1.y > 0;
+			for(j = 1; j < num; j++) {
+				if (j == 1) {
+					svgPath = svg.createPath();
+					svgPath.move(p1.x, p1.y);
+					point = this.getPoint(pt[0], pt[1], k, d - restDist, direction);
+				} else {
+					point = this.getPoint(pt[0], pt[1], k, d, direction);
+				}
+				pt = [point.x, point.y];
+				svgPath.line(pt[0], pt[1]);
+			}
+			if (j > 1)
+				data.svgPath = svgPath;
+			data.restDist = (dist + restDist) - (j - 1) * d;
+			return data;
 		},
 
 		// 停止导航
@@ -689,15 +666,25 @@ var storage = window.localStorage;
 		skew: function (x1, y1, x2, y2) {
 			return (y2-y1)/(x2-x1);
 		},
-		// 获取斜率为 k 的直线上距离点（x1,y1）长度为 d 的点坐标
+		// 获取斜率为 k 的直线上距离点（x1,y1）长度为 d 的点坐标。
+		// 坐标原点在左上，向右为X轴正向，向下为Y轴正向。
+		// xAxisRight: true(默认), 斜线取点方向为X轴的正方向。 false, 取点方向为 X 轴 负方向。
+		//   当为平行于Y的直线时，true，为 Y 轴正向。false, 取点方向为 Y 轴 负方向。
 		getPoint: function (x1, y1, k, d, xAxisRight) {
 			d = d || 50;
 			xAxisRight = xAxisRight !== false;
-			var f = d / Math.sqrt(Math.pow(k,2) + 1);
-			if (xAxisRight)
-				return {'x': x1 + f , 'y': y1 + f * k };
-			else
-				return {'x': x1 - f , 'y': y1 - f * k };
+			if (k === Infinity || k === -Infinity) {    // 直线为平行于Y轴的情况，其斜率为 无穷大
+				if (xAxisRight)
+					return {'x': x1, 'y': y1 + d };
+				else
+					return {'x': x1 , 'y': y1 - d };
+			} else {
+				var f = d / Math.sqrt(Math.pow(k,2) + 1);
+				if (xAxisRight)
+					return {'x': x1 + f , 'y': y1 + f * k };
+				else
+					return {'x': x1 - f , 'y': y1 - f * k };
+			}
 		}
 	};
 	//-------------------------------------------------------------------------
