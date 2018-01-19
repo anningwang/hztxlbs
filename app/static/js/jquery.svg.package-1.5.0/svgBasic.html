@@ -78,6 +78,14 @@ function drawShape() {
 	else if (shape == 'line') {
 		svg.line(random(400), random(300), random(400), random(300),
 			{stroke: colours[random(9)], strokeWidth: random(5) + 1});
+
+		// --------------------------------------------------------------------
+		// test by WXG begin
+		var pathLine = svg.createPath();
+		svg.path(pathLine.move(50, 90).line(150, 90).move(50, 150).line(150, 150),
+				{fill: 'none', stroke: '#D90000', strokeWidth: 2});
+
+		// --------------------------------------------------------------------
 	}
 	else if (shape == 'circle') {
 		svg.circle(random(300) + 50, random(200) + 50, random(80) + 20,

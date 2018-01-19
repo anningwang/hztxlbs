@@ -137,6 +137,7 @@ var storage = window.localStorage;
 		this.baseLayer = this.addLayer(this.container, 'svg_map_base');
 		this.mapSvgLayer = this.addMapSvg(this.baseLayer, 'svg_image', '/static/img/floor3.svg');
 		this.pathLayer = this.addLayer(this.baseLayer, 'svg_path');
+		this.pathLayer.svg();
 
 		this.roomLayer = this.addLayer(this.baseLayer, 'svg_sign');
 		this.userLayer = this.addLayer(this.baseLayer, 'svg_user_sign');
@@ -175,8 +176,8 @@ var storage = window.localStorage;
 
 		// 标签实时位置
 		var map = this;
-		this._socket = io.connect(hz_connStr);
-		this._socket.on('hz_position', function(msg) {
+		this.socket = io.connect(hz_connStr);
+		this.socket.on('hz_position', function(msg) {
 			console.log('hz_position', msg);
 			for (var i=0; i<msg.length; i++){
 				map.peopleMoveTo(msg[i]['x'], msg[i]['y'], msg[i]['userId']);
@@ -515,12 +516,12 @@ var storage = window.localStorage;
 		
 		// 开始导航
 		startNavigation: function (options) {
-			this._socket.emit('hz_navigating',
+			this.socket.emit('hz_navigating',
 				{'location': options.location, 'userId': options.userId });
 
 			var map = this;
 			// 导航路径
-			this._socket.on('hz_path', function (msg) {
+			this.socket.on('hz_path', function (msg) {
 				console.log('hz_path', msg);
 				map.pathData = msg;
 				
@@ -549,14 +550,10 @@ var storage = window.localStorage;
 				id: 'destination',
 				x: this.coordScreenToMap(pt_path[pt_path.length-1][0]),
 				y: this.coordScreenToMap(pt_path[pt_path.length-1][1]),
-				text: '',
-				img: '/static/img/dest.png'
+				text: '', img: '/static/img/dest.png'
 			});
 
-			var pathLayer = this.pathLayer;
-			pathLayer.svg();
-			var svg = pathLayer.svg('get');
-			
+			var svg = this.pathLayer.svg('get');
 			svg.clear();
 			var penColor = '#33cc61';
 			svg.polyline(pt_path, {fill: 'none', stroke: penColor, strokeWidth: 7});
@@ -564,28 +561,101 @@ var storage = window.localStorage;
 			// ----------------------------------------------------------------
 			// 画箭头
 			var defs = svg.defs('myDefs');
-			var marker = svg.marker(defs, 'arrow', 6, 6, 12, 12);
+			var marker = svg.marker(defs, 'arrow', 6, 6, 12, 12, {markerUnits: 'userSpaceOnUse'});
 			var arrow = svg.createPath();
-			svg.path(marker, arrow.move(2,2)
-				.line(10,6)
-				.line(2,10)
-				.line(6,6)
-				.line(2,2), {fill: 'white'}
+			svg.path(marker, arrow.move(2,2).line(10,6).line(2,10).line(6,6).line(2,2),
+				{fill: 'white'}
 			);
-			var path = svg.createPath();
-			path.move(pt_path[0][0], pt_path[0][1]);
-			for(var i = 1; i< pt_path.length; i++) {
-				path.line(pt_path[i][0], pt_path[i][1]);
+
+			var retPath = this.convertSvgPath(pt_path, svg);
+			for (var i = 0; i < retPath.length; i++) {
+				// markerStart:"url(#arrow)"
+				svg.path(retPath[i], {fill: 'none', stroke: penColor, strokeWidth: 1, markerMid:"url(#arrow)",  markerEnd:"url(#arrow)"});
 			}
-			svg.path(path,
-				{fill: 'none', stroke: penColor, strokeWidth: 1,
-					markerStart:"url(#arrow)", markerMid:"url(#arrow)", markerEnd:"url(#arrow)"});
+
 			// ----------------------------------------------------------------
+		},
+
+		// 转换svg path，每50像素设置一个marker
+		// path : array of [x, y] coordinate, [[x,y], ...]
+		convertSvgPath: function (path, svg) {
+			var retPath = [];
+			var pt = [];
+			if (path.length > 0) {
+				pt = path[0];
+			}
+			var dist, inc = 50, num, j, restDist = 0, point, sign, diff, svgPath;
+			for(var i=1; i< path.length; i++) {
+				if(path[i][0] == pt[0]) {   // 沿 Y 轴的直线
+					if (i+1 < path.length && path[i+1][0] == pt[0])
+						continue;
+
+					dist = Math.abs(path[i][1] - pt[1]);
+					sign = path[i][1] - pt[1] > 0 ? 1: -1;
+					num = (dist + restDist) / inc;
+					for(j = 1; j < num; j++) {
+						if (j == 1) {
+							svgPath = svg.createPath();
+							svgPath.move(pt[0], pt[1]);
+							diff = (inc - restDist) * sign;
+							pt = [pt[0], pt[1]+diff];
+						} else {
+							pt = [pt[0], pt[1]+inc*sign];
+						}
+						svgPath.line(pt[0], pt[1]);
+					}
+					if (j > 1)
+						retPath.push(svgPath);
+					restDist = (dist + restDist) - (j - 1) * inc;
+				} else if(path[i][1] == pt[1]) {    // 沿 X 轴的直线
+					if (i+1 < path.length && path[i+1][1] == pt[1])
+						continue;
+
+					dist = Math.abs(path[i][0] - pt[0]);
+					sign = path[i][0] - pt[0] > 0 ? 1: -1;
+					num = (dist + restDist) / inc;
+					for(j = 1; j < num; j++) {
+						if (j == 1) {
+							svgPath = svg.createPath();
+							svgPath.move(pt[0], pt[1]);
+							diff = (inc - restDist) * sign;
+							pt = [pt[0]+diff, pt[1]];
+						} else {
+							pt = [pt[0]+inc*sign, pt[1]];
+						}
+						svgPath.line(pt[0], pt[1]);
+					}
+					if (j > 1)
+						retPath.push(svgPath);
+					restDist = (dist + restDist) - (j - 1) * inc;
+				} else {    // 斜线
+					var k = this.skew(pt[0], pt[1], path[i][0], path[i][1]);
+					dist = this.distance(pt[0], pt[1], path[i][0], path[i][1]);
+					num = (dist + restDist) / inc;
+					for(j = 1; j < num; j++) {
+						if (j == 1) {
+							svgPath = svg.createPath();
+							svgPath.move(pt[0], pt[1]);
+							point = this.getPoint(pt[0], pt[1], k, inc - restDist, path[i][0]-pt[0] > 0);
+						} else {
+							point = this.getPoint(pt[0], pt[1], k, inc, path[i][0]-pt[0] > 0);
+						}
+						pt = [point.x, point.y];
+						svgPath.line(pt[0], pt[1]);
+					}
+					if (j > 1)
+						retPath.push(svgPath);
+					restDist = (dist + restDist) - (j - 1) * inc;
+				}
+
+				pt = path[i];
+			}
+			return retPath;
 		},
 
 		// 停止导航
 		stopNavigation: function () {
-			this._socket.emit('hz_stop_navigating');
+			this.socket.emit('hz_stop_navigating');
 			var svg = this.pathLayer.svg('get');
 			if (svg) svg.clear();
 			this.pathData = undefined;
@@ -606,6 +676,28 @@ var storage = window.localStorage;
 					break;
 				}
 			}
+		},
+
+		// ------------------------------------------------------------------------
+		// 工具函数
+		// ------------------------------------------------------------------------
+
+		distance: function (x1, y1, x2, y2) {
+			return Math.sqrt(Math.pow((x2-x1),2) + Math.pow((y2-y1),2));
+		},
+		// 直线的斜率
+		skew: function (x1, y1, x2, y2) {
+			return (y2-y1)/(x2-x1);
+		},
+		// 获取斜率为 k 的直线上距离点（x1,y1）长度为 d 的点坐标
+		getPoint: function (x1, y1, k, d, xAxisRight) {
+			d = d || 50;
+			xAxisRight = xAxisRight !== false;
+			var f = d / Math.sqrt(Math.pow(k,2) + 1);
+			if (xAxisRight)
+				return {'x': x1 + f , 'y': y1 + f * k };
+			else
+				return {'x': x1 - f , 'y': y1 - f * k };
 		}
 	};
 	//-------------------------------------------------------------------------
