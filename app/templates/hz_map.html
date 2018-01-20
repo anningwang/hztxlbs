@@ -35,6 +35,7 @@
     <script src="/static/js/hzlbs/hztools.js"></script>
     <script src="/static/js/hzlbs/hzmap.js"></script>
     <script src="/static/js/hzlbs/hznav.js"></script>
+    <script src="/static/js/hzlbs/hzdialog.js"></script>
 
     <link rel="shortcut icon" href="/static/img/favicon.ico" />
     <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
@@ -124,8 +125,25 @@
                         <button class="navigation btn btn-success btn-sm" id="btnBeginNav">开始导航</button>
                         <button id="btnStopNav"  class="btn btn-danger btn-sm">结束导航</button>
 
-                        <div style="margin-top: 5px"></div>
+                        <hr class="hr hr-4">
 
+                        历史轨迹:
+                        <select id="userId" title="用户">
+                            <option value="0">请选择用户</option>
+                            <option value="1918E00103AA">1918E00103AA</option>
+                            <option value="1918E00103A9">1918E00103A9</option>
+                        </select>
+                        <span class="input-icon">
+                            <input type="text" id="startTime" class="date-timepicker"  placeholder="查询起始时间" style="width:178px;"/>
+                        </span>
+
+                        <span class="input-icon input-icon-right">
+                            <input type="text" id="endTime" class="date-timepicker" placeholder="查询截止时间" style="width:178px;"/>
+                        </span>
+                        <button class="btn btn-info btn-sm" id="btnQueryHisLoc">查询</button>
+                        <button class="btn btn-info btn-sm" id="btnClearHisLoc">清除</button>
+
+                        <hr class="hr hr-4">
                         <div id="myCanvas"></div>
 
                         <!-- PAGE CONTENT ENDS -->
@@ -160,6 +178,7 @@
         console.log(map);
 
 
+        // 开始导航
         $('#btnBeginNav').click(function () {
             map.startNavigation({
                 location: 27,
@@ -167,9 +186,55 @@
             });
         });
 
-
+        // 结束导航
         $('#btnStopNav').click(function () {
             map.stopNavigation();
+        });
+
+        // 历史轨迹 ---------------------------------------------------------------
+        // 查询历史轨迹
+        $('#btnQueryHisLoc').click(function () {
+            var userId = $('#userId').val();
+            if(userId == 0){
+                hzInfo('请选择查询用户');
+                return;
+            }
+
+            var startTime = $('#startTime').val();
+            if(startTime == ''){
+                hzInfo('请选择查询起始时间');
+                return;
+            }
+
+            var endTime = $('#endTime').val();
+            if(endTime == ''){
+                hzInfo('请选择查询截止时间');
+                return;
+            }
+
+            getHistoryLocation({
+                userId: [userId],
+                datetimeFrom: startTime,
+                datetimeTo: endTime,
+                callback:function (data) {
+                    if(data.total == 0)
+                        hzInfo('该时间段没有数据！');
+                    map.drawHistoryLocation(data.data);
+                }
+            });
+
+        });
+
+        // 清除历史轨迹
+        $('#btnClearHisLoc').click(function () {
+            map.clearHistoryLocation();
+        });
+
+        // 时间日历插件格式化
+        $('.date-timepicker').datetimepicker({
+            language: 'zh-CN',
+            format: 'yyyy-mm-dd hh:ii:ss',
+            autoclose: true
         });
 
     });
@@ -181,6 +246,7 @@
 </script>
 <script src="/static/ace/components/bootstrap/dist/js/bootstrap.js"></script>
 <script src="/static/ace/components/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.min.js"></script>
+<script src="/static/ace/components/bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
 <script src="/static/ace/components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
 <script src="/static/ace/components/bootstrap-datepicker/dist/locales/bootstrap-datepicker.zh-CN.min.js"></script>
 <script src="/static/ace/components/jqGrid/js/jquery.jqGrid.min.js"></script>

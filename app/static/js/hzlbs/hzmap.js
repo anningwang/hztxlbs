@@ -139,6 +139,9 @@ var storage = window.localStorage;
 		this.pathLayer = this.addLayer(this.baseLayer, 'svg_path');
 		this.pathLayer.svg();
 
+		this.hisLocLayer = this.addLayer(this.baseLayer, 'svg_path_history');
+		this.hisLocLayer.svg();
+
 		this.roomLayer = this.addLayer(this.baseLayer, 'svg_sign');
 		this.userLayer = this.addLayer(this.baseLayer, 'svg_user_sign');
 		this.eventLayer = this.addLayer(this.baseLayer, 'svg_event');   // mouse event: mouseup, mousedown, mousemove
@@ -156,6 +159,7 @@ var storage = window.localStorage;
 
 		this.zoom -= 0.1;           // 缩小了2个级别 0.05一个级别
 		this.pathData = undefined;  // 导航路径信息（为地图缩放使用）
+		this.hisLocData = undefined;    // 历史轨迹（为地图缩放使用）
 		
 		// 显示地图
 		this.mapZoom(this.mapH * this.zoom, this.mapW * this.zoom);
@@ -642,6 +646,11 @@ var storage = window.localStorage;
 
 		// 增加缩放地图的回调函数
 		addZoomCallback: function (func) {
+			for(var i=0; i< this.zoomCallback.length; i++){
+				if (this.zoomCallback[i] === func){
+					return;
+				}
+			}
 			this.zoomCallback.push(func);
 		},
 
@@ -653,6 +662,41 @@ var storage = window.localStorage;
 					break;
 				}
 			}
+		},
+
+		// 画历史轨迹
+		drawHistoryLocation: function (data) {
+			if (data)
+				this.hisLocData = data;
+			else
+				data = this.hisLocData;
+			
+			var svg = this.hisLocLayer.svg('get');
+			svg.clear();
+			
+			var points = [];
+			var pt = [];
+			for(var key in data) {
+				if (!data.hasOwnProperty(key)) continue;
+				for (var m=0; m< data[key].length; m++) {
+					pt = [];
+					pt.push(this.coordMapToScreen(data[key][m].x));
+					pt.push(this.coordMapToScreen(data[key][m].y));
+					points.push(pt)
+				}
+				svg.polyline(points,{fill: 'none', stroke: 'blue', strokeWidth: 1});
+				svg.text(points[0][0],points[0][1],'起',{fontSize: 16, fontFamily: 'Verdana',fill:'red'});
+				svg.text(points[data[key].length-1][0],points[data[key].length-1][1],'终',{fontSize: 16, fontFamily: 'Verdana',fill:'red'});
+			}
+			
+			this.addZoomCallback(this.drawHistoryLocation);
+		},
+		// 清除历史轨迹
+		clearHistoryLocation: function () {
+			this.hisLocData = undefined;
+			this.delZoomCallback(this.drawHistoryLocation);
+			var svg = this.hisLocLayer.svg('get');
+			svg.clear();
 		},
 
 		// ------------------------------------------------------------------------

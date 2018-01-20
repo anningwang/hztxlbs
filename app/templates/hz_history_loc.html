@@ -199,18 +199,6 @@
 			}
 		});
 
-
-		//override dialog's title function to allow for HTML titles
-		$.widget("ui.dialog", $.extend({}, $.ui.dialog.prototype, {
-			_title: function(title) {
-				var $title = this.options.title || '&nbsp;';
-				if( ("title_html" in this.options) && this.options.title_html == true )
-					title.html($title);
-				else title.text($title);
-			}
-		}));
-
-
 		// 清除历史轨迹
 		$('#btnClearHisLoc').click(function () {
 			hisLocData = undefined;
@@ -339,14 +327,12 @@
 			return isDraw;
 		}
 
-
-		// 以下为时间日历插件
+		// 时间日历插件格式化
 		$('.date-timepicker').datetimepicker({
 			language: 'zh-CN',
 			format: 'yyyy-mm-dd hh:ii:ss',
 			autoclose: true
 		});
-
 	});
 
 </script>
@@ -356,7 +342,7 @@
 </script>
 <script src="/static/ace/components/bootstrap/dist/js/bootstrap.js"></script>
 <script src="/static/ace/components/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
-<script src="/static/ace/components/bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
+<script src="/static/ace/components/bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
 <script src="/static/ace/components/jquery-ui/jquery-ui.min.js"></script>
 
 <script src="/static/ace/assets/js/src/elements.scroller.js"></script> 
