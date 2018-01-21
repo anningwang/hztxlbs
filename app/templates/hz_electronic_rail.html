@@ -67,7 +67,7 @@
 		}
 		catch(e) {}
 	</script>
-  	<!-- #section:basics/sidebar -->
+	<!-- #section:basics/sidebar -->
 	<div id="sidebar" class="sidebar responsive ace-save-state">
 		<script type="text/javascript">
 			try {
@@ -115,7 +115,7 @@
 							<div class="map_panel_content col-xs-12" style="background:#FFF; border:1px solid #CCC;">
 								<div class="col-xs-12" style="display:none; " id="panelErAdd">
 									<div class="row" style="padding-right:10px; padding-top:3px;">
-										<form role="form" class="form-horizontal" id="form-validate">
+										<form role="form" class="form-horizontal" id="form_electRail">
 											<div class="alert alert-info">设置围栏 <br/></div>
 
 											<div class="form-group">
@@ -161,7 +161,7 @@
 
 								<div class="col-xs-12" style="display:none; " id="panelErChange">
 									<div class="row" style="padding-right:10px; padding-top:3px;">
-										<form role="form" class="form-horizontal" id="form-validate2">
+										<form role="form" class="form-horizontal" id="form_electRail_modify">
 											<div class="alert alert-info">修改围栏 <br />
 											</div>
 											<div class="form-group">
@@ -215,7 +215,6 @@
 										</form>
 									</div>
 								</div>
-
 							</div>
 						</div>
 
@@ -458,6 +457,7 @@
 					hzInfo(data.msg);
 				}
 			});
+			return false;		// 不提交表单
 		});
 
 		(function (factory) {
@@ -492,7 +492,7 @@
 			});
 		}));
 
-		$('#form-validate').validate({
+		$('#form_electRail').validate({
 			errorElement: 'div',
 			errorClass: 'help-block',
 			focusInvalid: false,
@@ -511,19 +511,17 @@
 			},
 
 			success: function (e) {
-				$(e).closest('.form-group').removeClass('has-error'); //.addClass('has-info');
+				$(e).closest('.form-group').removeClass('has-error');
 				$(e).remove();
 			},
 
-			// 新增电子围栏
+			// add 电子围栏
 			submitHandler: function (form) {
 				if(erAdd.points.length == 0 || erAdd.points[0] != erAdd.points[erAdd.points.length - 1]) {
 					hzInfo('您没有画图');
 					return;
 				}
-
 				var $form = $(form);
-
 				var data = {
 					name: $form.find("#er_name").val(),
 					floorNo: $form.find("#er_floor_no").val()
@@ -539,38 +537,20 @@
 				}
 				data.points = points;
 
-
+				console.log(data);
 				$('#btnDrawAddEr').click();
-				var result = ajaxRequest('/lbs/electronic_rail_cfg_modify', [data]);
-
-				if(result.errorCode === 0) {
-					query_electronic();
-					hzInfo(result.msg);
-					showElectronicRail();
-				}
+				ajaxFormRequest({
+					url: '/lbs/electronic_rail_cfg_modify',
+					txData: [data],
+					callback: function (data) {
+						query_electronic();
+						hzInfo(data.msg);
+						showElectronicRail();
+					}
+				});
 			},
 			invalidHandler: function (form) {}
 		});
-
-		function ajaxRequest(url, txData) {
-			// 接收到的数据
-			var result = null;
-			$.ajax({
-				url: url,
-				async: false,
-				type: 'POST',
-				data: {
-					data: JSON.stringify(txData)
-				}
-			}).done(function (data) {
-				//console.log('接口调用成功');
-				console.log('url & data(tx rx)', url, txData, data);
-				result = data;
-			}).fail(function () {
-				console.log('接口调用失败');
-			});
-			return result;
-		}
 
 		function query_electronic(){
 			getElectronicRailCfg({

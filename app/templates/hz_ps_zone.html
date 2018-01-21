@@ -529,14 +529,15 @@
 			console.log('btnChangePsZone, send data=', data);
 			ajaxJsonRequest({
 				url: '/lbs/people_stat_cfg_chg',
-				txData: [data],
-				callback: function () {
+				txData: {data: [data] },
+				callback: function (data) {
 					query_electronic();
 					$('#btnDrawChangePsZone').click();
 					showPsZone();
-					hzInfo(result.msg);
+					hzInfo(data.msg);
 				}
 			});
+			return false;		// 不提交表单
 		});
 
 		(function (factory) {
@@ -582,7 +583,7 @@
 				name: {
 					required: true
 				},
-				peopleNum: {
+				expectNum: {
 					digits: true
 				}
 			},
@@ -592,7 +593,7 @@
 			},
 
 			success: function (e) {
-				$(e).closest('.form-group').removeClass('has-error'); //.addClass('has-info');
+				$(e).closest('.form-group').removeClass('has-error');
 				$(e).remove();
 			},
 

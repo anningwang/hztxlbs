@@ -159,8 +159,8 @@ var storage = window.localStorage;
 		this.mapW = 3477;           // 地图图片宽度 px
 		this.mapH = 1769;           // 地图图片高度 px
 		this.userList = {};         // 用户列表 { userId: HzPeople }
+		this.erCtrlPanelId = 'hz-map-controller-panel-er';
 		this.mouseMoveCallback = options.mouseMoveCallback;     // mouse 移动 之 坐标拾取 回调函数
-
 		this.zoomCallback = [];     // func Array 缩放需要执行的临时函数
 
 		this.zoom -= 0.1;           // 缩小了2个级别 0.05一个级别
@@ -182,6 +182,9 @@ var storage = window.localStorage;
 
 		// 创建放大缩小按钮
 		this.createZoomCtrl();
+
+		if(options.showERCtrlPanel)
+			this.createElectronicRailCtrlPanel();
 
 		if(options.coordView)
 			this.createCoordView();
@@ -525,6 +528,172 @@ var storage = window.localStorage;
 			this.coordView =  $('#hz-divCoordView');
 		},
 
+		// 使用ACE框架，创建 电子围栏控制面板
+		createElectronicRailCtrlPanel: function () {
+			this.container.append(
+				'<div id="' + this.erCtrlPanelId + '" style="position:absolute; top:10px; left:80px; z-index:1000; width:390px;">' +
+				'<div class="btn-group btn-group-xs col-xs-12" id="er_hz_panel_button" style="background:#FFF; border:1px solid #CCC;">'+
+				'<button type="button" class="btn btn-danger disabled"><i class="ace-icon fa fa-tag align-top bigger-125"></i>电子围栏</button>'+
+				'<button type="button" class="btn btn-danger" data-hz-target="#panelErAdd">新增围栏</button>'+
+				'<button type="button" class="btn btn-danger" data-hz-target="#panelErChange">修改围栏</button>'+
+				'<button type="button" class="btn btn-danger" data-hz-target="#panelErDel">删除围栏</button>'+
+				'<button type="button" class="btn btn-danger" id="btn_hz_queryEr">显示围栏</button>'+
+				'</div>'+
+
+				'<div class="map_panel_content col-xs-12" style="background:#FFF; border:1px solid #CCC;">'+
+				'<div class="col-xs-12" style="display:none;" id="panelErAdd">'+
+				'<div class="row" style="padding-right:10px; padding-top:3px;">'+
+				'<form role="form" class="form-horizontal" id="form-validate">'+
+				'<div class="alert alert-info">设置围栏 <br/></div>'+
+
+				'<div class="form-group">'+
+				'<label for="er_name" class="col-sm-3 control-label no-padding-right">围栏名称:</label>'+
+				'<div class="col-sm-9">'+
+				'<input type="text" id="er_name" name="name" placeholder="请输入围栏名称" />'+
+				'</div>'+
+				'</div>'+
+
+				'<div class="form-group">'+
+				'<label for="er_floor_no" class="col-sm-3 control-label no-padding-right">楼层:</label>'+
+				'<div class="col-sm-9">'+
+				'<select class="form-control" id="er_floor_no" name="floorNo">'+
+				'<option value="floor3">3楼</option>'+
+				'</select>'+
+				'</div>'+
+				'</div>'+
+
+				'<div class="form-group">'+
+				'<label for="erAddDrawStyle" class="col-sm-3 control-label no-padding-right">绘制方式:</label>'+
+				'<div class="col-sm-9">'+
+				'<div class="col-xs-6">'+
+				'<select class="form-control" id="erAddDrawStyle">'+
+				'<option value="square">方形绘图</option>'+
+				'<option value="polyline">折线绘图</option>'+
+				'</select>'+
+				'</div>'+
+				'<div class="col-xs-6">'+
+				'<button type="button" id="btnDrawAddEr" class="btn btn-xs btn-danger"> <span>开始绘制</span> <i class="ace-icon fa fa-arrow-right icon-on-right"></i> </button>'+
+				'</div>'+
+				'</div>'+
+				'</div>'+
+
+				'<div class="form-group">'+
+				'<div class="col-xs-6 col-xs-push-6">'+
+				'<input type="submit" class="btn btn-success btn-xs" id="btnAddEr" value="提交" />'+
+				'</div>'+
+				'</div>'+
+
+				'</form>'+
+				'</div>'+
+				'</div>'+
+
+				'<div class="col-xs-12" style="display:none; " id="panelErChange">'+
+				'<div class="row" style="padding-right:10px; padding-top:3px;">'+
+				'<form role="form" class="form-horizontal" id="form-validate2">'+
+				'<div class="alert alert-info">修改围栏 <br />'+
+				'</div>'+
+				'<div class="form-group">'+
+				'<label for="erOldName" class="col-sm-3 control-label no-padding-right">选择围栏:</label>'+
+				'<div class="col-sm-9">'+
+				'<select class="form-control" id="erOldName" name="name"></select>'+
+				'</div>'+
+				'</div>'+
+
+				'<div class="form-group">'+
+				'<label for="erNewName" class="col-sm-3 control-label no-padding-right">新名称:</label>'+
+				'<div class="col-sm-9">'+
+				'<input type="text" id="erNewName" name="name" placeholder="不填为不修改!" />'+
+				'</div>'+
+				'</div>'+
+
+				'<div class="form-group">'+
+				'<label for="erChangeDrawStyle" class="col-sm-3 control-label no-padding-right">绘制方式:</label>'+
+				'<div class="col-sm-9">'+
+				'<div class="col-xs-6">'+
+				'<select class="form-control" id="erChangeDrawStyle">'+
+				'<option value="square">方形绘图</option>'+
+				'<option value="polyline">折线绘图</option>'+
+				'</select>'+
+				'</div>'+
+				'<div class="col-xs-6">'+
+				'<button type="button" id="btnDrawChangeEr" class="btn btn-xs btn-danger"> <span id="start_draw_span">开始绘制</span> <i class="ace-icon fa fa-arrow-right icon-on-right"></i> </button>'+
+				'</div>'+
+				'</div>'+
+				'</div>'+
+
+				'<div class="form-group">'+
+				'<div class="col-xs-6 col-xs-push-6">'+
+				'<input type="submit" class="btn btn-success btn-xs" id="btnChangeEr" value="提交" />'+
+				'</div>'+
+				'</div>'+
+				'</form>'+
+				'</div>'+
+				'</div>'+
+
+				'<div class="col-xs-12" style="display:none;" id="panelErDel">'+
+				'<div class="row" style="padding-right:10px; height:200px; padding-top:3px;">'+
+				'<form role="form" class="form-horizontal" id="form-validate3">'+
+				'<div class="alert alert-info">删除电子围栏 <br /></div>'+
+				'<div class="form-group" id="er_item"></div>'+
+				'<div class="form-group">'+
+				'<div class="col-xs-6 col-xs-push-6">'+
+				'<button type="button" class="btn btn-success btn-xs" id="btnErDel">删除</button>'+
+				'</div>'+
+				'</div>'+
+				'</form>'+
+				'</div>'+
+				'</div>'+
+				'</div>'+
+				'</div>'
+			);
+
+			map = this;
+
+			// svg地图 控制面板
+			$("#er_hz_panel_button").find("button").on('click', function () {
+				var btn = $(this);
+
+				if (btn.attr('id') === 'btn_hz_queryEr'){
+					if(btn.text() === '隐藏围栏') {
+						map.hideElectronicRail();
+						btn.text('显示围栏');
+					} else {
+						map.showElectronicRail();
+						btn.text('隐藏围栏');
+					}
+					return;
+				}
+
+				if(btn.hasClass('active')) {
+					er_button_slide_up(btn);
+				}
+				else {
+					er_button_slide_down(btn)
+				}
+			});
+
+			function er_button_slide_down(btn) {
+				btn.addClass('active');
+				btn.siblings().removeClass('active');
+				var panel = $(btn.attr('data-hz-target'));
+				panel.siblings().slideUp('100', function () {
+					panel.slideDown();
+				})
+			}
+
+			function er_button_slide_up(btn) {
+				btn.removeClass('active');
+				var panel = $(btn.attr('data-hz-target'));
+				panel.slideUp();
+			}
+
+		},
+
+		// 删除 电子围栏控制面板
+		removeElectronicRailCtrlPanel: function () {
+			$('#'+this.erCtrlPanelId).remove();
+		},
+
 		
 		// 开始导航
 		startNavigation: function (options) {
@@ -570,7 +739,7 @@ var storage = window.localStorage;
 					text: '', img: '/static/img/dest.png'
 				});
 			}
-			
+
 			var svg = this.pathLayer.svg('get');
 			svg.clear();
 			var penColor = '#33cc61';
