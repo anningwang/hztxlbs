@@ -286,7 +286,7 @@ function HzDrawZone(options) {
         if(points_length > 1) {
             _this.points.push(_this.points[0]);
             // 画热点
-            _this.create_hotspot(this.baseLayer, _this.points[points_length], _this.points.length - 1, true);
+            _this.create_hotspot(_this.baseLayer, _this.points[points_length], _this.points.length - 1, true);
         }
 
         _this.svgPolyline(_this.points, _this.line_style.result_line, _this.$board);
