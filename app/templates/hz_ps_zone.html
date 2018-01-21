@@ -463,8 +463,13 @@
 
 
 		$('#btnAddPsZoneDefault').click(function(){
-			var result = ajaxJsonRequest('/lbs/people_stat_cfg_add_default', {});
-			hzInfo(result.msg);
+			ajaxJsonRequest({
+				url: '/lbs/people_stat_cfg_add_default',
+				txData: {},
+				callback: function (data) {
+					hzInfo(data.msg);
+				}
+			});
 			showPsZone();
 		});
 
@@ -522,15 +527,16 @@
 				data.points = pointsToServer;
 
 			console.log('btnChangePsZone, send data=', data);
-			var result = ajaxJsonRequest('/lbs/people_stat_cfg_chg', {data:[data]});
-
-			if(result.errorCode === 0) {
-				query_electronic();
-				$('#btnDrawChangePsZone').click();
-				showPsZone();
-			}
-			hzInfo(result.msg);
-			return false;
+			ajaxJsonRequest({
+				url: '/lbs/people_stat_cfg_chg',
+				txData: [data],
+				callback: function () {
+					query_electronic();
+					$('#btnDrawChangePsZone').click();
+					showPsZone();
+					hzInfo(result.msg);
+				}
+			});
 		});
 
 		(function (factory) {
@@ -621,58 +627,41 @@
 				$('#btnDrawAddPsZone').click();
 				console.log('submitHandler send data=', data);
 
-				var result = ajaxJsonRequest('/lbs/people_stat_cfg_add', {
-					data: [data]
+				ajaxJsonRequest({
+					url: '/lbs/people_stat_cfg_add',
+					txData: { data: [data] },
+					callback: function (data) {
+						query_electronic();
+						showPsZone();
+						hzInfo(data.msg);
+					}
 				});
-
-				if(result.errorCode === 0) {
-					query_electronic();
-					showPsZone();
-				}
-				hzInfo(result.msg);
-
 			},
 			invalidHandler: function (form) {}
 		});
 
-
-		function ajaxJsonRequest(url, txData) {
-			var ajaxData = null;
-			$.ajax({
-				url: url,
-				async: false,
-				type: 'POST',
-				contentType: "application/json;charset=UTF-8",
-				data: JSON.stringify(txData)   // 发送json数据到服务器
-			}).done(function (data) {
-				console.log('接口调用成功');
-				console.log('receive:', data);
-				ajaxData = data;
-			}).fail(function () {
-				console.log('接口调用失败');
-				ajaxData = false;
-			});
-			return ajaxData;
-		}
-
 		function query_electronic(){
 			var url = '/lbs/people_stat_cfg_get';
 			var txData = {
-				rows:2000
+				rows:200
 			};
-			var data = ajaxJsonRequest(url, txData);
-
-			var dataData = data.data.rows;
-			var dataDataLength = dataData.length;
-			var selectHtml = '<option value="0">请选择盘点区域</option>';
-			var checkboxHtml = '';
-			for (var i = 0; i<dataDataLength; i++){
-				selectHtml += '<option value="'+dataData[i].id+'">'+dataData[i].name+'</option>';
-				if(dataData[i].id != undefined){
-					checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar-' + i + '" autocomplete="off" value="'+dataData[i].id+'" /><label class="lbl" for="ace-settings-navbar-'+i+'">'+dataData[i].name+'</div></div>'}
-			}
-			$('#alter_enclosure_name').html(selectHtml);
-			$('#enclosure_item').html(checkboxHtml);
+			ajaxJsonRequest({
+				url: url,
+				txData: txData,
+				callback: function (data) {
+					var dataData = data.data.rows;
+					var dataDataLength = dataData.length;
+					var selectHtml = '<option value="0">请选择盘点区域</option>';
+					var checkboxHtml = '';
+					for (var i = 0; i<dataDataLength; i++){
+						selectHtml += '<option value="'+dataData[i].id+'">'+dataData[i].name+'</option>';
+						if(dataData[i].id != undefined){
+							checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar-' + i + '" autocomplete="off" value="'+dataData[i].id+'" /><label class="lbl" for="ace-settings-navbar-'+i+'">'+dataData[i].name+'</div></div>'}
+					}
+					$('#alter_enclosure_name').html(selectHtml);
+					$('#enclosure_item').html(checkboxHtml);
+				}
+			});
 		}
 
 		query_electronic();
@@ -688,11 +677,9 @@
 				return false;
 			}
 			var ids = [];
-
 			items.each(function(){
 				ids.push($(this).val());
 			});
-
 
 			var url = '/lbs/hz_data_del';
 			var data = {
@@ -700,14 +687,15 @@
 				ids:ids
 			};
 			console.log('enclosure_item_button send data:',data);
-			var result = ajaxJsonRequest(url,data);
-			hzInfo(result.msg);
-
-			if(result.errorCode == 0)
-			{
-				query_electronic();
-				showPsZone();
-			}
+			ajaxJsonRequest({
+				url: url,
+				txData: data,
+				callback: function (data) {
+					query_electronic();
+					showPsZone();
+					hzInfo(data.msg);
+				}
+			});
 		});
 
 
@@ -729,12 +717,15 @@
 				"floorNo": 'Floor3',
 				rows: 100
 			};
-
-			var data = ajaxJsonRequest(url, txData);
-			console.log('showPsZone send data=',data);
-			ps_zone_data = data.data.rows;
-			drawPsZone(ps_zone_data);
-			addZoomCallback(draw_ps_zone_fn);
+			ajaxJsonRequest({
+				url: url,
+				txData: txData,
+				callback: function (data) {
+					ps_zone_data = data.data.rows;
+					drawPsZone(ps_zone_data);
+					addZoomCallback(draw_ps_zone_fn);
+				}
+			});
 		}
 
 		function clearPsZone (){

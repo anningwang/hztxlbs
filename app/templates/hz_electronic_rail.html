@@ -441,22 +441,23 @@
 				points.push(pt);
 			}
 
-			var data = {
+			var txData = [{
 				floorNo: 'floor3',
 				id: parseInt(erID),
 				points: points.length ? points : null ,
 				name: (!erNewName ? erOldName: erNewName)
-			};
+			}];
 
-			console.log('data', data);
-			var result = ajaxRequest('/lbs/electronic_rail_cfg_modify',[data]);
-			if(result.errorCode === 0) {
-				query_electronic();
-				$('#btnDrawChangeEr').click();
-				showElectronicRail();
-			}
-			hzInfo(result.msg);
-			return false;
+			ajaxFormRequest({
+				url: '/lbs/electronic_rail_cfg_modify',
+				txData: txData,
+				callback: function (data) {
+					query_electronic();
+					$('#btnDrawChangeEr').click();
+					showElectronicRail();
+					hzInfo(data.msg);
+				}
+			});
 		});
 
 		(function (factory) {
@@ -571,40 +572,21 @@
 			return result;
 		}
 
-		function ajaxJsonRequest(url, txData) {
-			var result = null;
-			$.ajax({
-				url: url,
-				async: false,
-				type: 'POST',
-				contentType: "application/json;charset=UTF-8",
-				data: JSON.stringify(txData)    // 发送json数据到服务器
-			}).done(function (data) {
-				//console.log('接口调用成功');
-				console.log('url & data(tx rx)', url, txData, data);
-				result = data;
-			}).fail(function () {
-				console.log('接口调用失败');
-			});
-			return result;
-		}
-
 		function query_electronic(){
-			var url = '/lbs/get_electronic_rail_cfg';
-			var txData = {
-				"floorNo": 'floor3'
-			};
-			var data = ajaxRequest(url, txData);
-			var et = data.data;
-			var selectHtml = '<option value="0">请选择围栏</option>';
-			var checkboxHtml = '';
-			for (var i = 0; i < et.length; i++){
-				selectHtml += '<option value="'+et[i].id+'">'+et[i].name+'</option>';
-				if(et[i].id != undefined){
-					checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar-'+i+'" autocomplete="off" value = "'+et[i].id+'" /><label class="lbl" for="ace-settings-navbar-'+i+'">'+et[i].name+'</div></div>'}
-			}
-			$('#erOldName').html(selectHtml);
-			$('#er_item').html(checkboxHtml);
+			getElectronicRailCfg({
+				callback: function (data) {
+					var et = data.data;
+					var selectHtml = '<option value="0">请选择围栏</option>';
+					var checkboxHtml = '';
+					for (var i = 0; i < et.length; i++){
+						selectHtml += '<option value="'+et[i].id+'">'+et[i].name+'</option>';
+						if(et[i].id != undefined){
+							checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar-'+i+'" autocomplete="off" value = "'+et[i].id+'" /><label class="lbl" for="ace-settings-navbar-'+i+'">'+et[i].name+'</div></div>'}
+					}
+					$('#erOldName').html(selectHtml);
+					$('#er_item').html(checkboxHtml);
+				}
+			});
 		}
 
 		query_electronic();
@@ -620,7 +602,6 @@
 				return false;
 			}
 			var ids = [];
-
 			items.each(function(){
 				ids.push($(this).val());
 			});
@@ -631,13 +612,15 @@
 				ids:ids
 			};
 			console.log('send: data=',data, 'url=', url);
-			var result = ajaxJsonRequest(url,data);
-			hzInfo(result.msg);
-			if(result.errorCode  == 0)
-			{
-				query_electronic();
-				showElectronicRail();
-			}
+			ajaxJsonRequest({
+				url: url,
+				txData: data,
+				callback: function (data) {
+					hzInfo(data.msg);
+					query_electronic();
+					showElectronicRail();
+				}
+			});
 		});
 
 
@@ -649,14 +632,13 @@
 		function showElectronicRail() {
 			if ($('#btnQueryEr').text() !== '隐藏围栏') return;
 
-			var url = '/lbs/get_electronic_rail_cfg';
-			var txData = {
-				"floorNo": 'floor3'
-			};
-			var data = ajaxRequest(url, txData);
-			er_data = data.data;
-			drawElectronicRail(er_data);
-			addZoomCallback(draw_et_fn);
+			getElectronicRailCfg({
+				callback:function (data) {
+					er_data = data.data;
+					drawElectronicRail(er_data);
+					addZoomCallback(draw_et_fn);
+				}
+			});
 		}
 
 		function clearElectronicRail (){

@@ -128,7 +128,7 @@ function HzDrawZone(options) {
     // 需要的html对象
     this.htmlObj = {
         // 画线开始图标
-        line_start: '#line_start',
+        line_start: '#line_start'
         // line_switch: '#btnDrawAddEr'
     };
     // 线样式
@@ -638,6 +638,22 @@ function getHistoryLocation(options) {
         url: url,
         txData: txData,
         callback: options.callback
+    });
+}
+
+/**
+ * 查询电子围栏配置
+ */
+function getElectronicRailCfg(options) {
+    options = options || {};
+    var url = '/lbs/get_electronic_rail_cfg';
+    var txData = {
+        "floorNo": options.floorNo || 'floor3'
+    };
+    ajaxFormRequest({
+        url: url,
+        txData: txData,
+        callback:options.callback
     });
 }
 
