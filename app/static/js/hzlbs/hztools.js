@@ -159,9 +159,8 @@ function HzDrawZone(options) {
 
         if(is_enclosureEvent_display) this.$event.css('display', 'none');
 
-        var $window = $(window);
-        $window.off('keydown', this.right_angle_package);
-        $window.off('keyup', this.keyup_fn);
+        $(window).off('keydown', this.right_angle_package);
+        $(window).off('keyup', this.keyup_fn);
         this.$event.off('click', this.line_click_package);
         this.$event.off('mousemove', this.mousemove_line_package);
 
@@ -175,44 +174,20 @@ function HzDrawZone(options) {
             this.baseLayer.find('.enclosure_spot').remove();
         }
 
-        $(this.htmlObj.line_start).css({
-            left: 0,
-            top: 0,
-            display: 'none'
-        });
+        $(this.htmlObj.line_start).css({left: 0, top: 0, display: 'none'});
     };
     // 围栏绘制功能入口
     this.polyline = function () {
         var _this = this;
-        var _window = $(window);
-
-        // 格式化数据
         this.points = [];
         this.is_coordinate_offset = false;
-        // 打开事件绑定div
-        this.$event.css('display', 'block');
+        this.$event.css('display', 'block');        // 显示事件绑定div
 
-        _window.on('keydown', {
-            _this: _this
-        }, this.right_angle_package);
-
-        _window.on('keyup', {
-            _this: _this
-        }, this.keyup_fn);
-
-
-        this.$event.on('click', {
-            _this: _this
-        }, this.line_click_package);
-
-
-        this.$event.on('mousemove', {
-            _this: _this
-        }, this.mousemove_line_package);
-
-        $(this.htmlObj.line_start).on('click', {
-            _this: _this
-        }, this.line_end);
+        $(window).on('keydown', {_this: _this}, this.right_angle_package);
+        $(window).on('keyup', {_this: _this}, this.keyup_fn);
+        this.$event.on('click', {_this: _this}, this.line_click_package);
+        this.$event.on('mousemove', {_this: _this}, this.mousemove_line_package);
+        $(this.htmlObj.line_start).on('click', {_this: _this}, this.line_end);
     };
 
     this.line_click_package = function (e) {
@@ -275,8 +250,7 @@ function HzDrawZone(options) {
         this.dotted_line[0] = this.points[this.points.length - 1];
         if(Math.abs(this.dotted_line[0][0] - new_points[0]) >= Math.abs(this.dotted_line[0][1] - new_points[1])) {
             this.dotted_line[1] = [new_points[0], this.dotted_line[0][1]];
-        }
-        else {
+        } else {
             this.dotted_line[1] = [this.dotted_line[0][0], new_points[1]];
         }
         this.svgPolyline(this.dotted_line, this.line_style.demo_line);
@@ -307,11 +281,7 @@ function HzDrawZone(options) {
         var points_length = _this.points.length;
 
         // this 判定该函数的对象
-        $(this).css({
-            top: 0,
-            left: 0,
-            display: 'none'
-        });
+        $(this).css({top: 0, left: 0, display: 'none'});
 
         if(points_length > 1) {
             _this.points.push(_this.points[0]);
@@ -321,19 +291,13 @@ function HzDrawZone(options) {
 
         _this.svgPolyline(_this.points, _this.line_style.result_line, _this.$board);
         _this.remove_event(false, false);
-
-        //结束绘制
-        //$(_this.htmlObj.line_switch).find('span').text('清空绘制');
     };
 
-    // 画长方形框
+    // 画方框
     this.square = function () {
         // 打开事件绑定div
         this.$event.css('display', 'block');
-
-        this.$event.on('mousedown', {
-            _this: this
-        }, this.square_mouse_down_package);
+        this.$event.on('mousedown', {_this: this}, this.square_mouse_down_package);
     };
     this.square_mouse_down_package = function (e) {
         var _this = e.data._this;
@@ -350,13 +314,8 @@ function HzDrawZone(options) {
         pt[0] = e.pageX - mapOffset.left - parseInt($map.css('border-left-width'));
         pt[1] = e.pageY - mapOffset.top - parseInt($map.css('border-top-width'));
         this.points[0] = pt;
-        var $window = $(window);
-        $window.on('mousemove', {
-            _this: this
-        }, this.square_mouse_move_package);
-        $window.on('mouseup', {
-            _this: this
-        }, this.square_mouse_up_package);
+        $(window).on('mousemove', {_this: this}, this.square_mouse_move_package);
+        $(window).on('mouseup', {_this: this}, this.square_mouse_up_package);
     };
 
     this.square_mouse_move_package = function (e) {
@@ -395,11 +354,7 @@ function HzDrawZone(options) {
             this.points = [];
         } else {
             for(var i = 1; i < points_length; i++) {
-                if(i < (points_length - 1)) {
-                    this.create_hotspot(this.baseLayer, this.points[i], i);
-                } else {
-                    this.create_hotspot(this.baseLayer, this.points[i], i, true);
-                }
+                this.create_hotspot(this.baseLayer, this.points[i], i, i==(points_length - 1));
             }
         }
         console.log('square_mouse_up', this.points, 'e=', e);
@@ -430,10 +385,7 @@ function HzDrawZone(options) {
             top: top + 'px'
         });
 
-        hotspot.on('mousedown', {
-            _this: this
-        }, this.hotspot_mouse_down_package);
-
+        hotspot.on('mousedown', {_this: this}, this.hotspot_mouse_down_package);
         parent.append(hotspot);
     };
 
@@ -581,7 +533,7 @@ String.prototype.format = function(args) {
     var _dic = typeof args === "object" ? args : arguments;
     // 如果 args 不是对象，那就是数组了，虽然arguments是伪数组，但不需要用到数组方法。
 
-    return this.replace(/\{([^}]+)\}/g, function(str, key) { // 替换 {任何字符} 这样的字符串
+    return this.replace(/{([^}]+)}/g, function(str, key) { // 替换 {任何字符} 这样的字符串
         return _dic[key] || str;    // 如果在 _dic 找不到对应的值，就返回原字符
     });
 };
