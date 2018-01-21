@@ -712,14 +712,7 @@
 		function showPsZone() {
 			if ($('#btnPsZoneShow').text() !== '隐藏') return;
 
-			var url = '/lbs/people_stat_cfg_get';
-			var txData = {
-				"floorNo": 'Floor3',
-				rows: 100
-			};
-			ajaxJsonRequest({
-				url: url,
-				txData: txData,
+			getPeopleStatZoneCfg({
 				callback: function (data) {
 					ps_zone_data = data.data.rows;
 					drawPsZone(ps_zone_data);

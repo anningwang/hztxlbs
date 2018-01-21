@@ -139,6 +139,12 @@ var storage = window.localStorage;
 		this.pathLayer = this.addLayer(this.baseLayer, 'svg_path');
 		this.pathLayer.svg();
 
+		this.erLayer = this.addLayer(this.baseLayer, 'svg-electronic-rail');
+		this.erLayer.svg();
+
+		this.psLayer = this.addLayer(this.baseLayer, 'svg-people-stat-zone');
+		this.psLayer.svg();
+
 		this.hisLocLayer = this.addLayer(this.baseLayer, 'svg_path_history');
 		this.hisLocLayer.svg();
 
@@ -160,6 +166,8 @@ var storage = window.localStorage;
 		this.zoom -= 0.1;           // 缩小了2个级别 0.05一个级别
 		this.pathData = undefined;  // 导航路径信息（为地图缩放使用）
 		this.hisLocData = undefined;    // 历史轨迹（为地图缩放使用）
+		this.psZoneData = undefined;    // 盘点区域数据 （为地图缩放使用）
+		this.erData = undefined;        // 电子围栏 （为地图缩放使用）
 		
 		// 显示地图
 		this.mapZoom(this.mapH * this.zoom, this.mapW * this.zoom);
@@ -550,13 +558,19 @@ var storage = window.localStorage;
 				pt_path[m+1] = [parseInt((msg.path[m].x+22-2) * this.zoom), parseInt((msg.path[m].y+22-2) * this.zoom)];
 			}
 
-			this.addPeople({
-				id: 'destination',
-				x: this.coordScreenToMap(pt_path[pt_path.length-1][0]),
-				y: this.coordScreenToMap(pt_path[pt_path.length-1][1]),
-				text: '', img: '/static/img/dest.png'
-			});
-
+			var peo = this.getPeople('destination');
+			if (peo) {
+				peo.setPosition(this.coordScreenToMap(pt_path[pt_path.length-1][0]),
+					this.coordScreenToMap(pt_path[pt_path.length-1][1]));
+			} else {
+				this.addPeople({
+					id: 'destination',
+					x: this.coordScreenToMap(pt_path[pt_path.length-1][0]),
+					y: this.coordScreenToMap(pt_path[pt_path.length-1][1]),
+					text: '', img: '/static/img/dest.png'
+				});
+			}
+			
 			var svg = this.pathLayer.svg('get');
 			svg.clear();
 			var penColor = '#33cc61';
@@ -695,8 +709,121 @@ var storage = window.localStorage;
 		clearHistoryLocation: function () {
 			this.hisLocData = undefined;
 			this.delZoomCallback(this.drawHistoryLocation);
-			var svg = this.hisLocLayer.svg('get');
+			this.hisLocLayer.svg('get').clear();
+		},
+		
+		// 显示盘点区域
+		showPeopleStatZone: function () {
+			map = this;
+			getPeopleStatZoneCfg({
+				callback: function (data) {
+					map.psZoneData = data.data.rows;
+					map.drawPeopleStatZone();
+					map.addZoomCallback(map.drawPeopleStatZone);
+				}
+			});
+		},
+		// 隐藏盘点区域
+		hidePeopleStatZone: function () {
+			this.psZoneData = undefined;
+			this.psLayer.svg('get').clear();
+			this.delZoomCallback(this.drawPeopleStatZone);
+			
+		},
+		// 画盘点区域
+		drawPeopleStatZone:function () {
+			var svg = this.psLayer.svg('get');
 			svg.clear();
+
+			data = this.psZoneData;
+			for(var k = 0; k < data.length; k++) {
+				var pts = data[k].points;
+				var pointsScreen = [];
+				var ptArr;
+				
+				for(var i = 0; i < pts.length; i++) {
+					ptArr = [];
+					ptArr.push(this.coordMapToScreen(pts[i].x));
+					ptArr.push(this.coordMapToScreen(pts[i].y));
+					pointsScreen.push(ptArr);
+				}
+				
+				// 增加第一个起点，使区域闭合
+				ptArr = [];
+				ptArr.push(this.coordMapToScreen(pts[0].x));
+				ptArr.push(this.coordMapToScreen(pts[0].y));
+				pointsScreen.push(ptArr);
+				
+				svg.polyline(pointsScreen, {
+					fill: 'DeepSkyBlue',
+					opacity: 0.6,
+					stroke: 'blue',
+					strokeWidth: 5
+				});
+				
+				svg.text(this.coordMapToScreen(pts[0].x) + 10, this.coordMapToScreen(pts[0].y) + 20, data[k].name, {
+					fontSize: 14,
+					fontFamily: 'Verdana',
+					fill: 'RoyalBlue'
+				});
+			}
+		},
+
+		// 显示电子围栏
+		showElectronicRail: function () {
+			map = this;
+			getElectronicRailCfg({
+				callback: function (data) {
+					map.erData = data.data;
+					map.drawElectronicRail();
+					map.addZoomCallback(map.drawElectronicRail);
+				}
+			});
+		},
+		// 隐藏电子围栏
+		hideElectronicRail: function () {
+			this.erData = undefined;
+			this.erLayer.svg('get').clear();
+			this.delZoomCallback(this.drawElectronicRail);
+		},
+
+		// 画电子围栏
+		drawElectronicRail: function() {
+			var svg = this.erLayer.svg('get');
+			svg.clear();
+
+			data = this.erData;
+			for(var k = 0; k < data.length; k++) {
+				var pts = data[k].points;
+				var pointsScreen = [];
+				var ptArr;
+
+				for (var i = 0; i < pts.length; i++) {
+					ptArr = [];
+					ptArr.push(this.coordMapToScreen(pts[i].x));
+					ptArr.push(this.coordMapToScreen(pts[i].y));
+					pointsScreen.push(ptArr);
+				}
+
+				// 增加第一个起点，使区域闭合
+				ptArr = [];
+				ptArr.push(this.coordMapToScreen(pts[0].x));
+				ptArr.push(this.coordMapToScreen(pts[0].y));
+				pointsScreen.push(ptArr);
+
+				svg.polyline(pointsScreen, {
+					fill: 'pink',
+					stroke: 'red',
+					opacity: 0.6,
+					strokeWidth: 5
+				});
+
+				svg.text(this.coordMapToScreen(pts[0].x) + 10, this.coordMapToScreen(pts[0].y) + 20, data[k].name, {
+					fontSize: 14,
+					fontFamily: 'Verdana',
+					fill: 'red'
+				});
+			}
 		},
 
 		// ------------------------------------------------------------------------

@@ -314,7 +314,7 @@ def hz_get_path(location, user_id):
     py = hz_uid_map[user_id][1]
 
     pt_from = dijkstra.get_nearest_vertex(px, py)
-    path = dijkstra.min_dist2(pt_from, location)
+    path = dijkstra.min_dist2(pt_from, int(location))
     # print path
 
     ret = []

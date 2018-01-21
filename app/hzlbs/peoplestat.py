@@ -846,7 +846,8 @@ def people_stat_cfg_add_default():
 @app.route('/lbs/people_stat_cfg_get', methods=['POST'])
 def people_stat_cfg_get():
     """ 查询盘点区域配置 """
-    return jsonify(ps.get_zone(request.json))
+    param = request.form if request.json is None else request.json
+    return jsonify(ps.get_zone(param))
 
 
 @app.route('/lbs/people_stat_cfg_chg', methods=['POST'])

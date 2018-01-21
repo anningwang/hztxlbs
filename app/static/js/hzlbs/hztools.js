@@ -657,6 +657,27 @@ function getElectronicRailCfg(options) {
     });
 }
 
+
+/**
+ * 查询 盘点区域 配置
+ */
+function getPeopleStatZoneCfg(options) {
+    options = options || {};
+    var url = '/lbs/people_stat_cfg_get';
+    var txData = {
+        floorNo: options.floorNo || 'Floor3',
+        page: options.page || 1,
+        rows: options.rows || 200
+    };
+    ajaxJsonRequest({
+        url: url,
+        txData: txData,
+        callback:options.callback
+    });
+}
+
+
+
 // ajax 方式 从服务器获取数据。 ContentType: application/x-www-form-urlencoded
 function ajaxFormRequest(options) {
     $.ajax({
@@ -671,7 +692,7 @@ function ajaxFormRequest(options) {
         } else {
             hzInfo('接口调用失败：' + data.msg);
         }
-    }).fail(function(qXHR, textStatus, errorThrown) {
+    }).fail(function(jqXHR, textStatus, errorThrown) {
         var msg = "请求失败。错误码：{0}({1})".format(jqXHR.status, errorThrown);
         hzInfo(msg);
     });
@@ -691,7 +712,7 @@ function ajaxJsonRequest(options) {
         } else {
             hzInfo('接口调用失败：' + data.msg);
         }
-    }).fail(function(qXHR, textStatus, errorThrown) {
+    }).fail(function(jqXHR, textStatus, errorThrown) {
         var msg = "请求失败。错误码：{0}({1})".format(jqXHR.status, errorThrown);
         hzInfo(msg);
     });
