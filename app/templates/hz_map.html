@@ -157,7 +157,7 @@
                         <button class="btn btn-info btn-sm" id="btnClearHisLoc">清除</button>
 
                         <button class="btn btn-pink btn-sm" id="btnPsZone">显示盘点区域</button>
-                        <button class="btn btn-purple btn-sm" id="btnElectRail">显示电子围栏</button>
+                        <button class="btn btn-purple btn-sm" id="btnElectRail">显示围栏面板</button>
 
                         <hr class="hr hr-4">
                         <div id="myCanvas"></div>
@@ -247,7 +247,7 @@
             map.clearHistoryLocation();
         });
 
-        // 显示/隐藏 盘点区域
+        // 显示/隐藏 盘点控制面板区域
         $('#btnPsZone').click(function () {
             var text = $(this).text();
             if (text == '显示盘点区域') {
@@ -259,17 +259,19 @@
             }
         });
 
-        // 显示/隐藏 电子围栏
+        // 显示/隐藏 电子围栏 面板
         $('#btnElectRail').click(function () {
             var text = $(this).text();
-            if (text == '显示电子围栏') {
-                map.showElectronicRail();
-                $(this).text('隐藏电子围栏');
+            if (text == '显示围栏面板') {
+                //map.showElectronicRail();
+                $(this).text('隐藏围栏面板');
+                map.createElectronicRailCtrlPanel();
             } else {
-                map.hideElectronicRail();
-                $(this).text('显示电子围栏');
+                //map.hideElectronicRail();
+                map.removeElectronicRailCtrlPanel();
+                $(this).text('显示围栏面板');
             }
-        });
+        }).click();
 
         // 时间日历插件格式化
         $('.date-timepicker').datetimepicker({

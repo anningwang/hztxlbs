@@ -5,8 +5,10 @@
  * Created by WXG on 2018/1/11.
  *
  * Requires: jQuery 1.2.2+
+ *           jquery.validate.js
  */
 
+document.write('<script src="/static/ace/components/jquery-validation/dist/jquery.validate.js"></script>');
 
 
 //var hz_is_navigating = false;           // 是否曾经设置过导航，或正在导航中
@@ -138,18 +140,20 @@ var storage = window.localStorage;
 		this.mapSvgLayer = this.addMapSvg(this.baseLayer, 'svg_image', '/static/img/floor3.svg');
 		this.pathLayer = this.addLayer(this.baseLayer, 'svg_path');
 		this.pathLayer.svg();
-
 		this.erLayer = this.addLayer(this.baseLayer, 'svg-electronic-rail');
 		this.erLayer.svg();
-
+		this.erDraftLayer = this.addLayer(this.baseLayer, 'svg-electronic-rail-draft');
+		this.erDraftLayer.svg();
 		this.psLayer = this.addLayer(this.baseLayer, 'svg-people-stat-zone');
 		this.psLayer.svg();
-
 		this.hisLocLayer = this.addLayer(this.baseLayer, 'svg_path_history');
 		this.hisLocLayer.svg();
-
 		this.roomLayer = this.addLayer(this.baseLayer, 'svg_sign');
 		this.userLayer = this.addLayer(this.baseLayer, 'svg_user_sign');
+		this.tempLineLayer = this.addLayer(this.baseLayer, 'svg_temporary_line');
+		this.tempLineLayer.svg();
+		this.drawEventLayer = this.addDrawEventLayer();
+		this.drawEventLayer.svg();
 		this.eventLayer = this.addLayer(this.baseLayer, 'svg_event');   // mouse event: mouseup, mousedown, mousemove
 		this.left = undefined;      // 地图在容器中的位置（距离左上角的距离，left, top）
 		this.top = undefined;
@@ -160,8 +164,10 @@ var storage = window.localStorage;
 		this.mapH = 1769;           // 地图图片高度 px
 		this.userList = {};         // 用户列表 { userId: HzPeople }
 		this.erCtrlPanelId = 'hz-map-controller-panel-er';
+		this.isErShowing = false;   // 电子围栏处于“显示”状态。
 		this.mouseMoveCallback = options.mouseMoveCallback;     // mouse 移动 之 坐标拾取 回调函数
 		this.zoomCallback = [];     // func Array 缩放需要执行的临时函数
+		this.restoreTools = new Init();     // 恢复工具类，恢复每次绘图的状态
 
 		this.zoom -= 0.1;           // 缩小了2个级别 0.05一个级别
 		this.pathData = undefined;  // 导航路径信息（为地图缩放使用）
@@ -211,6 +217,18 @@ var storage = window.localStorage;
 		addMapSvg: function (parent, id, filepath) {
 			parent.append('<img src="' + filepath +'" id=' + id + ' class="each_map_layer" />');
 			return $('#'+id);
+		},
+		// 添加 画图 事件 层
+		addDrawEventLayer: function (options) {
+			options = options || {};
+			var parent = options.parent || this.baseLayer;
+			var id = options.id || 'enclosureEvent';
+			parent.append('<div id=' + id + ' class="each_map_layer" style="display:none;" />');
+			var drawEventLayer = $('#'+id);
+			var img = options.img || '/static/img/drawing.png';
+			drawEventLayer.append('<img src="' + img +'" id="line_start" title="绘制起点" style="position:absolute; display:none;">');
+
+			return drawEventLayer;
 		},
 
 		addPeople: function (options) {
@@ -530,6 +548,8 @@ var storage = window.localStorage;
 
 		// 使用ACE框架，创建 电子围栏控制面板
 		createElectronicRailCtrlPanel: function () {
+			if(document.getElementById(this.erCtrlPanelId)){ return; }  // 存在则退出函数
+
 			this.container.append(
 				'<div id="' + this.erCtrlPanelId + '" style="position:absolute; top:10px; left:80px; z-index:1000; width:390px;">' +
 				'<div class="btn-group btn-group-xs col-xs-12" id="er_hz_panel_button" style="background:#FFF; border:1px solid #CCC;">'+
@@ -543,7 +563,7 @@ var storage = window.localStorage;
 				'<div class="map_panel_content col-xs-12" style="background:#FFF; border:1px solid #CCC;">'+
 				'<div class="col-xs-12" style="display:none;" id="panelErAdd">'+
 				'<div class="row" style="padding-right:10px; padding-top:3px;">'+
-				'<form role="form" class="form-horizontal" id="form-validate">'+
+				'<form role="form" class="form-horizontal" id="form_electRail">'+
 				'<div class="alert alert-info">设置围栏 <br/></div>'+
 
 				'<div class="form-group">'+
@@ -649,6 +669,10 @@ var storage = window.localStorage;
 
 			map = this;
 
+			if (this.isErShowing) {
+				$('#btn_hz_queryEr').text('隐藏围栏');
+			}
+
 			// svg地图 控制面板
 			$("#er_hz_panel_button").find("button").on('click', function () {
 				var btn = $(this);
@@ -672,6 +696,8 @@ var storage = window.localStorage;
 				}
 			});
 
+			this.updateErDelPanel();
+
 			function er_button_slide_down(btn) {
 				btn.addClass('active');
 				btn.siblings().removeClass('active');
@@ -686,6 +712,302 @@ var storage = window.localStorage;
 				var panel = $(btn.attr('data-hz-target'));
 				panel.slideUp();
 			}
+			
+			// ----------------------------------------------------------------
+			// 新增 电子围栏
+			var erAdd =  new HzDrawZone( {board: this.erDraftLayer});
+
+			// 新增围栏 --> “开始绘制” 按钮
+			$("#btnDrawAddEr").on('click', function () {
+				var btn = $(this);
+				var span = btn.find('span');
+				var buttonText = span.text();
+				var shape = $('#erAddDrawStyle');
+
+				if(shape.val() === 'polyline') {
+					if(buttonText === '清空绘制') {
+						map.restoreTools.run();
+					} else {
+						span.text('清空绘制');
+						map.restoreTools.run();
+						map.restoreTools.add(erAdd,erAdd.remove_event);
+						map.restoreTools.add(changeTextErAdd,btn);
+						shape.attr('disabled', 'disabled');
+						erAdd.polyline();
+					}
+				} else if(shape.val() === 'square') {      // 方形绘图
+					if(buttonText === '清空绘制') {
+						map.restoreTools.run();
+					} else {
+						span.text('清空绘制');
+						map.restoreTools.run();
+						map.restoreTools.add(erAdd,erAdd.remove_square);
+						map.restoreTools.add(changeTextErAdd,btn);
+						shape.attr('disabled', 'disabled');
+						erAdd.square();
+					}
+				}
+			});
+
+			function changeTextErAdd(btn){
+				var span = btn.find('span');
+				var buttonText = span.text();
+				var shape = $('#erAddDrawStyle');
+				if(shape.val() === 'polyline') {
+					if(buttonText === '清空绘制') {
+						span.text('开始绘制');
+						shape.removeAttr('disabled');
+					} else {
+						span.text('清空绘制');
+						shape.attr('disabled', 'disabled');
+					}
+				}
+				// 方形绘图
+				if(shape.val() === 'square') {
+					if(buttonText === '清空绘制') {
+						span.text('开始绘制');
+						shape.removeAttr('disabled');
+					} else {
+						span.text('清空绘制');
+						shape.attr('disabled', 'disabled');
+					}
+				}
+			}
+
+			(function (factory) {
+				if(typeof define === "function" && define.amd) {
+					define(["jquery", ""], factory);
+				} else {
+					factory(jQuery);
+				}
+			}(function ($) {
+				/*
+				 * Translated default messages for the jQuery validation plugin.
+				 * Locale: ZH (Chinese, 中文, 汉语, 漢語)
+				 */
+				$.extend($.validator.messages, {
+					required: "这是必填字段",
+					remote: "请修正此字段",
+					email: "请输入有效的电子邮件地址",
+					url: "请输入有效的网址",
+					date: "请输入有效的日期",
+					dateISO: "请输入有效的日期 (YYYY-MM-DD)",
+					number: "请输入有效的数字",
+					digits: "只能输入数字",
+					creditCard: "请输入有效的信用卡号码",
+					equalTo: "你的输入不相同",
+					extension: "请输入有效的后缀",
+					maxLength: $.validator.format("最多可以输入 {0} 个字符"),
+					minLength: $.validator.format("最少要输入 {0} 个字符"),
+					rangeLength: $.validator.format("请输入长度在 {0} 到 {1} 之间的字符串"),
+					range: $.validator.format("请输入范围在 {0} 到 {1} 之间的数值"),
+					max: $.validator.format("请输入不大于 {0} 的数值"),
+					min: $.validator.format("请输入不小于 {0} 的数值")
+				});
+			}));
+			
+			$('#form_electRail').validate({
+				errorElement: 'div',
+				errorClass: 'help-block',
+				focusInvalid: false,
+				ignore: "",
+				rules: {
+					name: {
+						required: true
+					},
+					floorNo: {
+						required: true
+					}
+				},
+				
+				highlight: function (e) {
+					$(e).closest('.form-group').removeClass('has-info').addClass('has-error');
+				},
+				
+				success: function (e) {
+					$(e).closest('.form-group').removeClass('has-error');
+					$(e).remove();
+				},
+				
+				// add 电子围栏
+				submitHandler: function (form) {
+					if(erAdd.points.length == 0 || erAdd.points[0] != erAdd.points[erAdd.points.length - 1]) {
+						hzInfo('您没有画图');
+						return;
+					}
+					var $form = $(form);
+					var data = {
+						name: $form.find("#er_name").val(),
+						floorNo: $form.find("#er_floor_no").val()
+					};
+					
+					var points = [];
+					for(var i = 0; i < erAdd.points.length - 1; i++) {
+						var pt = {
+							x: map.coordScreenToMap(erAdd.points[i][0]),
+							y: map.coordScreenToMap(erAdd.points[i][1])
+						};
+						points.push(pt);
+					}
+					data.points = points;
+					
+					console.log(data);
+					$('#btnDrawAddEr').click();
+					ajaxFormRequest({
+						url: '/lbs/electronic_rail_cfg_modify',
+						txData: [data],
+						callback: function (data) {
+							map.updateErDelPanel();
+							hzInfo(data.msg);
+							map.showElectronicRail();
+						}
+					});
+				},
+				invalidHandler: function (form) {}
+			});
+
+			// 修改电子围栏
+			var erChange = new HzDrawZone({board: this.erDraftLayer});
+
+			function changeTextErChange(btn){
+				var span = btn.find('span');
+				var buttonText = span.text();
+				var oStyle = $('#erChangeDrawStyle');
+				if(oStyle.val() === 'polyline') {
+					if(buttonText === '清空绘制') {
+						span.text('开始绘制');
+						oStyle.removeAttr('disabled');
+					} else {
+						span.text('清空绘制');
+						oStyle.attr('disabled', 'disabled');
+					}
+				}
+				// 方形绘图
+				if(oStyle.val() === 'square') {
+					if(buttonText === '清空绘制') {
+						span.text('开始绘制');
+						oStyle.removeAttr('disabled');
+					} else {
+						span.text('清空绘制');
+						oStyle.attr('disabled', 'disabled');
+					}
+				}
+			}
+
+			$("#btnDrawChangeEr").on('click', function () {
+				var $this = $(this);
+				var $span = $this.find('span');
+				var buttonText = $span.text();
+				var oStyle = $('#erChangeDrawStyle');
+
+				if(oStyle.val() === 'polyline') {
+					if(buttonText === '清空绘制') {
+						map.restoreTools.run();
+					} else {	// 点击“开始绘制”按钮
+						$span.text('清空绘制');
+						map.restoreTools.run();
+						map.restoreTools.add(erChange,erChange.remove_event);
+						map.restoreTools.add(changeTextErChange,$this);
+						oStyle.attr('disabled', 'disabled');
+						erChange.polyline();
+					}
+				} else if(oStyle.val() === 'square') { // 方形绘图
+					if(buttonText === '清空绘制') {
+						map.restoreTools.run();
+					} else {
+						$span.text('清空绘制');
+						map.restoreTools.run();
+						map.restoreTools.add(erChange,erChange.remove_square);
+						map.restoreTools.add(changeTextErChange,$this);
+						oStyle.attr('disabled', 'disabled');
+						erChange.square();
+					}
+				}
+			});
+
+
+			/**
+			 * 修改围栏 提交 按钮点击事件
+			 *
+			 */
+			$('#btnChangeEr').on('click',function(){
+				var oErName = $('#erOldName');
+				var erID = oErName.val();
+				var erOldName = oErName.find("option:selected").text();
+				var erNewName =  $('#erNewName').val();
+
+				console.log('erChange.points',erChange.points);
+
+				if(erID === 'undefined'){
+					hzInfo('该围栏不能修改!');
+					return false;
+				} else if(erID == 0){
+					hzInfo('请选择围栏!');
+					return false;
+				} else if(erChange.points.length > 0 && erChange.points[0] != erChange.points[erChange.points.length - 1]) {
+					hzInfo('您没有画图');
+					return false;
+				}
+
+				var points = [];
+				for(var i = 0; i < erChange.points.length-1; i++) {
+					var pt = {
+						x: map.coordScreenToMap(erChange.points[i][0]),
+						y: map.coordScreenToMap(erChange.points[i][1])
+					};
+					points.push(pt);
+				}
+
+				var txData = [{
+					floorNo: 'floor3',
+					id: parseInt(erID),
+					points: points.length ? points : null ,
+					name: (!erNewName ? erOldName: erNewName)
+				}];
+
+				ajaxFormRequest({
+					url: '/lbs/electronic_rail_cfg_modify',
+					txData: txData,
+					callback: function (data) {
+						map.updateErDelPanel();
+						$('#btnDrawChangeEr').click();
+						map.showElectronicRail();
+						hzInfo(data.msg);
+					}
+				});
+				return false;		// 不提交表单
+			});
+
+			// 删除电子围栏
+			$('#btnErDel').on('click',function(){
+				var er_item = $('#er_item');
+				var items = er_item.find(':checked');
+
+				map.restoreTools.run();
+
+				if(items == undefined){
+					hzInfo('请选择要删除的围栏!');
+					return false;
+				}
+				var ids = [];
+				items.each(function(){
+					ids.push($(this).val());
+				});
+				var url = '/lbs/hz_data_del';
+				var data = {
+					who:'elect_rail_cfg',
+					ids:ids
+				};
+				ajaxJsonRequest({
+					url: url,
+					txData: data,
+					callback: function (data) {
+						hzInfo(data.msg);
+						map.updateErDelPanel();
+						map.showElectronicRail();
+					}
+				});
+			});
 
 		},
 
@@ -946,6 +1268,7 @@ var storage = window.localStorage;
 					map.erData = data.data;
 					map.drawElectronicRail();
 					map.addZoomCallback(map.drawElectronicRail);
+					map.isErShowing = true;
 				}
 			});
 		},
@@ -954,6 +1277,25 @@ var storage = window.localStorage;
 			this.erData = undefined;
 			this.erLayer.svg('get').clear();
 			this.delZoomCallback(this.drawElectronicRail);
+			this.isErShowing = false;
+		},
+
+		// 更新删除电子围栏界面。 ACE框架
+		updateErDelPanel: function () {
+			getElectronicRailCfg({
+				callback: function (data) {
+					var et = data.data;
+					var selectHtml = '<option value="0">请选择围栏</option>';
+					var checkboxHtml = '';
+					for (var i = 0; i < et.length; i++){
+						selectHtml += '<option value="'+et[i].id+'">'+et[i].name+'</option>';
+						if(et[i].id != undefined){
+							checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar-'+i+'" autocomplete="off" value = "'+et[i].id+'" /><label class="lbl" for="ace-settings-navbar-'+i+'">'+et[i].name+'</div></div>'}
+					}
+					$('#erOldName').html(selectHtml);
+					$('#er_item').html(checkboxHtml);
+				}
+			});
 		},
 
 		// 画电子围栏
