@@ -191,8 +191,9 @@
         var map = new HzMap({
             container: $('#myCanvas'),
             coordView: true,
-            showERCtrlPanel: true,
-            showPSCtrlPanel: true
+            showServicePanel: true
+            //showERCtrlPanel: true,
+            //showPSCtrlPanel: true
         });
         console.log(map);
 
@@ -261,7 +262,7 @@
                 map.removePeopleStatCtrlPanel();
                 $(this).text('显示盘点面板');
             }
-        }).click();
+        });
 
         // 显示/隐藏 电子围栏 面板
         $('#btnElectRail').click(function () {
@@ -275,7 +276,7 @@
                 map.removeElectronicRailCtrlPanel();
                 $(this).text('显示围栏面板');
             }
-        }).click();
+        });
 
         // 时间日历插件格式化
         $('.date-timepicker').datetimepicker({

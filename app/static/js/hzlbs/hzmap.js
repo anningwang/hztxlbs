@@ -10,6 +10,7 @@
 
 document.write('<script src="/static/ace/components/jquery-validation/dist/jquery.validate.js"></script>');
 
+'use strict';
 
 //var hz_is_navigating = false;           // 是否曾经设置过导航，或正在导航中
 //var HZ_DESTINATION_MEETING_ROOM = 27;    // 办公室编号
@@ -169,9 +170,12 @@ var storage = window.localStorage;
 		this.isErShowing = false;   // 电子围栏处于“显示”状态。
 		this.psCtrlPanelId = 'hz_map_controller_panel_ps';
 		this.isPsShowing = false;   // 盘点区域 处于“显示”状态。
+		this.zoomCtrlPanelId = 'hz_zoom_ctrl_panel';
+		this.serviceCtrlPanelId = 'hz_service_ctrl_panel';
 		this.mouseMoveCallback = options.mouseMoveCallback;     // mouse 移动 之 坐标拾取 回调函数
 		this.zoomCallback = [];     // func Array 缩放需要执行的临时函数
 		this.restoreTools = new Init();     // 恢复工具类，恢复每次绘图的状态
+		this.restoreService = new Init();   // 业务控制面板按钮间初始化对象
 
 		this.zoom -= 0.1;           // 缩小了2个级别 0.05一个级别
 		this.pathData = undefined;  // 导航路径信息（为地图缩放使用）
@@ -193,12 +197,16 @@ var storage = window.localStorage;
 		// 创建放大缩小按钮
 		this.createZoomCtrl();
 
+		// 创建 业务（电子围栏、人员盘点等）控制面板
+		if(options.showServicePanel)
+			this.createServicePanel();
+
 		// 创建电子围栏控制面板
-		if(options.showERCtrlPanel)
+		if(options['showERCtrlPanel'])
 			this.createElectronicRailCtrlPanel();
 		
 		// 创建盘点区域控制面板
-		if(options.showPSCtrlPanel)
+		if(options['showPSCtrlPanel'])
 			this.createPeopleStatCtrlPanel();
 
 		// 创建坐标拾取视图（显示框）
@@ -532,35 +540,94 @@ var storage = window.localStorage;
 
 		// 使用 ACE 框架。创建地图 缩放 按钮
 		createZoomCtrl: function () {
+			if(document.getElementById(this.zoomCtrlPanelId)){ return; }  // 存在则退出函数
 			this.container.append(
-				'<div  id="ctrl-panel" style="position:absolute; top:10px; left: 10px; z-index:1000;">' +
+				'<div id="' + this.zoomCtrlPanelId+ '" style="position:absolute; top:10px; left: 10px; z-index:1000;">' +
 				'<div class="btn-group btn-group-vertical btn-group-sm" style="background:#FFF; border:1px solid #CCC;">' +
 				'<div style="margin: 5px 5px;">' +
-				'<button type="button" class="btn btn-inverse btn-sm" id="btn-hz-zoomIn"><i class="ace-icon fa fa-plus align-middle"></i></button>' +
+				'<button type="button" class="btn btn-inverse btn-sm" id="btn_hz_zoomIn"><i class="ace-icon fa fa-plus align-middle"></i></button>' +
 				'</div>' +
 				'<div style="margin: 5px 5px;">'+
-				'<button type="button" class="btn btn-inverse btn-sm" id="btn-hz-zoomOut"><i class="ace-icon fa fa-minus align-middle"></i></button>'+
+				'<button type="button" class="btn btn-inverse btn-sm" id="btn_hz_zoomOut"><i class="ace-icon fa fa-minus align-middle"></i></button>'+
 				'</div>'+
 				'</div>'+
 				'</div>'
 			);
-			
-			$('#btn-hz-zoomIn').on('click', {_map: this}, this.zoomIn);
-			$('#btn-hz-zoomOut').on('click',{_map: this}, this.zoomOut);
+			var map = this;
+			$('#btn_hz_zoomIn').click(function () {
+				map.zoomIn();
+			});
+			$('#btn_hz_zoomOut').click(function () {
+				map.zoomOut();
+			});
 		},
+		// 创建 业务工具面板
+		createServicePanel: function () {
+			if(document.getElementById(this.serviceCtrlPanelId)){ return; }  // 存在则退出函数
+			this.container.append(
+				'<div id="'+ this.serviceCtrlPanelId + '" style="position:absolute; top:120px; left: 10px; z-index:1000;">' +
+				'<div class="btn-group btn-group-vertical btn-group-sm" style="background:#FFF; border:1px solid #CCC;">' +
+				'<div style="margin: 5px 5px;">' +
+				'<button type="button" class="btn btn-danger btn-sm hz_btn_class_service" id="hz_btn_showErPanel"><i class="ace-icon fa fa-square-o align-middle"></i>围栏</button>' +
+				'</div>' +
+				'<div class="hr hr-2"></div>'+
+				'<div style="margin: 5px 5px;">'+
+				'<button type="button" class="btn btn-primary btn-sm hz_btn_class_service" id="hz_btn_showPsPanel"><i class="ace-icon fa fa-check-square-o align-middle"></i>盘点</button>'+
+				'</div>'+
+				'</div>'+
+				'</div>'
+			);
+			var map = this;
+			var panel = $('#'+this.serviceCtrlPanelId);
+
+			// 显示 电子围栏 button
+			$('#hz_btn_showErPanel').click(function () {
+				var old_active = false;
+				map.restoreService.run();
+				if($(this).hasClass('active')) {    // 已经激活
+					old_active = true;
+				} else {    // 未激活
+					map.createElectronicRailCtrlPanel();
+					map.restoreService.add(map, map.removeElectronicRailCtrlPanel);
+				}
+				panel.find('.hz_btn_class_service').removeClass('active');
+				if (old_active) {
+					$(this).removeClass('active');
+				} else {
+					$(this).addClass('active');
+				}
+			});
+
+			// 显示 盘点控制 button
+			$('#hz_btn_showPsPanel').click(function () {
+				var old_active = false;
+				map.restoreService.run();
+				if($(this).hasClass('active')) {    // 已经激活
+					old_active = true;
+				} else {    // 未激活
+					map.createPeopleStatCtrlPanel();
+					map.restoreService.add(map, map.removePeopleStatCtrlPanel);
+				}
+				panel.find('.hz_btn_class_service').removeClass('active');
+				if (old_active) {
+					$(this).removeClass('active');
+				} else {
+					$(this).addClass('active');
+				}
+			});
+		},
+		
 		// 缩小
-		zoomOut: function (e) {
-			var map = e.data._map;
-			map.zoom = parseFloat(map.zoom) - 0.05;
-			storage['hz_zoom'] = map.zoom;
-			map.mapZoom(map.zoom * map.mapH, map.zoom * map.mapW);
+		zoomOut: function () {
+			this.zoom = parseFloat(this.zoom) - 0.05;
+			storage['hz_zoom'] = this.zoom;
+			this.mapZoom(this.zoom * this.mapH, this.zoom * this.mapW);
 		},
 		// 放大
-		zoomIn: function (e) {
-			var map = e.data._map;
-			map.zoom = parseFloat(map.zoom) + 0.05;
-			storage['hz_zoom'] = map.zoom;
-			map.mapZoom(map.zoom * map.mapH, map.zoom * map.mapW);
+		zoomIn: function () {
+			this.zoom = parseFloat(this.zoom) + 0.05;
+			storage['hz_zoom'] = this.zoom;
+			this.mapZoom(this.zoom * this.mapH, this.zoom * this.mapW);
 		},
 
 		// 创建坐标拾取显示区
@@ -695,7 +762,7 @@ var storage = window.localStorage;
 				'</div>'
 			);
 
-			map = this;
+			var map = this;
 
 			if (this.isErShowing) {
 				$('#btn_hz_queryEr').text('隐藏围栏');
@@ -1046,7 +1113,7 @@ var storage = window.localStorage;
 		
 		// 显示电子围栏
 		showElectronicRail: function () {
-			map = this;
+			var map = this;
 			getElectronicRailCfg({
 				callback: function (data) {
 					map.erData = data.data;
@@ -1135,7 +1202,7 @@ var storage = window.localStorage;
 		createPeopleStatCtrlPanel: function () {
 			if(document.getElementById(this.psCtrlPanelId)){ return; }  // 存在则退出函数
 			this.container.append(
-				'<div id="' + this.psCtrlPanelId + '" style="position:absolute; top:10px; right:80px; z-index:1000; width:420px;">'+
+				'<div id="' + this.psCtrlPanelId + '" style="position:absolute; top:10px; left:80px; z-index:1000; width:420px;">'+
 				'<div class="btn-group btn-group-xs col-xs-12" id="ps_hz_panel_button" style="background:#FFF; border:1px solid #CCC;">'+
 				'<button type="button" class="btn btn-primary disabled"><i class="ace-icon fa fa-tag align-top bigger-125"></i>盘点区域</button>'+
 				'<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneAdd">新增</button>'+
@@ -1270,7 +1337,7 @@ var storage = window.localStorage;
 				'</div>'
 			);
 
-			map = this;
+			var map = this;
 
 			if (this.isPsShowing) {
 				$('#btnPsZoneShow').text('隐藏');
@@ -1659,8 +1726,8 @@ var storage = window.localStorage;
 					url: url,
 					txData: data,
 					callback: function (data) {
-						updatePsDelPanel();
 						map.showPeopleStatZone();
+						updatePsDelPanel();
 						hzInfo(data.msg);
 					}
 				});
