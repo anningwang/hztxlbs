@@ -53,7 +53,7 @@
           <a class="brand" href="/">和仲通讯</a>
             <ul class="nav">
               <li><a href="{{ url_for('index') }}">{{ _('Home') }}</a></li>
-              <li><a href="{{ url_for('gettoken') }}">{{ _('位置服务平台') }}</a></li>
+              <li><a href="{{ url_for('hz_page_2d_map') }}">{{ _('位置服务平台') }}</a></li>
 
               {% if g.user.is_authenticated %}
               <li><a href="{{ url_for('user', nickname = g.user.nickname) }}">{{ _('Your Profile') }}</a></li>

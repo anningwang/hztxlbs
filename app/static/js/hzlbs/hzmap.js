@@ -58,11 +58,33 @@ var storage = window.localStorage;
 		this.map = map;
 		this.img = options.img || '/static/img/people.png';
 
-		map.userLayer.append('<img src="'+ this.img +'" style="position:absolute;display: none" id='+ options.id + ' />');
-		map.userLayer.append('<div id="' + options.id + '-t" class="hz-div-people-txt" style="position:absolute;display: none">'+ options.text + '</div>');
+		map.eventLayer.append('<img src="'+ this.img +'" style="position:absolute;display: none" id='+ options.id + ' />');
+		map.eventLayer.append('<div id="' + options.id + '-t" class="hz-div-people-txt" style="position:absolute;display: none">'+ options.text + '</div>');
 
 		this.imgContainer = $('#'+options.id);
 		this.textContainer = $('#'+options.id + '-t');
+
+		var people = this;
+
+		this.imgContainer.mouseover(function () {
+			$(this).css("cursor","pointer");
+		}).mouseout(function () {
+			$(this).css("cursor","default");
+		}).click(function () {
+			if (map.curPeople)
+				map.curPeople.unselect();
+			people.select();
+		});
+
+		this.textContainer.mouseover(function () {
+			$(this).css("cursor","pointer");
+		}).mouseout(function () {
+			$(this).css("cursor","default");
+		}).click(function () {
+			if (map.curPeople)
+				map.curPeople.unselect();
+			people.select();
+		});
 
 		this.renderer();
 	}
@@ -120,6 +142,17 @@ var storage = window.localStorage;
 			var pName = this.textContainer;
 			pName.stop(true, true).animate({left: coord.x - pName.width()/2, top: coord.y - _textOffsetTop});
 		},
+
+		// 选中用户
+		select: function () {
+			this.imgContainer.attr('src', '/static/img/peoplesel.png');
+			this.map.curPeople = this;
+		},
+
+		unselect: function () {
+			this.imgContainer.attr('src', '/static/img/people.png');
+			this.map.curPeople = undefined;
+		},
 		
 		destroy: function () {
 			this.imgContainer.remove();
@@ -152,9 +185,9 @@ var storage = window.localStorage;
 		this.hisLocLayer = this.addLayer(this.baseLayer, 'svg_path_history');
 		this.hisLocLayer.svg();
 		this.roomLayer = this.addLayer(this.baseLayer, 'svg_sign');
-		this.userLayer = this.addLayer(this.baseLayer, 'svg_user_sign');
-		this.tempLineLayer = this.addLayer(this.baseLayer, 'svg_temporary_line');
-		this.tempLineLayer.svg();
+		//this.userLayer = this.addLayer(this.baseLayer, 'svg_user_sign');
+		//this.tempLineLayer = this.addLayer(this.baseLayer, 'svg_temporary_line');
+		//this.tempLineLayer.svg();
 		this.drawEventLayer = this.addDrawEventLayer();
 		this.drawEventLayer.svg();
 		this.eventLayer = this.addLayer(this.baseLayer, 'svg_event');   // mouse event: mouseup, mousedown, mousemove
@@ -170,6 +203,7 @@ var storage = window.localStorage;
 		this.isErShowing = false;   // 电子围栏处于“显示”状态。
 		this.psCtrlPanelId = 'hz_map_controller_panel_ps';
 		this.isPsShowing = false;   // 盘点区域 处于“显示”状态。
+		this.navCtrlPanelId = 'hz_map_controller_panel_nav';
 		this.zoomCtrlPanelId = 'hz_zoom_ctrl_panel';
 		this.serviceCtrlPanelId = 'hz_service_ctrl_panel';
 		this.mouseMoveCallback = options.mouseMoveCallback;     // mouse 移动 之 坐标拾取 回调函数
@@ -182,6 +216,8 @@ var storage = window.localStorage;
 		this.hisLocData = undefined;    // 历史轨迹（为地图缩放使用）
 		this.psZoneData = undefined;    // 盘点区域数据 （为地图缩放使用）
 		this.erData = undefined;        // 电子围栏 （为地图缩放使用）
+
+		this.curPeople = undefined;     // 当前选中用户
 		
 		// 显示地图
 		this.mapZoom(this.mapH * this.zoom, this.mapW * this.zoom);
@@ -561,61 +597,73 @@ var storage = window.localStorage;
 				map.zoomOut();
 			});
 		},
+
+		// --------------------------------------------------------------------
+		// 业务工具面板 功能代码 begin
+		// --------------------------------------------------------------------
+
 		// 创建 业务工具面板
 		createServicePanel: function () {
 			if(document.getElementById(this.serviceCtrlPanelId)){ return; }  // 存在则退出函数
 			this.container.append(
 				'<div id="'+ this.serviceCtrlPanelId + '" style="position:absolute; top:120px; left: 10px; z-index:1000;">' +
 				'<div class="btn-group btn-group-vertical btn-group-sm" style="background:#FFF; border:1px solid #CCC;">' +
+
 				'<div style="margin: 5px 5px;">' +
-				'<button type="button" class="btn btn-danger btn-sm hz_btn_class_service" id="hz_btn_showErPanel"><i class="ace-icon fa fa-square-o align-middle"></i>围栏</button>' +
+				'<button type="button" class="btn btn-pink btn-sm hz_btn_class_service" id="hz_btn_showNavPanel"><i class="ace-icon fa fa-road align-middle"></i>导航</button>' +
 				'</div>' +
 				'<div class="hr hr-2"></div>'+
+
+				'<div style="margin: 5px 5px;">' +
+				'<button type="button" class="btn btn-danger btn-sm hz_btn_class_service" id="hz_btn_showErPanel"><i class="ace-icon fa fa-square-o align-middle bigger-125"></i>围栏</button>' +
+				'</div>' +
+				'<div class="hr hr-2"></div>'+
+
 				'<div style="margin: 5px 5px;">'+
-				'<button type="button" class="btn btn-primary btn-sm hz_btn_class_service" id="hz_btn_showPsPanel"><i class="ace-icon fa fa-check-square-o align-middle"></i>盘点</button>'+
+				'<button type="button" class="btn btn-primary btn-sm hz_btn_class_service" id="hz_btn_showPsPanel"><i class="ace-icon fa fa-check-square-o align-middle bigger-115"></i>盘点</button>'+
 				'</div>'+
+
 				'</div>'+
 				'</div>'
 			);
 			var map = this;
 			var panel = $('#'+this.serviceCtrlPanelId);
 
+			// 显示 导航控制面板 button
+			$('#hz_btn_showNavPanel').click(function () {
+				serviceButtonClick($(this), map, map.createNavigationCtrlPanel, map.removeNavigationCtrlPanel);
+			});
+
 			// 显示 电子围栏 button
 			$('#hz_btn_showErPanel').click(function () {
-				var old_active = false;
-				map.restoreService.run();
-				if($(this).hasClass('active')) {    // 已经激活
-					old_active = true;
-				} else {    // 未激活
-					map.createElectronicRailCtrlPanel();
-					map.restoreService.add(map, map.removeElectronicRailCtrlPanel);
-				}
-				panel.find('.hz_btn_class_service').removeClass('active');
-				if (old_active) {
-					$(this).removeClass('active');
-				} else {
-					$(this).addClass('active');
-				}
+				serviceButtonClick($(this), map, map.createElectronicRailCtrlPanel, map.removeElectronicRailCtrlPanel);
 			});
 
 			// 显示 盘点控制 button
 			$('#hz_btn_showPsPanel').click(function () {
+				serviceButtonClick($(this), map, map.createPeopleStatCtrlPanel, map.removePeopleStatCtrlPanel);
+			});
+
+			function serviceButtonClick(btn, map, mapFuncOpen, mapFuncClose) {
 				var old_active = false;
 				map.restoreService.run();
-				if($(this).hasClass('active')) {    // 已经激活
+				if(btn.hasClass('active')) {    // 已经激活
 					old_active = true;
 				} else {    // 未激活
-					map.createPeopleStatCtrlPanel();
-					map.restoreService.add(map, map.removePeopleStatCtrlPanel);
+					mapFuncOpen.call(map);
+					map.restoreService.add(map, mapFuncClose);
 				}
 				panel.find('.hz_btn_class_service').removeClass('active');
 				if (old_active) {
-					$(this).removeClass('active');
+					btn.removeClass('active');
 				} else {
-					$(this).addClass('active');
+					btn.addClass('active');
 				}
-			});
+			}
 		},
+		// --------------------------------------------------------------------
+		// 业务工具面板 功能代码 end
+		// --------------------------------------------------------------------
 		
 		// 缩小
 		zoomOut: function () {
@@ -635,6 +683,69 @@ var storage = window.localStorage;
 			this.container.append('<div id="hz-divCoordView">坐标拾取</div>');
 			this.coordView =  $('#hz-divCoordView');
 		},
+
+		// --------------------------------------------------------------------
+		// 导航控制面板 功能代码 begin
+		// --------------------------------------------------------------------
+
+		// 使用ACE框架，创建 导航控制面板
+		createNavigationCtrlPanel: function () {
+			if (document.getElementById(this.navCtrlPanelId)) {
+				return;
+			}  // 存在则退出函数
+
+			this.container.append(
+				'<div id="' + this.navCtrlPanelId + '" style="position:absolute; top:10px; left:80px; z-index:1000; width:370px;">'+
+				'<div class="btn-group btn-group-xs col-xs-12" id="hz_panel_nav_button" style="background:#FFF; border:1px solid #CCC;">'+
+				'<button type="button" class="btn btn-pink disabled"><i class="ace-icon fa fa-road align-top bigger-125"></i>导航</button>'+
+				'<select id="hz_nav_dest" class="btn btn-pink" name="locations" style="font-family:Verdana,sans-serif;" title="目的地">'+
+				'<option value="27">Room 1 北斗羲和</option>'+
+				'<option value="29">Room 2</option>'+
+				'<option value="30">Room 3</option>'+
+				'<option value="31">Room 4 健身房</option>'+
+				'<option value="32">Room 5</option>'+
+				'<option value="33">Room 6</option>'+
+				'<option value="34">Room 7 演示厅</option>'+
+				'<option value="23">会议室</option>'+
+				'<option value="28">总裁办公室</option>'+
+				'<option value="24">副总办公室</option>'+
+				'<option value="25">仓库1</option>'+
+				'<option value="26">仓库2</option>'+
+				'</select>'+
+				'<button type="button" class="btn btn-pink" id="hz_btn_begin_nav" >开始导航</button>'+
+				'<button type="button" class="btn btn-pink" id="hz_btn_stop_nav">结束导航</button>'+
+				'</div>'+
+				'</div>'
+			);
+			var map = this;
+
+			// 开始导航 button
+			$('#hz_btn_begin_nav').click(function () {
+				if(!map.curPeople) {
+					hzInfo('请在地图上选择要导航的用户。');
+					return;
+				}
+				map.startNavigation({
+					location: $('#hz_nav_dest').val(),
+					userId: map.curPeople.getId() ||  '1918E00103AA'
+				});
+			});
+
+			// 结束导航 button
+			$('#hz_btn_stop_nav').click(function () {
+				map.stopNavigation();
+			});
+
+		},
+
+		// 删除 电子围栏控制面板
+		removeNavigationCtrlPanel: function () {
+			$('#'+this.navCtrlPanelId).remove();
+		},
+
+		// --------------------------------------------------------------------
+		// 导航控制面板 功能代码 end
+		// --------------------------------------------------------------------
 		
 		
 		// --------------------------------------------------------------------
@@ -648,7 +759,7 @@ var storage = window.localStorage;
 			this.container.append(
 				'<div id="' + this.erCtrlPanelId + '" style="position:absolute; top:10px; left:80px; z-index:1000; width:390px;">' +
 				'<div class="btn-group btn-group-xs col-xs-12" id="er_hz_panel_button" style="background:#FFF; border:1px solid #CCC;">'+
-				'<button type="button" class="btn btn-danger disabled"><i class="ace-icon fa fa-tag align-top bigger-125"></i>电子围栏</button>'+
+				'<button type="button" class="btn btn-danger disabled"><i class="ace-icon fa fa-square-o align-top bigger-125"></i>电子围栏</button>'+
 				'<button type="button" class="btn btn-danger" data-hz-target="#panelErAdd">新增围栏</button>'+
 				'<button type="button" class="btn btn-danger" data-hz-target="#panelErChange">修改围栏</button>'+
 				'<button type="button" class="btn btn-danger" data-hz-target="#panelErDel">删除围栏</button>'+
@@ -1204,7 +1315,7 @@ var storage = window.localStorage;
 			this.container.append(
 				'<div id="' + this.psCtrlPanelId + '" style="position:absolute; top:10px; left:80px; z-index:1000; width:420px;">'+
 				'<div class="btn-group btn-group-xs col-xs-12" id="ps_hz_panel_button" style="background:#FFF; border:1px solid #CCC;">'+
-				'<button type="button" class="btn btn-primary disabled"><i class="ace-icon fa fa-tag align-top bigger-125"></i>盘点区域</button>'+
+				'<button type="button" class="btn btn-primary disabled"><i class="ace-icon fa fa-check-square-o align-top bigger-125"></i>盘点区域</button>'+
 				'<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneAdd">新增</button>'+
 				'<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneChange">修改</button>'+
 				'<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneDel">删除</button>'+

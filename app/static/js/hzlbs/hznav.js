@@ -10,7 +10,6 @@ $(function(){
 		'<ul class="submenu">' +
 
 		'<li class=""><a href="/token"><i class="menu-icon fa fa-caret-right"></i>地图导航</a><b class="arrow"></b></li>' +
-		'<li class=""><a href="/hz_coord_get"><i class="menu-icon fa fa-caret-right"></i>坐标拾取</a><b class="arrow"></b></li>' +
 		'<li class=""><a href="/hz_history_loc"><i class="menu-icon fa fa-caret-right"></i>历史轨迹</a><b class="arrow"></b></li>' +
 		'<li class=""><a href="#" class="dropdown-toggle"><i class="menu-icon fa fa-caret-right"></i><span class="menu-text">电子围栏</span><b class="arrow fa fa-angle-down"></b></a><b class="arrow"></b> ' +
 		'<ul class="submenu">' +
@@ -27,6 +26,8 @@ $(function(){
 
 		'</ul></li>' +
 
+		'<li class=""><a href="/hz_2d_map"><i class="menu-icon fa fa-map-o"></i><span class="menu-text"> 2D地图 </span></a><b class="arrow"></b></li>' +
+
 		'<li class="">' +
 			'<a href="/hz_3d_map">' +
 				'<i class="menu-icon fa fa-desktop"></i>' +
@@ -42,13 +43,19 @@ $(function(){
 		'<li class=""><a href="/hz_ace_blank"><i class="menu-icon fa fa-caret-right"></i>ACE空白页</a><b class="arrow"></b></li>' +
 		'<li class=""><a href="/hz_ace_easyui"><i class="menu-icon fa fa-caret-right"></i>ACE与jqEasyUI</a><b class="arrow"></b></li>' +
 		'<li class=""><a href="/hz_map"><i class="menu-icon fa fa-caret-right"></i>新版地图</a><b class="arrow"></b></li>' +
+		'<li class=""><a href="/hz_coord_get"><i class="menu-icon fa fa-caret-right"></i>坐标拾取-old</a><b class="arrow"></b></li>' +
 		'</ul></li>'
 		
 	);
 
+	var count = 1;
 	$sign_position = $nav.find('[href="'+location.pathname+'"]').parent('li').addClass('active').parent('ul');
+	console.log($sign_position, location.pathname);
 	while (!$nav.is($sign_position)){
 		$sign_position = $sign_position.parent('li').addClass('open').parent('ul');
 		console.log($sign_position);
+		count++;
+		if (count > 200)
+			break;
 	}
 });

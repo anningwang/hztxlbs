@@ -58,7 +58,7 @@ body
 #svg_path_history			{ 	z-index:125;	}
 #svg_path					{	z-index:130;	}
 #svg_sign					{	z-index:140;	}
-#svg_user_sign				{	z-index:150;	}
+#svg_user_sign				{	z-index:300;	}
 #svg_temporary_line			{  	z-index:200;	}
 #svg_event					{	z-index:300;	}
 #enclosureEvent				{	z-index:400;	}

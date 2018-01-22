@@ -352,6 +352,11 @@ def hz_3d_map():
     return render_template('hz_3dmap.html')
 
 
+@app.route('/hz_2d_map')
+def hz_page_2d_map():
+    return render_template('hz_2d_map.html')
+
+
 @app.route('/hz_ps_zone')
 def hz_ps_zone():
     return render_template('hz_ps_zone.html')
