@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="/static/ace/components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/static/ace/components/font-awesome/css/font-awesome.css" />
     <link rel="stylesheet" href="/static/ace/assets/css/ace-fonts.css" />
+    <link rel="stylesheet" href="/static/ace/components/jquery.gritter/css/jquery.gritter.min.css" />
 
     <link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css" />
     <link rel="stylesheet" href="/static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" />
@@ -156,8 +157,8 @@
                         <button class="btn btn-info btn-sm" id="btnQueryHisLoc">查询</button>
                         <button class="btn btn-info btn-sm" id="btnClearHisLoc">清除</button>
 
-                        <button class="btn btn-pink btn-sm" id="btnPsZone">显示盘点区域</button>
-                        <button class="btn btn-purple btn-sm" id="btnElectRail">显示围栏面板</button>
+                        <button class="btn btn-danger btn-sm" id="btnElectRail">显示围栏面板</button>
+                        <button class="btn btn-primary btn-sm" id="btnPsZone">显示盘点面板</button>
 
                         <hr class="hr hr-4">
                         <div id="myCanvas"></div>
@@ -190,7 +191,8 @@
         var map = new HzMap({
             container: $('#myCanvas'),
             coordView: true,
-            showERCtrlPanel: true
+            showERCtrlPanel: true,
+            showPSCtrlPanel: true
         });
         console.log(map);
 
@@ -250,14 +252,16 @@
         // 显示/隐藏 盘点控制面板区域
         $('#btnPsZone').click(function () {
             var text = $(this).text();
-            if (text == '显示盘点区域') {
-                map.showPeopleStatZone();
-                $(this).text('隐藏盘点区域');
+            if (text == '显示盘点面板') {
+                //map.showPeopleStatZone();
+                map.createPeopleStatCtrlPanel();
+                $(this).text('隐藏盘点面板');
             } else {
-                map.hidePeopleStatZone();
-                $(this).text('显示盘点区域');
+                //map.hidePeopleStatZone();
+                map.removePeopleStatCtrlPanel();
+                $(this).text('显示盘点面板');
             }
-        });
+        }).click();
 
         // 显示/隐藏 电子围栏 面板
         $('#btnElectRail').click(function () {
@@ -292,6 +296,7 @@
 <script src="/static/ace/components/bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
 <script src="/static/ace/components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
 <script src="/static/ace/components/bootstrap-datepicker/dist/locales/bootstrap-datepicker.zh-CN.min.js"></script>
+<script src="/static/ace/components/jquery.gritter/js/jquery.gritter.min.js"></script>
 <script src="/static/ace/components/jqGrid/js/jquery.jqGrid.min.js"></script>
 <script src="/static/ace/components/jqGrid/js/i18n/grid.locale-cn.js"></script>
 <script src="/static/ace/assets/js/src/elements.scroller.js"></script>

@@ -106,8 +106,8 @@
 			<div class="page-content" style="padding-bottom:0;">
 				<div class="row">
 					<div id="myCanvas">
-						<div class="" id="map_controller_panel" style="position:absolute; top:10px; left:80px; z-index:1000; width:470px;">
-							<div class="btn-group btn-group-xs col-xs-12" id="map_panel_button" style="background:#FFF; border:1px solid #CCC;">
+						<div class="" id="hz_map_controller_panel_ps" style="position:absolute; top:10px; left:80px; z-index:1000; width:470px;">
+							<div class="btn-group btn-group-xs col-xs-12" id="ps_hz_panel_button" style="background:#FFF; border:1px solid #CCC;">
 								<button type="button" class="btn btn-primary disabled"><i class="ace-icon fa fa-tag align-top bigger-125"></i>盘点区域</button>
 								<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneAdd">新增</button>
 								<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneChange">修改</button>
@@ -122,7 +122,7 @@
 								<!-- 新增盘点区域 -->
 								<div class="col-xs-12" style="display:none; " id="panelPsZoneAdd">
 									<div class="row" style="padding-right:10px; padding-top:3px;">
-										<form role="form" class="form-horizontal" id="form-validate">
+										<form role="form" class="form-horizontal" id="form_hz_ps_add">
 											<div class="alert alert-info">新增盘点区域 <br />
 											</div>
 											<div class="form-group">
@@ -164,7 +164,7 @@
 								<!-- 修改盘点区域 -->
 								<div class="col-xs-12" style="display:none;" id="panelPsZoneChange">
 									<div class="row" style="padding-right:10px; padding-top:3px;">
-										<form role="form" class="form-horizontal" id="form-validate2">
+										<form role="form" class="form-horizontal" id="form_hz_ps_change">
 											<div class="alert alert-info">修改盘点区域<br />
 											</div>
 											<div class="form-group">
@@ -224,7 +224,7 @@
 											</div>
 											<div class="form-group">
 												<div class="col-xs-6 col-xs-push-6">
-													<button type="button" class="btn btn-success btn-xs" id="enclosure_item_button">删除</button>
+													<button type="button" class="btn btn-success btn-xs" id="btn_hz_ps_zone_del">删除</button>
 												</div>
 											</div>
 										</form>
@@ -296,7 +296,7 @@
 		}
 
 		// svg地图 控制面板
-		$("#map_panel_button").find('button').on('click', function () {
+		$("#ps_hz_panel_button").find('button').on('click', function () {
 			var btn = $(this);
 
 			// added by wxg 2018-01-02
@@ -337,8 +337,6 @@
 			$target.slideUp();
 		}
 
-
-		//var psZoneAdd = new HzDrawTools();
 		var psZoneAdd = new HzDrawZone({board: boardLayer, penColor:'blue'});
 
 		function changeTextPsZoneAdd($this){
@@ -400,7 +398,6 @@
 			}
 		});
 
-		// var psZoneChange = new HzDrawTools();
 		var psZoneChange = new HzDrawZone({board: boardLayer, penColor:'blue'});
 
 		function changeTextPsZoneChange($this){
@@ -574,7 +571,7 @@
 		}));
 
 
-		$('#form-validate').validate({
+		$('#form_hz_ps_add').validate({
 			errorElement: 'div',
 			errorClass: 'help-block',
 			focusInvalid: false,
@@ -667,7 +664,7 @@
 
 		query_electronic();
 
-		$('#enclosure_item_button').on('click',function(){
+		$('#btn_hz_ps_zone_del').on('click',function(){
 			var $enclosure_item = $('#enclosure_item');
 			var items = $enclosure_item.find(':checked');
 
@@ -687,7 +684,7 @@
 				who:'people_stat_cfg',
 				ids:ids
 			};
-			console.log('enclosure_item_button send data:',data);
+			console.log('btn_hz_ps_zone_del send data:',data);
 			ajaxJsonRequest({
 				url: url,
 				txData: data,
