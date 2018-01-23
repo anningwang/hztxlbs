@@ -132,17 +132,6 @@
     var map;
 
     window.onload = function() {
-
-        var HZ_USER_IDS = ['1918E00103AA', '1918E00103A9'];
-        var hz_user_id = 0;
-        var storage = window.localStorage;
-        if(storage){
-            var _userId = storage['hz_user_id'];
-            if(typeof _userId !== 'undefined') {
-                hz_user_id = _userId;
-            }
-        }
-
         map = new fengmap.FMMap({
             container: document.getElementById('map-container'), // 渲染dom
 
@@ -223,7 +212,7 @@
                         });
                     } else {
                         var color = 'blue';
-                        if (hz_user_id != 0 && HZ_USER_IDS[hz_user_id-1] == msg[i].userId) color = 'red';
+                        if (HzTools.selectUserId == msg[i].userId) color = 'red';
                         var im = addMarker(fm_coord, color);
                         if (im) {
                             hz_marker[msg[i].userId] = {marker: im};

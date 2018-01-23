@@ -342,11 +342,6 @@ def hz_er_alarm():
     return render_template('hz_er_alarm.html')
 
 
-@app.route('/hz_coord_get')
-def hz_coord_get():
-    return render_template('hz_coord_get.html')
-
-
 @app.route('/hz_3d_map')
 def hz_3d_map():
     return render_template('hz_3dmap.html')

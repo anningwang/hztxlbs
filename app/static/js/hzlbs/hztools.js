@@ -47,7 +47,7 @@
             if(this._storage)  this._storage['hz_zoom'] = this.zoom;
         },
         getNavStatus: function () {
-            return Boolean(this._storage.getItem('hz_is_navigating'));
+            return this._storage.getItem('hz_is_navigating') == 'true';
         },
         setNavStatus: function (status) {
             this.is_navigating = status;
@@ -74,9 +74,9 @@
         getSelectUserId: function () {
             return this._storage.getItem('hz_select_userId');
         }
-        
     };
-    window.HzTools = HzTools;
+
+    window.HzTools = new HzTools();
 })(window);
 
 

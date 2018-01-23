@@ -32,7 +32,7 @@
 
 	<script src="/static/js/hzlbs/hznav.js"></script>
 	<script src="/static/js/hzlbs/hztools.js"></script>
-	<script src="/static/js/hzlbs/hzshowmap.js"></script>
+	<script src="/static/js/hzlbs/hzmap.js"></script>
 	<script src="/static/js/hzlbs/hzdialog.js"></script>
 
 	<link rel="shortcut icon" href="/static/img/favicon.ico" />
@@ -126,49 +126,7 @@
 					<h1>历史轨迹</h1>
 				</div>
 
-				<div class="row">
-					<div class="col-xs-12" >
-
-						<div class="col-xs-2">
-							<div class="col-xs-4">
-								<label for="userId" class="control-label no-padding-right pull-right">用户:</label>
-							</div>
-							<div class="col-sm-8">
-								<select id="userId" >
-									<option value="0">请选择用户</option>
-									<option value="1918E00103AA">1918E00103AA</option>
-									<option value="1918E00103A9">1918E00103A9</option>
-								</select>
-							</div>
-						</div>
-
-
-						<div class="col-sm-1">
-							<label class="control-label no-padding-right pull-right">时间:</label>
-						</div>
-						<div class="col-xs-4">
-							<span class="input-icon">
-								<input type="text" id="startTime" class="date-timepicker"  placeholder="查询起始时间" style="width:178px;"/>
-							</span>
-
-							<span class="input-icon input-icon-right">
-								<input type="text" id="endTime" class="date-timepicker" placeholder="查询截止时间" style="width:178px;"/>
-							</span>
-						</div>
-						<div class="col-xs-1">
-							<button class="btn btn-info btn-sm" id="btnQueryHisLoc">查询</button>
-						</div>
-						<div class="col-xs-1">
-							<button class="btn btn-info btn-sm" id="btnClearHisLoc">清除</button>
-						</div>
-
-					</div> <!-- /.col -->
-				</div> <!-- /.row -->
-
-				<div class="hr hr-10"></div>
-				<div id="myCanvas">
-
-				</div>
+				<div id="myCanvas"></div>
 
 				<!--页脚-->
 				<div class="footer">
@@ -189,150 +147,12 @@
 	'use strict';
 
 	$(function(){
-		var hisLocData = undefined;
-
-		var socket = io.connect(hz_connStr);
-		socket.on('hz_position', function(msg) {
-			console.log('hz_position', msg);
-			for (var i=0; i<msg.length; i++){
-				hzPeopleGoto(msg[i]['x'], msg[i]['y'], msg[i]['userId']);
-			}
+		var map = new HzMap({
+			container: $('#myCanvas'),
+			coordView: true,
+			showHisLocCtrlPanel: true
 		});
-
-		// 清除历史轨迹
-		$('#btnClearHisLoc').click(function () {
-			hisLocData = undefined;
-			delZoomCallback(draw_his_loc);
-
-			var hisLayer = $('#svg_path_history');
-			hisLayer.svg();
-			var svg = hisLayer.svg('get');
-			svg.clear();
-		});
-
-
-		// 历史轨迹查询按钮绑定
-		$('#btnQueryHisLoc').click(function(){
-			getHisLocation();
-		});
-
-		// 历史轨迹查询函数
-		function getHisLocation(){
-
-			// 获得数据并校验是否合法
-			var userName = $('#userId').val();
-			if(userName == 0){
-				hzInfo('请选择查询用户');
-				return;
-			}
-
-			var startTime = $('#startTime').val();
-			if(startTime == ''){
-				hzAlert('请选择查询起始时间');
-				return;
-			}
-
-			var endTime = $('#endTime').val();
-			if(endTime == ''){
-				hzInfo('请选择查询截止时间');
-				return;
-			}
-
-			/**
-			 * 向服务器发送 Ajax 请求，查询相关数据, POST方式
-			 * @param url       请求 url
-			 * @param txData    请求 参数，具体参数含义，见对应接口说明
-			 *
-			 * 数据格式
-			 * 	 url = '/lbs/get_history_location';  访问地址
-			 * 	 txData = {
-			 * 	 	"userId": ["1918E00103AA"],     				["all"] for all users
-			 * 	 	"datetimeFrom": "2017-09-17 11:17:35",          按照时间段查询
-			 * 	 	"datetimeTo": "2017-09-23 11:17:35",
-			 * 	 	"compress": false        是否压缩，压缩的含义是，服务器会根据特定策略返回部分路径坐标。 保留参数
-			 * 	 	};
-			 */
-			var url = '/lbs/get_history_location';
-			var txData = {
-				"userId": [userName],     // "userId": ["all"] for all users
-				"datetimeFrom": startTime,          // 按照时间段查询
-				"datetimeTo": endTime,
-				"compress": false       // 是否压缩，压缩的含义是，服务器会根据特定策略返回部分路径坐标。 保留参数
-			};
-
-			$.ajax({
-				url: url,
-				async: true,
-				type: 'POST',
-				data: {data: JSON.stringify(txData)}
-			}).done(function(data) {
-				// console.log('接口调用成功');
-				console.log('url & data:', url, data);
-
-				if(data.errorCode == 0){
-					hisLocData = data.data;
-					addZoomCallback(draw_his_loc);
-					var isDraw = drawHisLocation(data.data);
-					if (!isDraw) {
-						hzInfo('该时间段没有数据!');
-					}
-				} else {
-					hzInfo('接口调用失败：' + data.msg);
-				}
-
-			}).fail(function() {
-				console.log('接口调用失败, url=', url, 'data=', data);
-				hzInfo('连接错误');
-			});
-		}
-
-		function draw_his_loc() {
-			drawHisLocation(hisLocData);
-		}
-
-		// 画历史轨迹
-		function drawHisLocation(data){
-			if (!data) return false;
-
-			var hisLayer = $('#svg_path_history');
-			hisLayer.svg();
-			var svg = hisLayer.svg('get');
-			svg.clear();
-
-			var isDraw;
-			var points = [];
-			var pt = [];
-
-			for(var key in data) {
-				if (!data.hasOwnProperty(key)) continue;
-				for (var m=0; m< data[key].length; m++) {
-					pt = [];
-					pt.push(coordMapToScreen(data[key][m].x));
-					pt.push(coordMapToScreen(data[key][m].y));
-					points.push(pt)
-				}
-
-				// 曲线
-				svg.polyline(points,{
-					fill: 'none',
-					stroke: 'blue',
-					strokeWidth: 1
-				});
-				svg.text(points[0][0],points[0][1],'起',{fontSize: 16, fontFamily: 'Verdana',fill:'red'});
-				svg.text(points[data[key].length-1][0],points[data[key].length-1][1],'终',{fontSize: 16, fontFamily: 'Verdana',fill:'red'});
-
-				isDraw = true;
-			}
-
-			return isDraw;
-		}
-
-		// 时间日历插件格式化
-		$('.date-timepicker').datetimepicker({
-			language: 'zh-CN',
-			format: 'yyyy-mm-dd hh:ii:ss',
-			autoclose: true
-		});
+		console.log(map);
 	});
 
 </script>

@@ -43,7 +43,6 @@ $(function(){
 		'<li class=""><a href="/hz_ace_blank"><i class="menu-icon fa fa-caret-right"></i>ACE空白页</a><b class="arrow"></b></li>' +
 		'<li class=""><a href="/hz_ace_easyui"><i class="menu-icon fa fa-caret-right"></i>ACE与jqEasyUI</a><b class="arrow"></b></li>' +
 		'<li class=""><a href="/hz_map"><i class="menu-icon fa fa-caret-right"></i>新版地图</a><b class="arrow"></b></li>' +
-		'<li class=""><a href="/hz_coord_get"><i class="menu-icon fa fa-caret-right"></i>坐标拾取-old</a><b class="arrow"></b></li>' +
 		'</ul></li>'
 		
 	);

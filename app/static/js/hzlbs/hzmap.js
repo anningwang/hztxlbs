@@ -164,6 +164,8 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 	// begin of HzMap
 	//-------------------------------------------------------------------------
 	function HzMap(options) {
+		options = options || {};
+		if (!options.container) { return; }
 		this.container = options.container;     // JQuery 对象
 		this.baseLayer = this.addLayer(this.container, 'svg_map_base');
 		this.mapSvgLayer = this.addMapSvg(this.baseLayer, 'svg_image', '/static/img/floor3.svg');
@@ -186,18 +188,21 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		this.drawEventLayer = this.addDrawEventLayer();
 		this.drawEventLayer.svg();
 		this.eventLayer = this.addLayer(this.baseLayer, 'svg_event');   // mouse event: mouseup, mousedown, mousemove
+		this.tools = HzTools;
 		this.left = undefined;      // 地图在容器中的位置（距离左上角的距离，left, top）
 		this.top = undefined;
 		this.fator = 0.0891;        // 物理坐标转像素的比例
-		this.zoom = 0.486;          // 地图缩放级别
+		this.zoom = this.tools.zoom;      // 地图缩放级别
 		if (options.zoom !== undefined) this.zoom = options.zoom;
 		this.mapW = 3477;           // 地图图片宽度 px
 		this.mapH = 1769;           // 地图图片高度 px
 		this.userList = {};         // 用户列表 { userId: HzPeople }
 		this.erCtrlPanelId = 'hz_map_controller_panel_er';
 		this.isErShowing = false;   // 电子围栏处于“显示”状态。
+		if (options.showErZone) { this.showElectronicRail(); }
 		this.psCtrlPanelId = 'hz_map_controller_panel_ps';
 		this.isPsShowing = false;   // 盘点区域 处于“显示”状态。
+		if (options.showPsZone) { this.showPeopleStatZone(); }
 		this.navCtrlPanelId = 'hz_map_controller_panel_nav';
 		this.hisLocCtrlPanelId = 'hz_map_controller_panel_hisLoc';
 		this.zoomCtrlPanelId = 'hz_zoom_ctrl_panel';
@@ -207,14 +212,12 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		this.restoreTools = new Init();     // 恢复工具类，恢复每次绘图的状态
 		this.restoreService = new Init();   // 业务控制面板按钮间初始化对象
 
-		this.zoom -= 0.1;           // 缩小了2个级别 0.05一个级别
 		this.pathData = undefined;  // 导航路径信息（为地图缩放使用）
 		this.hisLocData = undefined;    // 历史轨迹（为地图缩放使用）
 		this.psZoneData = undefined;    // 盘点区域数据 （为地图缩放使用）
 		this.erData = undefined;        // 电子围栏 （为地图缩放使用）
 
 		this.curPeople = undefined;     // 当前选中用户
-		this.tools = new HzTools();
 		
 		// 显示地图
 		this.mapZoom(this.mapH * this.zoom, this.mapW * this.zoom);
@@ -229,22 +232,24 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 
 		// 创建放大缩小按钮
 		this.createZoomCtrl();
-
-		// 创建 业务（电子围栏、人员盘点等）控制面板
-		if(options.showServicePanel)
-			this.createServicePanel();
-
+		
 		// 创建电子围栏控制面板
-		if(options['showERCtrlPanel'])
-			this.createElectronicRailCtrlPanel();
+		if(options['showERCtrlPanel']) { this.createElectronicRailCtrlPanel(); }
 		
 		// 创建盘点区域控制面板
-		if(options['showPSCtrlPanel'])
-			this.createPeopleStatCtrlPanel();
+		if(options['showPSCtrlPanel']) { this.createPeopleStatCtrlPanel(); }
+
+		// 创建历史轨迹控制面板
+		if(options['showHisLocCtrlPanel']) { this.createHistoryLocationCtrlPanel();  }
+
+		// 创建地图导航控制面板
+		if(options['showNavCtrlPanel']) { this.createNavigationCtrlPanel(); }
 
 		// 创建坐标拾取视图（显示框）
-		if(options.coordView)
-			this.createCoordView();
+		if(options.coordView) { this.createCoordView(); }
+
+		// 创建 业务（电子围栏、人员盘点等）控制面板
+		if(options.showServicePanel) { this.createServicePanel(); }
 
 		// 通知组件
 		this.container.append('<div id="gritter-notice-wrapper" style="position:absolute; right:0; z-index:1001;"></div>');
@@ -676,6 +681,13 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 					btn.addClass('active');
 				}
 			}
+
+			// 业务控制面板 和 导航、轨迹、围栏或者盘点 控制面板同时显示时，控制 页面面板按钮的状态。
+			if (document.getElementById(this.navCtrlPanelId)) {
+				$('#hz_btn_showNavPanel').addClass('active');
+				this.restoreService.add(this, this.removeNavigationCtrlPanel);
+			}
+
 		},
 		// --------------------------------------------------------------------
 		// 业务工具面板 功能代码 end
@@ -1314,12 +1326,12 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		// 显示电子围栏
 		showElectronicRail: function () {
 			var map = this;
+			map.isErShowing = true;
 			getElectronicRailCfg({
 				callback: function (data) {
 					map.erData = data.data;
 					map.drawElectronicRail();
 					map.addZoomCallback(map.drawElectronicRail);
-					map.isErShowing = true;
 				}
 			});
 		},
@@ -1354,7 +1366,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 			var svg = this.erLayer.svg('get');
 			svg.clear();
 			
-			data = this.erData;
+			var data = this.erData;
 			for(var k = 0; k < data.length; k++) {
 				var pts = data[k].points;
 				var pointsScreen = [];
@@ -1942,13 +1954,13 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		
 		// 显示盘点区域
 		showPeopleStatZone: function () {
-			map = this;
+			var map = this;
+			this.isPsShowing = true;
 			getPeopleStatZoneCfg({
 				callback: function (data) {
 					map.psZoneData = data.data.rows;
 					map.drawPeopleStatZone();
 					map.addZoomCallback(map.drawPeopleStatZone);
-					map.isPsShowing = true;
 				}
 			});
 		},
@@ -1964,7 +1976,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 			var svg = this.psLayer.svg('get');
 			svg.clear();
 			
-			data = this.psZoneData;
+			var data = this.psZoneData;
 			for(var k = 0; k < data.length; k++) {
 				var pts = data[k].points;
 				var pointsScreen = [];
