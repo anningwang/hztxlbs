@@ -10,6 +10,76 @@
 'use strict';
 
 
+(function(window){
+
+    var HZ_ZOOM = 0.386;                        // 地图缩放级别
+    var HZ_DESTINATION_MEETING_ROOM = 27;       // 办公室编号
+    var HZ_USER_ID_DEFAULT = '1918E00103AA';    // 默认导航用户，容错处理
+
+    function HzTools() {
+        this.zoom = HZ_ZOOM;
+        this.dest = HZ_DESTINATION_MEETING_ROOM;
+        this.is_navigating = false;
+        this.navUserId = undefined;
+        this.selectUserId = undefined;
+        this._storage = window.localStorage;
+
+        this._init();
+    }
+
+    HzTools.prototype = {
+        constructor:HzTools,
+        
+        _init: function () {
+            if(this._storage) {
+                this.zoom = this.getZoom();
+                this.dest = this.getDestination();
+                this.is_navigating = this.getNavStatus();
+                this.navUserId = this.getNavUserId();
+                this.selectUserId = this.getSelectUserId();
+            }
+        },
+        getZoom: function () {
+            return this._storage.getItem('hz_zoom') ||  HZ_ZOOM;
+        },
+        setZoom: function (zoom) {
+            this.zoom = zoom;
+            if(this._storage)  this._storage['hz_zoom'] = this.zoom;
+        },
+        getNavStatus: function () {
+            return Boolean(this._storage.getItem('hz_is_navigating'));
+        },
+        setNavStatus: function (status) {
+            this.is_navigating = status;
+            if(this._storage) this._storage['hz_is_navigating'] = this.is_navigating;
+        },
+        setDestination: function (dest) {
+            this.dest = parseInt(dest);
+            if(this._storage) this._storage['hz_destination'] = this.dest;
+        },
+        getDestination: function () {
+            return this._storage.getItem('hz_destination')|| HZ_DESTINATION_MEETING_ROOM;
+        },
+        setNavUserId: function (userId) {
+            this.navUserId = userId;
+            if(this._storage) this._storage['hz_nav_userId'] = this.navUserId;
+        },
+        getNavUserId: function () {
+            return this._storage.getItem('hz_nav_userId') || HZ_USER_ID_DEFAULT;
+        },
+        setSelectUserId: function (userId) {
+            this.selectUserId = userId;
+            if(this._storage) this._storage['hz_select_userId'] = this.selectUserId;
+        },
+        getSelectUserId: function () {
+            return this._storage.getItem('hz_select_userId');
+        }
+        
+    };
+    window.HzTools = HzTools;
+})(window);
+
+
 var hz_namespace = '/HeZhong';
 // Connect to the Socket.IO server.
 // The connection URL has the following format:

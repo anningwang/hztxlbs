@@ -10,16 +10,8 @@
 
 document.write('<script src="/static/ace/components/jquery-validation/dist/jquery.validate.js"></script>');
 
-'use strict';
-
-//var hz_is_navigating = false;           // 是否曾经设置过导航，或正在导航中
-//var HZ_DESTINATION_MEETING_ROOM = 27;    // 办公室编号
-//var hz_destination = HZ_DESTINATION_MEETING_ROOM;     // 导航的目的地，默认 第一个 目的地
-//var hz_user_id = 0;   // 为HZ_USER_IDS 的索引-1， 0 表示 未选择用户
-//var HZ_USER_IDS = ['1918E00103AA', '1918E00103A9'];
-var storage = window.localStorage;
-
 (function(w) {
+	'use strict';
 
 	// 房间名称所在坐标
 	var _roomNameCoord = [
@@ -71,8 +63,6 @@ var storage = window.localStorage;
 		}).mouseout(function () {
 			$(this).css("cursor","default");
 		}).click(function () {
-			if (map.curPeople)
-				map.curPeople.unselect();
 			people.select();
 		});
 
@@ -81,10 +71,10 @@ var storage = window.localStorage;
 		}).mouseout(function () {
 			$(this).css("cursor","default");
 		}).click(function () {
-			if (map.curPeople)
-				map.curPeople.unselect();
 			people.select();
 		});
+
+		if(map.tools.selectUserId && map.tools.selectUserId == this.id) { this.select();  }
 
 		this.renderer();
 	}
@@ -145,13 +135,18 @@ var storage = window.localStorage;
 
 		// 选中用户
 		select: function () {
+			if (this.map.curPeople)
+				this.map.curPeople.unselect();
+
 			this.imgContainer.attr('src', '/static/img/peoplesel.png');
 			this.map.curPeople = this;
+			this.map.tools.setSelectUserId(this.getId());
 		},
 
 		unselect: function () {
 			this.imgContainer.attr('src', '/static/img/people.png');
 			this.map.curPeople = undefined;
+			this.map.tools.setSelectUserId('');
 		},
 		
 		destroy: function () {
@@ -204,6 +199,7 @@ var storage = window.localStorage;
 		this.psCtrlPanelId = 'hz_map_controller_panel_ps';
 		this.isPsShowing = false;   // 盘点区域 处于“显示”状态。
 		this.navCtrlPanelId = 'hz_map_controller_panel_nav';
+		this.hisLocCtrlPanelId = 'hz_map_controller_panel_hisLoc';
 		this.zoomCtrlPanelId = 'hz_zoom_ctrl_panel';
 		this.serviceCtrlPanelId = 'hz_service_ctrl_panel';
 		this.mouseMoveCallback = options.mouseMoveCallback;     // mouse 移动 之 坐标拾取 回调函数
@@ -218,6 +214,7 @@ var storage = window.localStorage;
 		this.erData = undefined;        // 电子围栏 （为地图缩放使用）
 
 		this.curPeople = undefined;     // 当前选中用户
+		this.tools = new HzTools();
 		
 		// 显示地图
 		this.mapZoom(this.mapH * this.zoom, this.mapW * this.zoom);
@@ -264,11 +261,21 @@ var storage = window.localStorage;
 
 		// 电子围栏信息
 		this.socket.on('hz_electronic_tail', function (msg) {
-			console.log('电子围栏：', msg);
+			//console.log('电子围栏：', msg);
 			for (var i=0; i< msg.length; i++){
 				var state = (msg[i].status == 1) ? '进入': '离开';
 				gritter_alert('电子围栏警报', '用户ID【' + msg[i].userId + '】 '+
 					msg[i].datetime +' 【'+ state + '】了电子围栏【' + msg[i].name + '】');
+			}
+		});
+		
+		this.socket.on('connect', function() {
+			map.socket.emit('hz_event', {data: "I'm connected!"});
+			if (map.tools.getNavStatus()) {
+				map.startNavigation({
+					location: map.tools.getDestination(),
+					userId: map.tools.getNavUserId()
+				});
 			}
 		});
 	}
@@ -480,7 +487,7 @@ var storage = window.localStorage;
 
 				// 保存缩放比例
 				map.zoom = resultWidth / map.mapW;
-				storage['hz_zoom'] = map.zoom;
+				this.tools.setZoom(map.zoom);
 
 				console.log('resultHeight', resultHeight, 'resultWidth', resultWidth);
 				map.mapZoom(resultHeight, resultWidth, map.left, map.top);
@@ -615,6 +622,11 @@ var storage = window.localStorage;
 				'<div class="hr hr-2"></div>'+
 
 				'<div style="margin: 5px 5px;">' +
+				'<button type="button" class="btn btn-info btn-sm hz_btn_class_service" id="hz_btn_showHisLocPanel"><i class="ace-icon fa fa-location-arrow align-middle bigger-125"></i>轨迹</button>' +
+				'</div>' +
+				'<div class="hr hr-2"></div>'+
+
+				'<div style="margin: 5px 5px;">' +
 				'<button type="button" class="btn btn-danger btn-sm hz_btn_class_service" id="hz_btn_showErPanel"><i class="ace-icon fa fa-square-o align-middle bigger-125"></i>围栏</button>' +
 				'</div>' +
 				'<div class="hr hr-2"></div>'+
@@ -632,6 +644,10 @@ var storage = window.localStorage;
 			// 显示 导航控制面板 button
 			$('#hz_btn_showNavPanel').click(function () {
 				serviceButtonClick($(this), map, map.createNavigationCtrlPanel, map.removeNavigationCtrlPanel);
+			});
+
+			$('#hz_btn_showHisLocPanel').click(function () {
+				serviceButtonClick($(this), map, map.createHistoryLocationCtrlPanel, map.removeHistoryLocationCtrlPanel);
 			});
 
 			// 显示 电子围栏 button
@@ -668,13 +684,13 @@ var storage = window.localStorage;
 		// 缩小
 		zoomOut: function () {
 			this.zoom = parseFloat(this.zoom) - 0.05;
-			storage['hz_zoom'] = this.zoom;
+			this.tools.setZoom(this.zoom);
 			this.mapZoom(this.zoom * this.mapH, this.zoom * this.mapW);
 		},
 		// 放大
 		zoomIn: function () {
 			this.zoom = parseFloat(this.zoom) + 0.05;
-			storage['hz_zoom'] = this.zoom;
+			this.tools.setZoom(this.zoom);
 			this.mapZoom(this.zoom * this.mapH, this.zoom * this.mapW);
 		},
 
@@ -685,14 +701,85 @@ var storage = window.localStorage;
 		},
 
 		// --------------------------------------------------------------------
+		// 历史轨迹控制面板 功能代码 begin
+		// --------------------------------------------------------------------
+		createHistoryLocationCtrlPanel: function () {
+			if (document.getElementById(this.hisLocCtrlPanelId)) { return; }  // 存在则退出函数
+
+			this.container.append(
+			'<div id="' + this.hisLocCtrlPanelId + '" style="position:absolute; top:10px; left:80px; z-index:1000; width:540px;">'+
+				'<div class="btn-group btn-group-xs col-xs-12" id="hz_nav_panel_button" style="background:#FFF; border:1px solid #CCC;">'+
+				'<button type="button" class="btn btn-info disabled"><i class="ace-icon fa fa-location-arrow align-top bigger-125"></i>轨迹</button>'+
+				'<input type="text"  id="hz_startTime" class="date-timepicker btn btn-info"  placeholder="起始时间" style="width:178px;"/>'+
+				'<input type="text" id="hz_endTime" class="date-timepicker btn btn-info" placeholder="截止时间" style="width:178px;"/>'+
+				'<button type="button" class="btn btn-info" id="hz_btnQueryHisLoc" >查询</button>'+
+				'<button type="button" class="btn btn-info" id="hz_btnClearHisLoc">清除</button>'+
+				'</div>'+
+				'</div>'
+			);
+
+			$('.date-timepicker').datetimepicker({
+				language: 'zh-CN',
+				format: 'yyyy-mm-dd hh:ii:ss',
+				autoclose: true
+			});
+
+			var map = this;
+			// 查询历史轨迹
+			$('#hz_btnQueryHisLoc').click(function () {
+				if(!map.curPeople) {
+					hzInfo('请在地图上选择用户。');
+					return;
+				}
+				var userId = map.curPeople.getId();
+
+				var startTime = $('#hz_startTime').val();
+				if(startTime == ''){
+					hzInfo('请选择查询起始时间');
+					return;
+				}
+
+				var endTime = $('#hz_endTime').val();
+				if(endTime == ''){
+					hzInfo('请选择查询截止时间');
+					return;
+				}
+
+				getHistoryLocation({
+					userId: [userId],
+					datetimeFrom: startTime,
+					datetimeTo: endTime,
+					callback:function (data) {
+						if(data.total == 0)
+							hzInfo('该时间段没有数据！');
+						map.drawHistoryLocation(data.data);
+					}
+				});
+			});
+
+			// 清除 历史轨迹
+			$('#hz_btnClearHisLoc').click(function () {
+				map.clearHistoryLocation();
+			});
+
+		},
+
+		// 删除 电子围栏控制面板
+		removeHistoryLocationCtrlPanel: function () {
+			$('#'+this.hisLocCtrlPanelId).remove();
+		},
+
+		// --------------------------------------------------------------------
+		// 历史轨迹控制面板 功能代码 end
+		// --------------------------------------------------------------------
+
+		// --------------------------------------------------------------------
 		// 导航控制面板 功能代码 begin
 		// --------------------------------------------------------------------
 
 		// 使用ACE框架，创建 导航控制面板
 		createNavigationCtrlPanel: function () {
-			if (document.getElementById(this.navCtrlPanelId)) {
-				return;
-			}  // 存在则退出函数
+			if (document.getElementById(this.navCtrlPanelId)) { return; }  // 存在则退出函数
 
 			this.container.append(
 				'<div id="' + this.navCtrlPanelId + '" style="position:absolute; top:10px; left:80px; z-index:1000; width:370px;">'+
@@ -718,6 +805,8 @@ var storage = window.localStorage;
 				'</div>'
 			);
 			var map = this;
+
+			$("#hz_nav_dest").val(parseInt(this.tools.getDestination()));
 
 			// 开始导航 button
 			$('#hz_btn_begin_nav').click(function () {
@@ -1919,6 +2008,10 @@ var storage = window.localStorage;
 			this.socket.emit('hz_navigating',
 				{'location': options.location, 'userId': options.userId });
 
+			this.tools.setNavStatus(true);
+			this.tools.setDestination(options.location);
+			this.tools.setNavUserId(options.userId);
+
 			var map = this;
 			// 导航路径
 			this.socket.on('hz_path', function (msg) {
@@ -2044,6 +2137,8 @@ var storage = window.localStorage;
 			this.pathData = undefined;
 			this.delZoomCallback(this.drawNavPath);
 			this.delPeople('destination');
+			
+			this.tools.setNavStatus(false);
 		},
 
 		// 增加缩放地图的回调函数

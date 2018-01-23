@@ -342,8 +342,15 @@ def background_thread():
         if len(pos_to_client) > 0:
             socketio.emit('hz_position', pos_to_client, namespace=HZ_NAMESPACE)
 
+        # 每隔2分钟。强制刷新位置 和 导航路径。
         if count % 120 == 0:
             socketio.emit('hz_position', hz_get_pos(), namespace=HZ_NAMESPACE)
+
+            for client in hz_client_id:
+                if hz_client_id[client]['navigating'] == 1:
+                    path = hz_get_path(hz_client_id[client]['location'], hz_client_id[client]['userId'])
+                    socketio.emit('hz_path', path, namespace=HZ_NAMESPACE, room=client)
+                    hz_client_id[client]['path_cmp'] = path
 
         data = hz_get_pos()
         with app.app_context():
@@ -357,5 +364,5 @@ def background_thread():
                 if path == hz_client_id[client]['path_cmp']:
                     continue
 
-                hz_client_id[client]['path_cmp'] = path
                 socketio.emit('hz_path', path, namespace=HZ_NAMESPACE, room=client)
+                hz_client_id[client]['path_cmp'] = path
