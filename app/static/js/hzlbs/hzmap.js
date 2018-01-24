@@ -257,6 +257,8 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		// 通知组件
 		this.container.append('<div id="gritter-notice-wrapper" style="position:absolute; right:0; z-index:1001;"></div>');
 
+		this.messager = this.addMessageBox(this.container, 'hz_messager');
+
 		// 标签实时位置
 		var map = this;
 		this.socket = io.connect(hz_connStr);
@@ -299,18 +301,15 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		addMapSvg: function (parent, id, filepath) {
 			parent.append('<img src="' + filepath +'" id=' + id + ' class="each_map_layer" />');
 			return $('#'+id);
-			/*
-			parent.append('<div id=' + id + ' class="each_map_layer" />');
-			var mapSvg = $('#'+id);
-			mapSvg.css({width: this.zoom * this.mapW, height: this.zoom * this.mapH});
-			mapSvg.svg();
-			var svg = mapSvg.svg('get');
-
-			svg.load(filepath, {changeSize: false});
-			svg.configure({width: this.zoom * this.mapW, height: this.zoom * this.mapH});
-
-			return mapSvg;
-			*/
+		},
+		addMessageBox: function (parent, id) {
+			parent.append(
+				'<div id="' + id + '" class="alert alert-warning hidden" style="margin-top: 100px;margin-left: 200px; margin-right: 200px" >'+
+				'<a href="#" class="close" data-dismiss="alert">&times;</a>'+
+				'<span><strong>警告！</strong></span>'+
+				'</div>'
+			);
+			return $('#'+id);
 		},
 		// 添加 画图 事件 层
 		addDrawEventLayer: function (options) {
@@ -362,6 +361,8 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 			this.roomLayer.svg();
 			var svg = this.roomLayer.svg('get');
 			svg.clear();
+
+			if(this.zoom < 0.2) { return; }
 
 			for(var i = 0; i < _roomNameCoord.length; i++) {
 				var str = 'translate(' + this.coordMapToScreen(_roomNameCoord[i].x) + ',' + this.coordMapToScreen(_roomNameCoord[i].y) + ')';
@@ -506,11 +507,18 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 				map.left = mapLeft + mouseLeft;
 
 				// 保存缩放比例
-				map.zoom = resultWidth / map.mapW;
-				map.tools.setZoom(map.zoom);
+				var _zoom = resultWidth / map.mapW;
 
-				console.log('resultHeight', resultHeight, 'resultWidth', resultWidth);
-				map.mapZoom(resultHeight, resultWidth, map.left, map.top);
+				if (_zoom > 0.05) {
+					map.zoom = resultWidth / map.mapW;
+					map.tools.setZoom(map.zoom);
+					map.mapZoom(resultHeight, resultWidth, map.left, map.top);
+
+					map.messager.addClass('hidden');
+				} else {
+					map.messager.removeClass('hidden');
+					map.messager.html('<strong>警告！</strong>已经是最小级别!');
+				}
 			}
 		},
 
@@ -711,15 +719,23 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		
 		// 缩小
 		zoomOut: function () {
-			this.zoom = parseFloat(this.zoom) - 0.05;
-			this.tools.setZoom(this.zoom);
-			this.mapZoom(this.zoom * this.mapH, this.zoom * this.mapW);
+			var _zoom = parseFloat(this.zoom) - 0.05;
+			if (_zoom > 0.05) {
+				this.zoom = parseFloat(this.zoom) - 0.05;
+				this.tools.setZoom(this.zoom);
+				this.mapZoom(this.zoom * this.mapH, this.zoom * this.mapW);
+				this.messager.addClass('hidden');
+			} else {
+				this.messager.removeClass('hidden');
+				this.messager.html('<strong>警告！</strong>已经是最小级别!');
+			}
 		},
 		// 放大
 		zoomIn: function () {
 			this.zoom = parseFloat(this.zoom) + 0.05;
 			this.tools.setZoom(this.zoom);
 			this.mapZoom(this.zoom * this.mapH, this.zoom * this.mapW);
+			this.messager.addClass('hidden');
 		},
 
 		// 创建坐标拾取显示区
