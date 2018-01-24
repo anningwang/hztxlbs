@@ -8,27 +8,36 @@
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 
-    <link rel="stylesheet" href="/static/ace/assets/css/bootstrap.css" />
+    <link rel="stylesheet" href="/static/ace/components/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/static/ace/components/font-awesome/css/font-awesome.css" />
     <link rel="stylesheet" href="/static/ace/assets/css/ace-fonts.css" />
+    <link rel="stylesheet" href="/static/ace/components/jquery.gritter/css/jquery.gritter.min.css" />
 
-    <link rel="stylesheet" href="/static/ace/assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
+    <link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css" />
+    <link rel="stylesheet" href="/static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" />
+    <link rel="stylesheet" href="/static/ace/components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css" />
+    <link rel="stylesheet" href="/static/ace/components/_mod/jqgrid/ui.jqgrid.min.css" />
+    <link rel="stylesheet" href="/static/ace/components/bootstrap-multiselect/dist/css/bootstrap-multiselect.css" />
+    <link rel="stylesheet" href="/static/js/jbox/Skins2/Metro/jbox.css" />
+
+    <!-- 确保 ace.min.css 在 ui.jqgrid.min.css 之下。防止ace表格样式不生效 -->
+    <link rel="stylesheet" href="/static/ace/assets/css/ace.min.css" />
     <link rel="stylesheet" href="/static/ace/assets/css/ace-skins.css" />
     <link rel="stylesheet" href="/static/ace/assets/css/ace-rtl.css" />
+    <link rel="stylesheet" href="/static/css/hzmap.css" />
 
-    <link rel="stylesheet" href="/static/js/jquery.svg.package-1.5.0/jquery.svg.css">
-    <link rel="stylesheet" href="/static/ace/components/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css"/>
-    <script src="/static/ace/assets/js/ace-extra.js"></script>
-
+    <!-- 防止其他使用jquery的脚本不起作用，将jquery.min.js设置为第一个出现的js脚本 -->
     <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/ace/assets/js/ace-extra.js"></script>
     <script src="/static/js/jquery.svg.package-1.5.0/jquery.svg.js"></script>
     <script src="/static/js/socket.io-1.3.5/socket.io.min.js"></script>
     <script src="/static/js/jquery.mousewheel.js"></script>
+    <script src="/static/js/jbox/jquery.jBox-2.3.min.js"></script>
 
-    <link rel="stylesheet" href="/static/css/hzmap.css" />
     <script src="/static/js/hzlbs/hztools.js"></script>
     <script src="/static/js/hzlbs/hzmap.js"></script>
     <script src="/static/js/hzlbs/hznav.js"></script>
+    <script src="/static/js/hzlbs/hzdialog.js"></script>
 
     <link rel="shortcut icon" href="/static/img/favicon.ico" />
     <link rel="bookmark" href="/static/img/favicon.ico" type="image/x-icon" />
@@ -144,11 +153,14 @@
     });
 </script>
 
-<script type="text/javascript">
-    if('ontouchstart' in document.documentElement) document.write("<script src='/static/ace/components/_mod/jquery.mobile.custom/jquery.mobile.custom.js'>"+"<"+"/script>");
-</script>
 <script src="/static/ace/components/bootstrap/dist/js/bootstrap.js"></script>
 <script src="/static/ace/components/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.min.js"></script>
+<script src="/static/ace/components/bootstrap-datetimepicker-master/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+<script src="/static/ace/components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script src="/static/ace/components/bootstrap-datepicker/dist/locales/bootstrap-datepicker.zh-CN.min.js"></script>
+<script src="/static/ace/components/jquery.gritter/js/jquery.gritter.min.js"></script>
+<script src="/static/ace/components/jqGrid/js/jquery.jqGrid.min.js"></script>
+<script src="/static/ace/components/jqGrid/js/i18n/grid.locale-cn.js"></script>
 <script src="/static/ace/assets/js/src/elements.scroller.js"></script>
 <script src="/static/ace/assets/js/src/elements.colorpicker.js"></script>
 <script src="/static/ace/assets/js/src/elements.fileinput.js"></script>
@@ -172,7 +184,6 @@
 <script src="/static/ace/assets/js/src/ace.settings-skin.js"></script>
 <script src="/static/ace/assets/js/src/ace.widget-on-reload.js"></script>
 <script src="/static/ace/assets/js/src/ace.searchbox-autocomplete.js"></script>
-
-
+<script src="/static/ace/components/bootstrap-multiselect/dist/js/bootstrap-multiselect.js"></script>
 </body>
 </html>

@@ -1,11 +1,12 @@
 // 导航目录
 
 $(function(){
+	'use strict';
+
 	// 导航插入位置
-	var $nav = $('#hz_nav');
+	var navBar = $('#hz_nav');
 	// 函数运行位置
-	var $sign_position;
-	$nav.html('<li class="" id="li1"> <a href="#" class="dropdown-toggle"> <i class="menu-icon  fa fa-home"></i>' +
+	navBar.html('<li class="" id="li1"> <a href="#" class="dropdown-toggle"> <i class="menu-icon  fa fa-home"></i>' +
 		'<span class="menu-text">我的建筑</span><b class="arrow fa fa-angle-down"></b></a><b class="arrow"></b>' +
 		'<ul class="submenu">' +
 
@@ -46,15 +47,10 @@ $(function(){
 		'</ul></li>'
 		
 	);
-
-	var count = 1;
-	$sign_position = $nav.find('[href="'+location.pathname+'"]').parent('li').addClass('active').parent('ul');
-	console.log($sign_position, location.pathname);
-	while (!$nav.is($sign_position)){
-		$sign_position = $sign_position.parent('li').addClass('open').parent('ul');
-		console.log($sign_position);
-		count++;
-		if (count > 200)
-			break;
+	
+	var item = navBar.find('[href="'+location.pathname+'"]').parent('li').addClass('active').parent('ul');
+	// 增加防止死循环的判断。 当修改js文件。浏览器没有刷新时，点击新页面，chrome 会出现是循环。fire fox 测试则不会。
+	while (item[0] && !navBar.is(item)){
+		item = item.parent('li').addClass('open').parent('ul');
 	}
 });

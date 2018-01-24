@@ -7,8 +7,10 @@
  *           jquery.gritter.js & jquery.gritter.css
  */
 
-'use strict';
+document.write('<link rel="stylesheet" href="/static/ace/components/jquery.gritter/css/jquery.gritter.min.css" />');
+document.write('<script src="/static/ace/components/jquery.gritter/js/jquery.gritter.min.js"></script>');
 
+'use strict';
 
 (function(window){
 

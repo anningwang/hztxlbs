@@ -5,11 +5,12 @@
  *           jBox v2.3
  */
 
-'use strict';
 
 document.write('<link rel="stylesheet" href="/static/js/jbox/Skins2/Metro/jbox.css" />');
 document.write('<script language=javascript src="/static/js/jbox/jquery.jBox-2.3.min.js"></script>');
 document.write('<script src="/static/ace/components/jquery-ui/jquery-ui.min.js"></script>');
+
+'use strict';
 
 $(function(){
 	//override dialog's title function to allow for HTML titles

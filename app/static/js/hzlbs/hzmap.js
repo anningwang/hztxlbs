@@ -369,7 +369,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 			// 缩放 div 中 svg 的 宽和高
 			$('.each_map_layer').each(function () {
 				$(this).css({height: height+'px', width: width+'px'});
-
+				
 				var divSvg = $(this).find('svg');
 				if(divSvg) {
 					divSvg.width($(this).width());
@@ -645,9 +645,10 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 			);
 			var map = this;
 			var panel = $('#'+this.serviceCtrlPanelId);
+			var btnShowNav = $('#hz_btn_showNavPanel');
 
 			// 显示 导航控制面板 button
-			$('#hz_btn_showNavPanel').click(function () {
+			btnShowNav.click(function () {
 				serviceButtonClick($(this), map, map.createNavigationCtrlPanel, map.removeNavigationCtrlPanel);
 			});
 
@@ -684,7 +685,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 
 			// 业务控制面板 和 导航、轨迹、围栏或者盘点 控制面板同时显示时，控制 页面面板按钮的状态。
 			if (document.getElementById(this.navCtrlPanelId)) {
-				$('#hz_btn_showNavPanel').addClass('active');
+				btnShowNav.addClass('active');
 				this.restoreService.add(this, this.removeNavigationCtrlPanel);
 			}
 
