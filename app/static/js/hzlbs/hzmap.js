@@ -166,6 +166,16 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 	function HzMap(options) {
 		options = options || {};
 		if (!options.container) { return; }
+
+		this.tools = HzTools;
+		this.left = undefined;      // 地图在容器中的位置（距离左上角的距离，left, top）
+		this.top = undefined;
+		this.fator = 0.0891;        // 物理坐标转像素的比例
+		this.zoom = this.tools.zoom;      // 地图缩放级别
+		if (options.zoom !== undefined) this.zoom = options.zoom;
+		this.mapW = 3477;           // 地图图片宽度 px
+		this.mapH = 1769;           // 地图图片高度 px
+
 		this.container = options.container;     // JQuery 对象
 		this.baseLayer = this.addLayer(this.container, 'svg_map_base');
 		this.mapSvgLayer = this.addMapSvg(this.baseLayer, 'svg_image', '/static/img/floor3.svg');
@@ -188,14 +198,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		this.drawEventLayer = this.addDrawEventLayer();
 		this.drawEventLayer.svg();
 		this.eventLayer = this.addLayer(this.baseLayer, 'svg_event');   // mouse event: mouseup, mousedown, mousemove
-		this.tools = HzTools;
-		this.left = undefined;      // 地图在容器中的位置（距离左上角的距离，left, top）
-		this.top = undefined;
-		this.fator = 0.0891;        // 物理坐标转像素的比例
-		this.zoom = this.tools.zoom;      // 地图缩放级别
-		if (options.zoom !== undefined) this.zoom = options.zoom;
-		this.mapW = 3477;           // 地图图片宽度 px
-		this.mapH = 1769;           // 地图图片高度 px
+
 		this.userList = {};         // 用户列表 { userId: HzPeople }
 		this.erCtrlPanelId = 'hz_map_controller_panel_er';
 		this.isErShowing = false;   // 电子围栏处于“显示”状态。
@@ -296,6 +299,18 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		addMapSvg: function (parent, id, filepath) {
 			parent.append('<img src="' + filepath +'" id=' + id + ' class="each_map_layer" />');
 			return $('#'+id);
+			/*
+			parent.append('<div id=' + id + ' class="each_map_layer" />');
+			var mapSvg = $('#'+id);
+			mapSvg.css({width: this.zoom * this.mapW, height: this.zoom * this.mapH});
+			mapSvg.svg();
+			var svg = mapSvg.svg('get');
+
+			svg.load(filepath, {changeSize: false});
+			svg.configure({width: this.zoom * this.mapW, height: this.zoom * this.mapH});
+
+			return mapSvg;
+			*/
 		},
 		// 添加 画图 事件 层
 		addDrawEventLayer: function (options) {
@@ -368,7 +383,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 
 			// 缩放 div 中 svg 的 宽和高
 			$('.each_map_layer').each(function () {
-				$(this).css({height: height+'px', width: width+'px'});
+				$(this).css({height: height, width: width});
 				
 				var divSvg = $(this).find('svg');
 				if(divSvg) {
@@ -393,8 +408,8 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 			}
 
 			base.css({
-				left: this.left + 'px',
-				top: this.top + 'px'
+				left: this.left,
+				top: this.top
 			});
 
 			if (this.mapSvgLayer.css('display') == 'none') {
@@ -492,7 +507,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 
 				// 保存缩放比例
 				map.zoom = resultWidth / map.mapW;
-				this.tools.setZoom(map.zoom);
+				map.tools.setZoom(map.zoom);
 
 				console.log('resultHeight', resultHeight, 'resultWidth', resultWidth);
 				map.mapZoom(resultHeight, resultWidth, map.left, map.top);
@@ -524,8 +539,8 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 			_curY = e.pageY - _oldY + parseInt(map.top);
 
 			map.baseLayer.css({
-				left: _curX + 'px',
-				top: _curY + 'px'
+				left: _curX,
+				top: _curY
 			});
 		},
 
