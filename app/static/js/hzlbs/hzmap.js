@@ -261,7 +261,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 
 		// 标签实时位置
 		var map = this;
-		this.socket = io.connect(hz_connStr);
+		this.socket = io.connect(Hzlbs.HZ_CONN_STR);
 		this.socket.on('hz_position', function(msg) {
 			console.log('hz_position', msg);
 			for (var i=0; i<msg.length; i++){
@@ -871,7 +871,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 
 		},
 
-		// 删除 电子围栏控制面板
+		// 删除 地图导航 控制面板
 		removeNavigationCtrlPanel: function () {
 			$('#'+this.navCtrlPanelId).remove();
 		},
