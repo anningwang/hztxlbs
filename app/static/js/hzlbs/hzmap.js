@@ -63,6 +63,8 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		}).mouseout(function () {
 			$(this).css("cursor","default");
 		}).click(function () {
+			var oldSelect = map.getSelectPeople();
+			if (oldSelect) { oldSelect.unselect(); }
 			people.select();
 		});
 
@@ -71,10 +73,12 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		}).mouseout(function () {
 			$(this).css("cursor","default");
 		}).click(function () {
+			var oldSelect = map.getSelectPeople();
+			if (oldSelect) { oldSelect.unselect(); }
 			people.select();
 		});
 
-		if(map.tools.selectUserId && map.tools.selectUserId == this.id) { this.select();  }
+		if(map.tools.selectUserId == this.id) { this.select();  }
 
 		this.renderer();
 	}
@@ -135,17 +139,12 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 
 		// 选中用户
 		select: function () {
-			if (this.map.curPeople)
-				this.map.curPeople.unselect();
-
 			this.imgContainer.attr('src', '/static/img/peoplesel.png');
-			this.map.curPeople = this;
 			this.map.tools.setSelectUserId(this.getId());
 		},
 
 		unselect: function () {
 			this.imgContainer.attr('src', '/static/img/people.png');
-			this.map.curPeople = undefined;
 			this.map.tools.setSelectUserId('');
 		},
 		
@@ -175,6 +174,11 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		if (options.zoom !== undefined) this.zoom = options.zoom;
 		this.mapW = 3477;           // 地图图片宽度 px
 		this.mapH = 1769;           // 地图图片高度 px
+		
+		this.pathData = undefined;  // 导航路径信息（为地图缩放使用）
+		this.hisLocData = undefined;    // 历史轨迹（为地图缩放使用）
+		this.psZoneData = undefined;    // 盘点区域数据 （为地图缩放使用）
+		this.erData = undefined;        // 电子围栏 （为地图缩放使用）
 
 		this.container = options.container;     // JQuery 对象
 		this.baseLayer = this.addLayer(this.container, 'svg_map_base');
@@ -214,13 +218,6 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		this.zoomCallback = [];     // func Array 缩放需要执行的临时函数
 		this.restoreTools = new Init();     // 恢复工具类，恢复每次绘图的状态
 		this.restoreService = new Init();   // 业务控制面板按钮间初始化对象
-
-		this.pathData = undefined;  // 导航路径信息（为地图缩放使用）
-		this.hisLocData = undefined;    // 历史轨迹（为地图缩放使用）
-		this.psZoneData = undefined;    // 盘点区域数据 （为地图缩放使用）
-		this.erData = undefined;        // 电子围栏 （为地图缩放使用）
-
-		this.curPeople = undefined;     // 当前选中用户
 		
 		// 显示地图
 		this.mapZoom(this.mapH * this.zoom, this.mapW * this.zoom);
@@ -344,6 +341,9 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		// 根据用户ID查询 HzPeople 对象
 		getPeople: function (userId) {
 			return this.userList[userId];
+		},
+		getSelectPeople: function () {
+			return this.userList[this.tools.selectUserId];
 		},
 
 		// 屏幕坐标转地图坐标(单位：mm)
@@ -771,11 +771,11 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 			var map = this;
 			// 查询历史轨迹
 			$('#hz_btnQueryHisLoc').click(function () {
-				if(!map.curPeople) {
+				if(!map.getSelectPeople()) {
 					hzInfo('请在地图上选择用户。');
 					return;
 				}
-				var userId = map.curPeople.getId();
+				var userId = map.getSelectPeople().getId();
 
 				var startTime = $('#hz_startTime').val();
 				if(startTime == ''){
@@ -854,13 +854,14 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 
 			// 开始导航 button
 			$('#hz_btn_begin_nav').click(function () {
-				if(!map.curPeople) {
+				var selectPeople = map.getSelectPeople();
+				if(!map.tools.navUserId && !selectPeople) {
 					hzInfo('请在地图上选择要导航的用户。');
 					return;
 				}
 				map.startNavigation({
 					location: $('#hz_nav_dest').val(),
-					userId: map.curPeople.getId() ||  '1918E00103AA'
+					userId: selectPeople.getId() || map.tools.navUserId
 				});
 			});
 
