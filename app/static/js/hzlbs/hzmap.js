@@ -39,6 +39,8 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 	var _picOffsetTop = 45;                 // 人物marker 图片针尖的偏移量：上偏移
 	var _textOffsetTop = 64;                // 文字marker上部偏移量。显示在人物marker的上方
 
+	var CTRL_PANEL_LEFT = 120;
+
 	//-------------------------------------------------------------------------
 	// begin of HzPeople
 	//-------------------------------------------------------------------------
@@ -751,7 +753,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 			if (document.getElementById(this.hisLocCtrlPanelId)) { return; }  // 存在则退出函数
 
 			this.container.append(
-			'<div id="' + this.hisLocCtrlPanelId + '" style="position:absolute; top:10px; left:80px; z-index:1000; width:540px;">'+
+			'<div id="' + this.hisLocCtrlPanelId + '" style="position:absolute; top:10px; left:'+CTRL_PANEL_LEFT+'px; z-index:1000; width:540px;">'+
 				'<div class="btn-group btn-group-xs col-xs-12" id="hz_nav_panel_button" style="background:#FFF; border:1px solid #CCC;">'+
 				'<button type="button" class="btn btn-info disabled"><i class="ace-icon fa fa-location-arrow align-top bigger-125"></i>轨迹</button>'+
 				'<input type="text"  id="hz_startTime" class="date-timepicker btn btn-info"  placeholder="起始时间" style="width:178px;"/>'+
@@ -826,7 +828,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 			if (document.getElementById(this.navCtrlPanelId)) { return; }  // 存在则退出函数
 
 			this.container.append(
-				'<div id="' + this.navCtrlPanelId + '" style="position:absolute; top:10px; left:80px; z-index:1000; width:370px;">'+
+				'<div id="' + this.navCtrlPanelId + '" style="position:absolute; top:10px; left:'+CTRL_PANEL_LEFT+'px; z-index:1000; width:370px;">'+
 				'<div class="btn-group btn-group-xs col-xs-12" id="hz_panel_nav_button" style="background:#FFF; border:1px solid #CCC;">'+
 				'<button type="button" class="btn btn-pink disabled"><i class="ace-icon fa fa-road align-top bigger-125"></i>导航</button>'+
 				'<select id="hz_nav_dest" class="btn btn-pink" name="locations" style="font-family:Verdana,sans-serif;" title="目的地">'+
@@ -891,7 +893,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 			if(document.getElementById(this.erCtrlPanelId)){ return; }  // 存在则退出函数
 
 			this.container.append(
-				'<div id="' + this.erCtrlPanelId + '" style="position:absolute; top:10px; left:80px; z-index:1000; width:390px;">' +
+				'<div id="' + this.erCtrlPanelId + '" style="position:absolute; top:10px; left:'+CTRL_PANEL_LEFT+'px; z-index:1000; width:390px;">' +
 				'<div class="btn-group btn-group-xs col-xs-12" id="er_hz_panel_button" style="background:#FFF; border:1px solid #CCC;">'+
 				'<button type="button" class="btn btn-danger disabled"><i class="ace-icon fa fa-square-o align-top bigger-125"></i>电子围栏</button>'+
 				'<button type="button" class="btn btn-danger" data-hz-target="#panelErAdd">新增围栏</button>'+
@@ -1447,7 +1449,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		createPeopleStatCtrlPanel: function () {
 			if(document.getElementById(this.psCtrlPanelId)){ return; }  // 存在则退出函数
 			this.container.append(
-				'<div id="' + this.psCtrlPanelId + '" style="position:absolute; top:10px; left:80px; z-index:1000; width:420px;">'+
+				'<div id="' + this.psCtrlPanelId + '" style="position:absolute; top:10px; left:'+CTRL_PANEL_LEFT+'px; z-index:1000; width:420px;">'+
 				'<div class="btn-group btn-group-xs col-xs-12" id="ps_hz_panel_button" style="background:#FFF; border:1px solid #CCC;">'+
 				'<button type="button" class="btn btn-primary disabled"><i class="ace-icon fa fa-check-square-o align-top bigger-125"></i>盘点区域</button>'+
 				'<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneAdd">新增</button>'+

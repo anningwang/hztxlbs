@@ -26,22 +26,27 @@
 		if (!options.container) { return; }
 		
 		var self = this;
-		
 		this.tools = HzTools;
-		
 		this.container = options.container; // JQuery 对象
 		this.restoreTools = new Init();     // 恢复工具类，恢复每次绘图的状态
 		this.restoreService = new Init();   // 业务控制面板按钮间初始化对象
 		this.erLayer = null;
+		this.psLayer = null;
 		this.serviceCtrlPanelId = 'hz_service_ctrl_panel';
 		this.fmapContainerId = options.fmapContainerId;
 		this.isNavigating = false;  // 是否处于模拟导航状态
 		this.destCoord = undefined;  // 导航目的地
 		this.userList = {};          // 用户列表 { userId: HzPeople }
 		this.erData = undefined;     // 电子围栏信息
+		this.psZoneData = undefined; // 盘点区域数据
 		this.erCtrlPanelId = 'hz_map_controller_panel_er';
 		this.isErShowing = false;   // 电子围栏处于“显示”状态。
 		if (options.showErZone) { this.showElectronicRail(); }
+		this.psCtrlPanelId = 'hz_map_controller_panel_ps';
+		this.isPsShowing = false;   // 盘点区域 处于“显示”状态。
+		if (options.showPsZone) { this.showPeopleStatZone(); }
+		this.navCtrlPanelId = 'hz_map_controller_panel_nav';
+		this.hisLocCtrlPanelId = 'hz_map_controller_panel_hisLoc';
 
 		// 创建 3D 地图
 		this.createFmap();
@@ -58,16 +63,15 @@
 		// 创建电子围栏控制面板
 		if(options['showERCtrlPanel']) { this.createElectronicRailCtrlPanel(); }
 		
+		// 创建盘点区域控制面板
+		if(options['showPSCtrlPanel']) { this.createPeopleStatCtrlPanel(); }
+		
 		// 创建 业务（电子围栏、人员盘点等）控制面板
 		if(options.showServicePanel) { self.createServicePanel(); }
 	};
 	
 	hzlbs.Hz3DMap.prototype = {
 		constructor: hzlbs.Hz3DMap,  // 构造函数
-		
-		// --------------------------------------------------------------------
-		// 业务工具面板 功能代码 begin
-		// --------------------------------------------------------------------
 
 		addPeople: function (options) {
 			options = options || {};
@@ -77,7 +81,6 @@
 			}
 			return false;
 		},
-
 		// 删除用户marker
 		delPeople: function (userId) {
 			var people = this.userList[userId];
@@ -86,7 +89,6 @@
 				delete this.userList[userId]
 			}
 		},
-
 		// 根据用户ID查询 HzPeople 对象
 		getPeople: function (userId) {
 			return this.userList[userId];
@@ -95,7 +97,11 @@
 		getSelectPeople: function () {
 			return this.getPeople(this.tools.selectUserId);
 		},
-		
+
+		// --------------------------------------------------------------------
+		// 业务工具面板 功能代码 begin
+		// --------------------------------------------------------------------
+
 		// 创建 业务工具面板。 使用ACE框架。
 		createServicePanel: function () {
 			if(document.getElementById(this.serviceCtrlPanelId)){ return; }  // 存在则退出函数
@@ -835,7 +841,617 @@
 		// --------------------------------------------------------------------
 		// 电子围栏 功能代码 end
 		// --------------------------------------------------------------------
+		
+		// --------------------------------------------------------------------
+		// 盘点区域 功能代码 begin
+		// --------------------------------------------------------------------
+		
+		// 创建 盘点区域 控制面板
+		createPeopleStatCtrlPanel: function () {
+			if(document.getElementById(this.psCtrlPanelId)){ return; }  // 存在则退出函数
+			this.container.append(
+				'<div id="' + this.psCtrlPanelId + '" style="position:absolute; top:10px; left:'+CTRL_PANEL_LEFT+'px; z-index:1000; width:420px;">'+
+				'<div class="btn-group btn-group-xs col-xs-12" id="ps_hz_panel_button" style="background:#FFF; border:1px solid #CCC;">'+
+				'<button type="button" class="btn btn-primary disabled"><i class="ace-icon fa fa-check-square-o align-top bigger-125"></i>盘点区域</button>'+
+				'<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneAdd">新增</button>'+
+				'<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneChange">修改</button>'+
+				'<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneDel">删除</button>'+
+				'<button type="button" class="btn btn-primary" id="btnPsZoneShow">显示</button>'+
+				'<button type="button" class="btn btn-primary" data-hz-target="#panelPsZoneAddDefault">增加默认</button>'+
+				'<button type="button" class="btn btn-primary" id="btnPsExec">立即盘点</button>'+
+				'</div>'+
+				
+				'<div class="map_panel_content col-xs-12" style="background:#FFF; border:1px solid #CCC;">'+
+				
+				'<!-- 新增盘点区域 -->'+
+				'<div class="col-xs-12" style="display:none; " id="panelPsZoneAdd">'+
+				'<div class="row" style="padding-right:10px; padding-top:3px;">'+
+				'<form role="form" class="form-horizontal" id="form_hz_ps_add">'+
+				'<div class="alert alert-info">新增盘点区域 <br />'+
+				'</div>'+
+				'<div class="form-group">'+
+				'<label for="inventory_name" class="col-sm-3 control-label no-padding-right">盘点名称:</label>'+
+				'<div class="col-sm-9">'+
+				'<input type="text" id="inventory_name" name="name" placeholder="" />'+
+				'</div>'+
+				'</div>'+
+				'<div class="form-group">'+
+				'<label for="psZonePeopleExpect" class="col-sm-3 control-label no-padding-right">期望人数:</label>'+
+				'<div class="col-sm-9">'+
+				'<input type="text" id="psZonePeopleExpect" name="peopleNum" placeholder="" />'+
+				'</div>'+
+				'</div>'+
+				'<div class="form-group">'+
+				'<label for="hz_ps_add_draw_style" class="col-sm-3 control-label no-padding-right">绘制方式:</label>'+
+				'<div class="col-sm-9">'+
+				'<div class="col-xs-6">'+
+				'<select class="form-control" id="hz_ps_add_draw_style">'+
+				'<option value="square">方形绘图</option>'+
+				'<option value="polyline">折线绘图</option>'+
+				'</select>'+
+				'</div>'+
+				'<div class="col-xs-6">'+
+				'<button type="button" id="btnDrawAddPsZone" class="btn btn-xs btn-danger"> <span>开始绘制</span> <i class="ace-icon fa fa-arrow-right icon-on-right"></i> </button>'+
+				'</div>'+
+				'</div>'+
+				'</div>'+
+				'<div class="form-group">'+
+				'<div class="col-xs-6 col-xs-push-6">'+
+				'<input type="submit" class="btn btn-success btn-xs" id="set_enclosure_submit" value="提交" />'+
+				'</div>'+
+				'</div>'+
+				'</form>'+
+				'</div>'+
+				'</div>'+
+				
+				
+				'<!-- 修改盘点区域 -->'+
+				'<div class="col-xs-12" style="display:none;" id="panelPsZoneChange">'+
+				'<div class="row" style="padding-right:10px; padding-top:3px;">'+
+				'<form role="form" class="form-horizontal" id="form_hz_ps_change">'+
+				'<div class="alert alert-info">修改盘点区域<br />'+
+				'</div>'+
+				'<div class="form-group">'+
+				'<label for="alter_enclosure_name" class="col-sm-3 control-label no-padding-right">修改的区域:</label>'+
+				'<div class="col-sm-9">'+
+				'<select class="form-control" id="alter_enclosure_name" name="name"></select>'+
+				'</div>'+
+				'</div>'+
+				
+				'<div class="form-group">'+
+				'<label for="enclosure_new_name" class="col-sm-3 control-label no-padding-right">区域名称:</label>'+
+				'<div class="col-sm-9">'+
+				'<input type="text" id="enclosure_new_name" name="name" placeholder="不填为不修改!" />'+
+				'</div>'+
+				'</div>'+
+				
+				'<div class="form-group">'+
+				'<label for="enclosure_new_name" class="col-sm-3 control-label no-padding-right">期望人数:</label>'+
+				'<div class="col-sm-9">'+
+				'<input type="text" id="enclosure_new_expectNum" name="name" placeholder="不填为不修改!" />'+
+				'</div>'+
+				'</div>'+
+				
+				
+				'<div class="form-group">'+
+				'<label for="hz_ps_change_draw_style" class="col-sm-3 control-label no-padding-right">绘制方式:</label>'+
+				'<div class="col-sm-9">'+
+				'<div class="col-xs-6">'+
+				'<select class="form-control" id="hz_ps_change_draw_style">'+
+				'<option value="square">方形绘图</option>'+
+				'<option value="polyline">折线绘图</option>'+
+				'</select>'+
+				'</div>'+
+				'<div class="col-xs-6">'+
+				'<button type="button" id="btnDrawChangePsZone" class="btn btn-xs btn-danger"> <span>开始绘制</span> <i class="ace-icon fa fa-arrow-right icon-on-right"></i> </button>'+
+				'</div>'+
+				'</div>'+
+				'</div>'+
+				'<div class="form-group">'+
+				'<div class="col-xs-6 col-xs-push-6">'+
+				'<input type="submit" class="btn btn-success btn-xs" id="btnChangePsZone" value="提交" />'+
+				'</div>'+
+				'</div>'+
+				'</form>'+
+				'</div>'+
+				'</div>'+
+				
+				'<!-- 删除盘点区域 -->'+
+				'<div class="col-xs-12" style="display:none;" id="panelPsZoneDel">'+
+				'<div class="row" style="padding-right:10px; height:200px; padding-top:3px;">'+
+				'<form role="form" class="form-horizontal" id="form-validate3">'+
+				'<div class="alert alert-info">删除盘点区域 <br />'+
+				'</div>'+
+				
+				'<div class="form-group" id="enclosure_item">'+
+				
+				'</div>'+
+				'<div class="form-group">'+
+				'<div class="col-xs-6 col-xs-push-6">'+
+				'<button type="button" class="btn btn-success btn-xs" id="btn_hz_ps_zone_del">删除</button>'+
+				'</div>'+
+				'</div>'+
+				'</form>'+
+				'</div>'+
+				'</div>'+
+				
+				'<div class="col-xs-12" style="display:none;" id="panelPsZoneAddDefault">'+
+				'<div class="row" style="padding-right:10px; padding-top:3px; padding-bottom:20px;">'+
+				'<div class="alert alert-info">增加默认盘点区域 <br /></div>'+
+				'<button id="btnAddPsZoneDefault" class="col-lg-12 btn btn-info">增加</button>'+
+				'</div>'+
+				'</div>'+
+				'</div>'+
+				'</div>'
+			);
+			
+			var map = this;
+			
+			if (this.isPsShowing) {
+				$('#btnPsZoneShow').text('隐藏');
+			}
+			
+			/**
+			 * 显示盘点结果
+			 */
+			function showPsResult(data) {
+				console.log('showPsResult', data);
+				if (data.errorCode !== 0) return;
+				var psRec = data['statInfo'];
+				if (psRec.length == 0) return;
+				var text = '编号['+ psRec[0]['statNo'] +'] 盘点时间[' + psRec[0]['datetime'] + ']<br>';
+				
+				for(var i=0; i< psRec.length; i++) {
+					if (psRec[i]['curPeopleNum'] > 0) {
+						text += '区域[' + psRec[i]['roomName'] + ']  人数[' + psRec[i]['curPeopleNum'] + ']  期望人数[' + psRec[i]['expectNum'] + ']<br>'
+					}
+				}
+				text += '其他区域，盘点人数为：0';
+				
+				$.gritter.add({
+					title: '盘点结果',
+					text: text,
+					class_name: 'gritter-info',
+					image: '/static/img/redImageMarker.png',
+					sticky: true,
+					time: ''
+				});
+			}
+			
+			// svg地图 控制面板
+			$("#ps_hz_panel_button").find('button').on('click', function () {
+				var btn = $(this);
+				
+				// added by wxg 2018-01-02
+				if (btn.attr('id') === 'btnPsZoneShow'){
+					if(btn.text() === '隐藏') {	// 隐藏 盘点区域
+						btn.text('显示');
+						map.hidePeopleStatZone();
+					} else {	// 显示 盘点区域
+						btn.text('隐藏');
+						map.showPeopleStatZone();
+					}
+					return;
+				} else if (btn.attr('id') === 'btnPsExec'){
+					psExec({showMsg: false, callback: showPsResult });
+					return;
+				}
+				
+				if(btn.hasClass('active')) {
+					ps_button_slide_up(btn);
+				} else {
+					ps_button_slide_down(btn)
+				}
+			});
+			
+			function ps_button_slide_down($this) {
+				$this.addClass('active');
+				$this.siblings().removeClass('active');
+				var $target = $($this.attr('data-hz-target'));
+				$target.siblings().slideUp('100', function () {
+					$target.slideDown();
+				})
+			}
+			
+			function ps_button_slide_up($this) {
+				$this.removeClass('active');
+				var $target = $($this.attr('data-hz-target'));
+				$target.slideUp();
+			}
+			
+			var psZoneAdd = new HzDrawZone({board: this.psDraftLayer, penColor:'blue'});
+			
+			function changeTextPsZoneAdd($this){
+				var $span = $this.find('span');
+				var buttonText = $span.text();
+				var shape = $('#hz_ps_add_draw_style');
+				if(shape.val() === 'polyline') {
+					if(buttonText === '清空绘制') {
+						$span.text('开始绘制');
+						shape.removeAttr('disabled');
+					} else {
+						$span.text('清空绘制');
+						shape.attr('disabled', 'disabled');
+					}
+				} else if(shape.val() === 'square') {  // 方形绘图
+					if(buttonText === '清空绘制') {
+						$span.text('开始绘制');
+						shape.removeAttr('disabled');
+					} else {
+						$span.text('清空绘制');
+						shape.attr('disabled', 'disabled');
+					}
+				}
+			}
+			
+			// 增加 盘点区域
+			$("#btnDrawAddPsZone").on('click', function () {
+				var $this = $(this);
+				var $span = $this.find('span');
+				var buttonText = $span.text();
+				var $method_select = $('#hz_ps_add_draw_style');
+				if($method_select.val() === 'polyline') {
+					
+					if(buttonText === '清空绘制') {
+						map.restoreTools.run();
+					} else {
+						$span.text('清空绘制');
+						map.restoreTools.run();
+						map.restoreTools.add(psZoneAdd,psZoneAdd.remove_event);
+						map.restoreTools.add(changeTextPsZoneAdd,$this);
+						$method_select.attr('disabled', 'disabled');
+						psZoneAdd.polyline();
+					}
+				}
+				// 方形绘图
+				if($method_select.val() === 'square') {
+					if(buttonText === '清空绘制') {
+						map.restoreTools.run();
+					} else {
+						$span.text('清空绘制');
+						map.restoreTools.run();
+						map.restoreTools.add(psZoneAdd,psZoneAdd.remove_square);
+						map.restoreTools.add(changeTextPsZoneAdd,$this);
+						$method_select.attr('disabled', 'disabled');
+						psZoneAdd.square();
+					}
+				}
+			});
+			
+			var psZoneChange = new HzDrawZone({board: this.psDraftLayer, penColor:'blue'});
+			
+			function changeTextPsZoneChange($this){
+				var $span = $this.find('span');
+				var buttonText = $span.text();
+				var $method_select = $('#hz_ps_change_draw_style');
+				if($method_select.val() === 'polyline') {
+					if(buttonText === '清空绘制') {
+						$span.text('开始绘制');
+						$method_select.removeAttr('disabled');
+					} else {
+						$span.text('清空绘制');
+						$method_select.attr('disabled', 'disabled');
+					}
+				} else if($method_select.val() === 'square') { // 方形绘图
+					if(buttonText === '清空绘制') {
+						$span.text('开始绘制');
+						$method_select.removeAttr('disabled');
+					} else {
+						$span.text('清空绘制');
+						$method_select.attr('disabled', 'disabled');
+					}
+				}
+			}
+			
+			// 修改盘点区域
+			$("#btnDrawChangePsZone").on('click', function () {
+				var $this = $(this);
+				var $span = $this.find('span');
+				var buttonText = $span.text();
+				var $method_select = $('#hz_ps_change_draw_style');
+				if($method_select.val() === 'polyline') {
+					if(buttonText === '清空绘制') {
+						map.restoreTools.run();
+					} else {
+						$span.text('清空绘制');
+						map.restoreTools.run();
+						map.restoreTools.add(psZoneChange,psZoneChange.remove_event);
+						map.restoreTools.add(changeTextPsZoneChange,$this);
+						$method_select.attr('disabled', 'disabled');
+						psZoneChange.polyline();
+					}
+				} else if($method_select.val() === 'square') { // 方形绘图
+					if(buttonText === '清空绘制') {
+						map.restoreTools.run();
+					} else {
+						$span.text('清空绘制');
+						map.restoreTools.run();
+						map.restoreTools.add(psZoneChange,psZoneChange.remove_square);
+						map.restoreTools.add(changeTextPsZoneChange,$this);
+						$method_select.attr('disabled', 'disabled');
+						psZoneChange.square();
+					}
+				}
+			});
+			
+			
+			// 增加默认盘点区域
+			$('#btnAddPsZoneDefault').click(function(){
+				ajaxJsonRequest({
+					url: '/lbs/people_stat_cfg_add_default',
+					txData: {},
+					callback: function (data) {
+						hzInfo(data.msg);
+					}
+				});
+				map.showPeopleStatZone();
+			});
+			
+			// 修改盘点区域
+			$('#btnChangePsZone').on('click', function () {
+				var oName = $('#alter_enclosure_name');
+				var psZoneId = oName.val();
+				var enclosure_new_expectNum = $('#enclosure_new_expectNum').val();
+				var psZoneOldName = oName.find("option:selected").text();
+				var psZoneNewName = $('#enclosure_new_name').val();
+				
+				var psZoneChange_points = psZoneChange.points;
+				
+				console.log('psZoneChange_points', psZoneChange_points);
+				if(psZoneId == 'undefined') {
+					hzInfo('该盘点区域不能修改!');
+					return false;
+				}
+				
+				if(psZoneId == 0) {
+					hzInfo('请选择盘点区域!');
+					return false;
+				}
+				if(psZoneChange.points.length > 0 && psZoneChange.points[0] != psZoneChange.points[psZoneChange.points.length - 1]) {
+					hzInfo('您没有画图');
+					return false;
+				}
+				
+				var pointsToServer = [];
+				
+				var points_length = psZoneChange_points.length - 1;
+				for(var i = 0; i < points_length; i++) {
+					var pt = {
+						x: map.coordScreenToMap(psZoneChange.points[i][0]),
+						y: map.coordScreenToMap(psZoneChange.points[i][1])
+					};
+					pointsToServer.push(pt);
+				}
+				
+				var data = {
+					id: parseInt(psZoneId)
+				};
+				
+				if(psZoneNewName == '') {
+					data.name = psZoneOldName;
+				} else {
+					data.name = psZoneNewName;
+				}
+				
+				if(enclosure_new_expectNum != ''){
+					data.expectNum = enclosure_new_expectNum;
+				}
+				
+				if (pointsToServer.length > 0)
+					data.points = pointsToServer;
+				
+				console.log('btnChangePsZone, send data=', data);
+				ajaxJsonRequest({
+					url: '/lbs/people_stat_cfg_chg',
+					txData: {data: [data] },
+					callback: function (data) {
+						updatePsDelPanel();
+						$('#btnDrawChangePsZone').click();
+						map.showPeopleStatZone();
+						hzInfo(data.msg);
+					}
+				});
+				return false;		// 不提交表单
+			});
+			
+			// 更新盘点区域删除面板。增加 盘点区域 复选框
+			function updatePsDelPanel(){
+				var url = '/lbs/people_stat_cfg_get';
+				var txData = {
+					rows:200
+				};
+				ajaxJsonRequest({
+					url: url,
+					txData: txData,
+					callback: function (data) {
+						var dataData = data.data.rows;
+						var dataDataLength = dataData.length;
+						var selectHtml = '<option value="0">请选择盘点区域</option>';
+						var checkboxHtml = '';
+						for (var i = 0; i<dataDataLength; i++){
+							selectHtml += '<option value="'+dataData[i].id+'">'+dataData[i].name+'</option>';
+							if(dataData[i].id != undefined){
+								checkboxHtml += '<div class="col-xs-6"><div class="ace-settings-item"><input type="checkbox" class="ace ace-checkbox-2 ace-save-state" id="ace-settings-navbar-' + i + '" autocomplete="off" value="'+dataData[i].id+'" /><label class="lbl" for="ace-settings-navbar-'+i+'">'+dataData[i].name+'</div></div>'}
+						}
+						$('#alter_enclosure_name').html(selectHtml);
+						$('#enclosure_item').html(checkboxHtml);
+					}
+				});
+			}
+			
+			updatePsDelPanel();
+			
+			// 增加盘点区域 submit button
+			$('#form_hz_ps_add').validate({
+				errorElement: 'div',
+				errorClass: 'help-block',
+				focusInvalid: false,
+				ignore: "",
+				rules: {
+					name: {
+						required: true
+					},
+					expectNum: {
+						digits: true
+					}
+				},
+				
+				highlight: function (e) {
+					$(e).closest('.form-group').removeClass('has-info').addClass('has-error');
+				},
+				
+				success: function (e) {
+					$(e).closest('.form-group').removeClass('has-error');
+					$(e).remove();
+				},
+				
+				
+				submitHandler: function (form) {
+					if(psZoneAdd.points[0] == undefined || psZoneAdd.points[0] != psZoneAdd.points[psZoneAdd.points.length - 1]) {
+						hzInfo('您没有画图');
+						return;
+					}
+					
+					var $form = $(form);
+					var data = {
+						name: $form.find("#inventory_name").val()
+					};
+					
+					var peopleNum = $form.find("#psZonePeopleExpect").val();
+					if(peopleNum) {
+						data.expectNum = parseInt(peopleNum);
+					}
+					
+					var points = [];
+					var points_length = psZoneAdd.points.length - 1;
+					for(var i = 0; i < points_length; i++) {
+						var pt = {
+							x: map.coordScreenToMap(psZoneAdd.points[i][0]),
+							y: map.coordScreenToMap(psZoneAdd.points[i][1])
+						};
+						points.push(pt);
+					}
+					data.points = points;
+					
+					$('#btnDrawAddPsZone').click();
+					console.log('submitHandler send data=', data);
+					
+					ajaxJsonRequest({
+						url: '/lbs/people_stat_cfg_add',
+						txData: { data: [data] },
+						callback: function (data) {
+							updatePsDelPanel();
+							map.showPeopleStatZone();
+							hzInfo(data.msg);
+						}
+					});
+				},
+				invalidHandler: function (form) {}
+			});
+			
+			$('#btn_hz_ps_zone_del').on('click',function(){
+				var $enclosure_item = $('#enclosure_item');
+				var items = $enclosure_item.find(':checked');
+				
+				map.restoreTools.run();
+				
+				if(items == undefined){
+					hzInfo('请选择要删除的盘点区域!');
+					return false;
+				}
+				var ids = [];
+				items.each(function(){
+					ids.push($(this).val());
+				});
+				
+				var url = '/lbs/hz_data_del';
+				var data = {
+					who:'people_stat_cfg',
+					ids:ids
+				};
+				console.log('btn_hz_ps_zone_del send data:',data);
+				ajaxJsonRequest({
+					url: url,
+					txData: data,
+					callback: function (data) {
+						map.showPeopleStatZone();
+						updatePsDelPanel();
+						hzInfo(data.msg);
+					}
+				});
+			});
+			
+		},
+		
+		// 删除 盘点区域 控制面板
+		removePeopleStatCtrlPanel: function () {
+			$('#'+this.psCtrlPanelId).remove();
+		},
+		
+		// 显示盘点区域
+		showPeopleStatZone: function () {
+			var map = this;
+			this.isPsShowing = true;
+			getPeopleStatZoneCfg({
+				callback: function (data) {
+					map.psZoneData = data.data.rows;
+					map.drawPeopleStatZone();
+				}
+			});
+		},
+		// 隐藏盘点区域
+		hidePeopleStatZone: function () {
+			this.psZoneData = undefined;
+			this.psLayer.removeAll();
+			this.isPsShowing = false;
+		},
+		// 画盘点区域
+		drawPeopleStatZone:function () {
+			var data = this.psZoneData;
 
+			// 获取第一层
+			var group = this.fmap.getFMGroup(this.fmap.groupIDs[0]);
+
+			// 返回当前层中第一个polygonMarker,如果没有，则自动创建
+			if (!this.psLayer) {
+				this.psLayer = new fengmap.FMPolygonMarkerLayer();
+				group.addLayer(this.psLayer);
+			}
+			this.psLayer.removeAll();
+
+			for(var k = 0; k < data.length; k++) {
+				var pts = data[k].points;
+				var points = [];
+
+				for (var i = 0; i < pts.length; i++) {
+					var fm_coord = Hzlbs.coordMapToFMap({x: pts[i].x, y: pts[i].y});
+					points.push({
+						x: fm_coord.x,
+						y: fm_coord.y,
+						z: 0.5
+					});
+				}
+
+				var polygonMarker = new fengmap.FMPolygonMarker({
+					// 设置颜色
+					color: 'blue',
+					// 设置透明度
+					alpha: .3,
+					// 设置边框线的宽度
+					lineWidth: 3,
+					// 设置高度
+					height: 0.5,
+					// 设置电子围栏的坐标点
+					points: points
+				});
+				this.psLayer.addMarker(polygonMarker);
+			}
+		},
+		
+		// --------------------------------------------------------------------
+		// 盘点区域 功能代码 end
+		// --------------------------------------------------------------------
+		
 
 		// --------------------------------------------------------------------
 		// 3d map(fmap) 功能代码 begin
