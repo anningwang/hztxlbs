@@ -12,7 +12,12 @@
 
 (function(window){
     'use strict';
-
+    
+    if( !('hzlbs' in window) ) window['hzlbs'] = {};
+    if( !('Util' in window['hzlbs']) ) window['hzlbs']['Util'] = {};
+    
+    var hzlbs = window['hzlbs'];
+    
     var HZ_ZOOM = 0.386;                        // 地图缩放级别
     var HZ_DESTINATION_MEETING_ROOM = 27;       // 办公室编号
     var HZ_USER_ID_DEFAULT = '1918E00103AA';    // 默认导航用户，容错处理
@@ -76,117 +81,90 @@
             return this._storage.getItem('hz_select_userId');
         }
     };
-
-    window.HzTools = new HzTools();
-})(window);
-
-
-(function(window){
-    'use strict';
-
-    // 坐标转换 简化公式
-    var _locOrigin = {'x':0,'y':0};          // 定位坐标原点
-    var _locRange = {'x':39023,'y':19854};   // 定位范围
-    var _mapOrigin = {'x':12531716.588,'y':3101784.7414};
-    var _mapRange = {'x':12531761.921,'y':3101761.9051};
-
-    var _hz_socket_nameSpace = '/HeZhong';
-
-    window.Hzlbs = {
-        HZ_NAMESPACE: _hz_socket_nameSpace,
-
+    
+    var HZ_SOCKET_NAMESPACE = '/HeZhong';
+    hzlbs.CONST = {
+        HZ_NAMESPACE: HZ_SOCKET_NAMESPACE,
+        
         // Connect to the Socket.IO server.
         // The connection URL has the following format:
         //     http[s]://<domain>:<port>[/<namespace>]
-        HZ_CONN_STR:  location.protocol + '//' + document.domain + ':' + location.port + _hz_socket_nameSpace,
-
-        // 地图坐标 转 FMap 坐标
-        coordMapToFMap: function (coord) {
-            var x = (coord.x - _locOrigin.x)/ (_locRange.x - _locOrigin.x) * (_mapRange.x - _mapOrigin.x) + _mapOrigin.x;
-            var y = (coord.y - _locOrigin.y) / (_locRange.y - _locOrigin.x) * (_mapRange.y - _mapOrigin.y) + _mapOrigin.y;
-
-            return {'x': x, 'y': y};
-        }
+        HZ_CONN_STR:  location.protocol + '//' + document.domain + ':' + location.port + HZ_SOCKET_NAMESPACE
     };
 
-})(window);
+    hzlbs.HzTools = new HzTools();
+    
+    //-----------------------------------------------------------------------------
+    // Init对象功能 begin
+    //-----------------------------------------------------------------------------
+    
+    /**
+     * 添加格式
+     * 1. (函数)                    add(fn)         √
+     * 2. (对象,函数)               add(obj, fn)    √
+     * 3. (函数,参数)               add(fn, param)  √
+     * 4. (对象,函数,参数)          add(obj,fn,[param1,param2])
+     */
 
-
-
-//-----------------------------------------------------------------------------
-// Init对象功能 begin
-//-----------------------------------------------------------------------------
-
-/**
- * 添加格式
- * 1. (函数)                    add(fn)
- * 2. (对象,函数)               add(obj, fn)
- * 3. (函数,参数)               add(fn, param)
- * 4. (对象,函数,参数)          add(obj,fn,[param1,param2])
- */
-function Init(){
-    // 存运行函数的清除方法
-    this.stopFn = [];
-}
-
-Init.prototype.add = function(){
-    var args = [].slice.call(arguments);
-    this.stopFn.push(args);
-};
-
-Init.prototype.empty = function(){
-    this.stopFn = [];
-};
-
-Init.prototype.run = function(){
-    var param;
-    while(param = this.stopFn.pop()){
-        this.dispatch(param);
-    }
-};
-
-Init.prototype.dispatch = function(param){
-    switch (param.length){
-        case 1:
-            param[0].call(null);
-            break;
-        case 2:
-            if(typeof param[0] === 'function') {
-                this.func_param(param[0],param[1]);
-            } else {
-                this.obj_func(param[0],param[1]);
+    hzlbs.Util.Init = function () {
+        // 存运行函数的清除方法
+        this.stopFn = [];
+    };
+    hzlbs.Util.Init.prototype = {
+        constructor: hzlbs.Util.Init,
+        add: function () {
+            var args = [].slice.call(arguments);
+            this.stopFn.push(args);
+        },
+        empty: function () {
+            this.stopFn = [];
+        },
+        run: function () {
+            var param;
+            while(param = this.stopFn.pop()){
+                this.dispatch(param);
             }
-            break;
-        case 3:
-            this.obj_func_param(param[0],param[1],param[2]);
-            break;
-    }
-};
-
-Init.prototype.func_param = function(func,param) {
-    if(param instanceof Array) {
-        func.apply(window,param);
-    }else{
-        func.apply(window,[param]);
-    }
-};
-
-Init.prototype.obj_func = function(obj,func) {
-    func.apply(obj);
-};
-
-
-Init.prototype.obj_func_param = function(obj,func,param){
-    if(param instanceof Array) {
-        func.apply(obj,param);
-    }else{
-        func.apply(obj,[param]);
-    }
-};
-
-//-----------------------------------------------------------------------------
-// Init对象功能 end
-//-----------------------------------------------------------------------------
+        },
+        dispatch: function (param) {
+            switch (param.length){
+                case 1:
+                    param[0].call(null);
+                    break;
+                case 2:
+                    if(typeof param[0] === 'function') {
+                        this.func_param(param[0],param[1]);
+                    } else {
+                        this.obj_func(param[0],param[1]);
+                    }
+                    break;
+                case 3:
+                    this.obj_func_param(param[0],param[1],param[2]);
+                    break;
+            }
+        },
+        func_param: function (func,param) {
+            if(param instanceof Array) {
+                func.apply(window,param);
+            }else{
+                func.apply(window,[param]);
+            }
+        },
+        obj_func: function (obj,func) {
+            func.apply(obj);
+        },
+        obj_func_param: function ( obj,func,param ) {
+            if(param instanceof Array) {
+                func.apply(obj,param);
+            }else{
+                func.apply(obj,[param]);
+            }
+        }
+    };
+    //-----------------------------------------------------------------------------
+    // Init对象功能 end
+    //-----------------------------------------------------------------------------
+    
+})(window);
 
 
 //-----------------------------------------------------------------------------

@@ -168,7 +168,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		options = options || {};
 		if (!options.container) { return; }
 
-		this.tools = HzTools;
+		this.tools =  hzlbs.HzTools;
 		this.left = undefined;      // 地图在容器中的位置（距离左上角的距离，left, top）
 		this.top = undefined;
 		this.fator = 0.0891;        // 物理坐标转像素的比例
@@ -218,8 +218,8 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		this.serviceCtrlPanelId = 'hz_service_ctrl_panel';
 		this.mouseMoveCallback = options.mouseMoveCallback;     // mouse 移动 之 坐标拾取 回调函数
 		this.zoomCallback = [];     // func Array 缩放需要执行的临时函数
-		this.restoreTools = new Init();     // 恢复工具类，恢复每次绘图的状态
-		this.restoreService = new Init();   // 业务控制面板按钮间初始化对象
+		this.restoreTools = new hzlbs.Util.Init();     // 恢复工具类，恢复每次绘图的状态
+		this.restoreService = new hzlbs.Util.Init();   // 业务控制面板按钮间初始化对象
 		
 		// 显示地图
 		this.mapZoom(this.mapH * this.zoom, this.mapW * this.zoom);
@@ -260,7 +260,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 
 		// 标签实时位置
 		var map = this;
-		this.socket = io.connect(Hzlbs.HZ_CONN_STR);
+		this.socket = io.connect(hzlbs.CONST.HZ_CONN_STR);
 		this.socket.on('hz_position', function(msg) {
 			console.log('hz_position', msg);
 			for (var i=0; i<msg.length; i++){

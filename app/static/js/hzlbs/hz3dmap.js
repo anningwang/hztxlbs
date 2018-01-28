@@ -6,10 +6,16 @@
 (function(window){
 	'use strict';
 
-	var hzlbs = window['hzlbs'] || {};
-	if( !('hzlbs' in window) ) window['hzlbs'] = hzlbs;
+	if( !('hzlbs' in window) ) window['hzlbs'] = {};
+	var hzlbs = window['hzlbs'];
 
 	var fmapID = 'hztx-hy-f3'; // mapId
+	
+	// 坐标转换 简化公式
+	var _locOrigin = {'x':0,'y':0};          // 定位坐标原点
+	var _locRange = {'x':39023,'y':19854};   // 定位范围
+	var _mapOrigin = {'x':12531716.588,'y':3101784.7414};
+	var _mapRange = {'x':12531761.921,'y':3101761.9051};
 
 	hzlbs.Hello = new function() {
 		var self = this;
@@ -26,10 +32,10 @@
 		if (!options.container) { return; }
 		
 		var self = this;
-		this.tools = HzTools;
+		this.tools = hzlbs.HzTools;
 		this.container = options.container; // JQuery 对象
-		this.restoreTools = new Init();     // 恢复工具类，恢复每次绘图的状态
-		this.restoreService = new Init();   // 业务控制面板按钮间初始化对象
+		this.restoreTools = new hzlbs.Util.Init();     // 恢复工具类，恢复每次绘图的状态
+		this.restoreService = new hzlbs.Util.Init();   // 业务控制面板按钮间初始化对象
 		this.erLayer = null;
 		this.psLayer = null;
 		this.serviceCtrlPanelId = 'hz_service_ctrl_panel';
@@ -37,8 +43,9 @@
 		this.isNavigating = false;  // 是否处于模拟导航状态
 		this.destCoord = undefined;  // 导航目的地
 		this.userList = {};          // 用户列表 { userId: HzPeople }
-		this.erData = undefined;     // 电子围栏信息
-		this.psZoneData = undefined; // 盘点区域数据
+		this.erData = undefined;        // 电子围栏信息
+		this.psZoneData = undefined;    // 盘点区域数据
+		this.hisLocData = undefined;    // 历史轨迹
 		this.erCtrlPanelId = 'hz_map_controller_panel_er';
 		this.isErShowing = false;   // 电子围栏处于“显示”状态。
 		if (options.showErZone) { this.showElectronicRail(); }
@@ -60,6 +67,9 @@
 		// 创建地图导航控制面板
 		if(options['showNavCtrlPanel']) { self.createNavigationCtrlPanel(); }
 
+		// 创建历史轨迹控制面板
+		if(options['showHisLocCtrlPanel']) { this.createHistoryLocationCtrlPanel();  }
+
 		// 创建电子围栏控制面板
 		if(options['showERCtrlPanel']) { this.createElectronicRailCtrlPanel(); }
 		
@@ -72,6 +82,14 @@
 	
 	hzlbs.Hz3DMap.prototype = {
 		constructor: hzlbs.Hz3DMap,  // 构造函数
+		
+		// 地图坐标 转 FMap 坐标
+		coordMapToFMap: function (coord) {
+			var x = (coord.x - _locOrigin.x)/ (_locRange.x - _locOrigin.x) * (_mapRange.x - _mapOrigin.x) + _mapOrigin.x;
+			var y = (coord.y - _locOrigin.y) / (_locRange.y - _locOrigin.x) * (_mapRange.y - _mapOrigin.y) + _mapOrigin.y;
+			
+			return {'x': x, 'y': y};
+		},
 
 		addPeople: function (options) {
 			options = options || {};
@@ -270,6 +288,79 @@
 
 			//this.tools.setNavStatus(false);
 		},
+
+		// --------------------------------------------------------------------
+		// 历史轨迹控制面板 功能代码 begin
+		// --------------------------------------------------------------------
+		createHistoryLocationCtrlPanel: function () {
+			if (document.getElementById(this.hisLocCtrlPanelId)) { return; }  // 存在则退出函数
+
+			this.container.append(
+				'<div id="' + this.hisLocCtrlPanelId + '" style="position:absolute; top:10px; left:'+CTRL_PANEL_LEFT+'px; z-index:1000; width:540px;">'+
+				'<div class="btn-group btn-group-xs col-xs-12" id="hz_nav_panel_button" style="background:#FFF; border:1px solid #CCC;">'+
+				'<button type="button" class="btn btn-info disabled"><i class="ace-icon fa fa-location-arrow align-top bigger-125"></i>轨迹</button>'+
+				'<input type="text"  id="hz_startTime" class="date-timepicker btn btn-info"  placeholder="起始时间" style="width:178px;"/>'+
+				'<input type="text" id="hz_endTime" class="date-timepicker btn btn-info" placeholder="截止时间" style="width:178px;"/>'+
+				'<button type="button" class="btn btn-info" id="hz_btnQueryHisLoc" >查询</button>'+
+				'<button type="button" class="btn btn-info" id="hz_btnClearHisLoc">清除</button>'+
+				'</div>'+
+				'</div>'
+			);
+
+			$('.date-timepicker').datetimepicker({
+				language: 'zh-CN',
+				format: 'yyyy-mm-dd hh:ii:ss',
+				autoclose: true
+			});
+
+			var map = this;
+			// 查询历史轨迹
+			$('#hz_btnQueryHisLoc').click(function () {
+				if(!map.getSelectPeople()) {
+					hzInfo('请在地图上选择用户。');
+					return;
+				}
+				var userId = map.getSelectPeople().getId();
+
+				var startTime = $('#hz_startTime').val();
+				if(startTime == ''){
+					hzInfo('请选择查询起始时间');
+					return;
+				}
+
+				var endTime = $('#hz_endTime').val();
+				if(endTime == ''){
+					hzInfo('请选择查询截止时间');
+					return;
+				}
+
+				getHistoryLocation({
+					userId: [userId],
+					datetimeFrom: startTime,
+					datetimeTo: endTime,
+					callback:function (data) {
+						if(data.total == 0)
+							hzInfo('该时间段没有数据！');
+						map.drawHistoryLocation(data.data);
+					}
+				});
+			});
+
+			// 清除 历史轨迹
+			$('#hz_btnClearHisLoc').click(function () {
+				map.clearHistoryLocation();
+			});
+
+		},
+
+		// 删除 电子围栏控制面板
+		removeHistoryLocationCtrlPanel: function () {
+			$('#'+this.hisLocCtrlPanelId).remove();
+		},
+
+		// --------------------------------------------------------------------
+		// 历史轨迹控制面板 功能代码 end
+		// --------------------------------------------------------------------
 
 		// --------------------------------------------------------------------
 		// 电子围栏 功能代码 begin
@@ -799,7 +890,7 @@
 				var points = [];
 
 				for (var i = 0; i < pts.length; i++) {
-					var fm_coord = Hzlbs.coordMapToFMap({x: pts[i].x, y: pts[i].y});
+					var fm_coord = this.coordMapToFMap({x: pts[i].x, y: pts[i].y});
 					points.push({
 						x: fm_coord.x,
 						y: fm_coord.y,
@@ -1424,7 +1515,7 @@
 				var points = [];
 
 				for (var i = 0; i < pts.length; i++) {
-					var fm_coord = Hzlbs.coordMapToFMap({x: pts[i].x, y: pts[i].y});
+					var fm_coord = this.coordMapToFMap({x: pts[i].x, y: pts[i].y});
 					points.push({
 						x: fm_coord.x,
 						y: fm_coord.y,
@@ -1507,12 +1598,12 @@
 					}
 				});
 
-				self.socket = io.connect(Hzlbs.HZ_CONN_STR);
+				self.socket = io.connect(hzlbs.CONST.HZ_CONN_STR);
 				// 增加定位代码，实时显示人物位置
 				self.socket.on('hz_position', function (msg) {
 					console.log('hz_position', msg);
 					for(var i = 0; i < msg.length; i++) {
-						var fm_coord = Hzlbs.coordMapToFMap({x: msg[i].x, y: msg[i].y});
+						var fm_coord = self.coordMapToFMap({x: msg[i].x, y: msg[i].y});
 
 						var people = self.getPeople(msg[i].userId);
 						if (people){
