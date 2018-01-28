@@ -38,6 +38,8 @@
 		this.restoreService = new hzlbs.Util.Init();   // 业务控制面板按钮间初始化对象
 		this.erLayer = null;
 		this.psLayer = null;
+		this.hisLocLayer = null;
+		this.pathLayer = null;
 		this.serviceCtrlPanelId = 'hz_service_ctrl_panel';
 		this.fmapContainerId = options.fmapContainerId;
 		this.isNavigating = false;  // 是否处于模拟导航状态
@@ -46,6 +48,9 @@
 		this.erData = undefined;        // 电子围栏信息
 		this.psZoneData = undefined;    // 盘点区域数据
 		this.hisLocData = undefined;    // 历史轨迹
+		this.hisLocData = undefined;    // 历史轨迹
+		this.hisLocLines = [];          // 历史轨迹路线
+
 		this.erCtrlPanelId = 'hz_map_controller_panel_er';
 		this.isErShowing = false;   // 电子围栏处于“显示”状态。
 		if (options.showErZone) { this.showElectronicRail(); }
@@ -54,6 +59,8 @@
 		if (options.showPsZone) { this.showPeopleStatZone(); }
 		this.navCtrlPanelId = 'hz_map_controller_panel_nav';
 		this.hisLocCtrlPanelId = 'hz_map_controller_panel_hisLoc';
+
+		this.setLineStyle();
 
 		// 创建 3D 地图
 		this.createFmap();
@@ -199,7 +206,11 @@
 		// --------------------------------------------------------------------
 		// 业务工具面板 功能代码 end
 		// --------------------------------------------------------------------
-		
+
+
+		isNaviCtrlPanelShowing: function () {
+			return (document.getElementById(this.navCtrlPanelId))
+		},
 		
 		// --------------------------------------------------------------------
 		// 导航控制面板 功能代码 begin
@@ -285,6 +296,7 @@
 			}
 			this.isNavigating = false;
 			this.destCoord = undefined;
+			if (this.pathLayer) { this.pathLayer.removeAll(); }
 
 			//this.tools.setNavStatus(false);
 		},
@@ -313,6 +325,14 @@
 				autoclose: true
 			});
 
+			var oStartTime = $('#hz_startTime');
+			var oEndTime = $('#hz_endTime');
+			var curDate = new Date();
+			var startDate = new Date(curDate.getTime() - 60 * 60 * 1000);
+
+			oStartTime.val(hzlbs.Util.getDate(startDate));
+			oEndTime.val(hzlbs.Util.getDate(curDate));
+
 			var map = this;
 			// 查询历史轨迹
 			$('#hz_btnQueryHisLoc').click(function () {
@@ -322,13 +342,13 @@
 				}
 				var userId = map.getSelectPeople().getId();
 
-				var startTime = $('#hz_startTime').val();
+				var startTime = oStartTime.val();
 				if(startTime == ''){
 					hzInfo('请选择查询起始时间');
 					return;
 				}
 
-				var endTime = $('#hz_endTime').val();
+				var endTime = oEndTime.val();
 				if(endTime == ''){
 					hzInfo('请选择查询截止时间');
 					return;
@@ -353,14 +373,81 @@
 
 		},
 
-		// 删除 电子围栏控制面板
-		removeHistoryLocationCtrlPanel: function () {
-			$('#'+this.hisLocCtrlPanelId).remove();
-		},
-
 		// --------------------------------------------------------------------
 		// 历史轨迹控制面板 功能代码 end
 		// --------------------------------------------------------------------
+
+		// 画历史轨迹
+		drawHistoryLocation: function (data) {
+			if (data) { this.hisLocData = data; }
+			else { data = this.hisLocData; }
+
+			// 获取第一层
+			var group = this.fmap.getFMGroup(this.fmap.groupIDs[0]);
+			if (!this.hisLocLayer) {
+				this.hisLocLayer = new fengmap.FMImageMarkerLayer();
+				group.addLayer(this.hisLocLayer);
+			}
+			this.hisLocLayer.removeAll();
+
+			this.fmap.clearLineMark();
+			// 生成历史轨迹线坐标点
+			var hisLocResults = [{
+				groupId: 1,
+				points: []
+			}];
+
+			for(var key in data) {
+				if (!data.hasOwnProperty(key)) continue;
+				var points = [];
+				for (var m=0; m< data[key].length; m++) {
+					var fm_coord = this.coordMapToFMap(data[key][m]);
+					points.push({x: fm_coord.x, y: fm_coord.y, z: 0.2})
+				}
+				console.log(data, points);
+				hisLocResults[0].points = points;
+				this.drawLines(hisLocResults, this.lineStyle[0]);
+
+				// 添加历史轨迹起点和终点标识
+				this.addImageMarker(this.hisLocLayer, points[0], '/static/img/start.png' );
+				this.addImageMarker(this.hisLocLayer, points[points.length-1], '/static/img/end.png' );
+			}
+		},
+		addImageMarker: function (layer, point, img) {
+			var im = new fengmap.FMImageMarker({
+				x: point.x,
+				y: point.y,
+				// 设置图片路径
+				url: img || '/static/img/start.png',
+				// 设置图片显示尺寸
+				size: 32,
+				height: 0.5,
+				callback: function() {
+					// 在图片载入完成后，设置 "一直可见"
+					im.alwaysShow();
+					// times为次数，0为无限循环。
+					// duration为跳跃一次所使用的时间，默认为1.
+					// delay为每次跳跃的间隔，默认为0.
+					//  height为跳跃的高度，默认为8米。
+					im.jump({
+						times: 0,
+						duration: 2,
+						delay: 0.5,
+						height: 2
+					});
+				}
+			});
+			layer.addMarker(im);
+			return im;
+		},
+
+		// 清除历史轨迹
+		clearHistoryLocation: function () {
+			this.hisLocData = undefined;
+			// 方法一：清除所有路径线
+			this.fmap.clearLineMark();
+			if (this.hisLocLayer) { this.hisLocLayer.removeAll(); }
+		},
 
 		// --------------------------------------------------------------------
 		// 电子围栏 功能代码 begin
@@ -877,8 +964,6 @@
 			var data = this.erData;
 			// 获取第一层
 			var group = this.fmap.getFMGroup(this.fmap.groupIDs[0]);
-
-			// 返回当前层中第一个polygonMarker,如果没有，则自动创建
 			if (!this.erLayer) {
 				this.erLayer = new fengmap.FMPolygonMarkerLayer();
 				group.addLayer(this.erLayer);
@@ -927,6 +1012,11 @@
 				});
 				this.erLayer.addMarker(polygonMarker);
 			}
+		},
+
+		// 删除 电子围栏控制面板
+		removeHistoryLocationCtrlPanel: function () {
+			$('#'+this.hisLocCtrlPanelId).remove();
 		},
 
 		// --------------------------------------------------------------------
@@ -1502,8 +1592,6 @@
 
 			// 获取第一层
 			var group = this.fmap.getFMGroup(this.fmap.groupIDs[0]);
-
-			// 返回当前层中第一个polygonMarker,如果没有，则自动创建
 			if (!this.psLayer) {
 				this.psLayer = new fengmap.FMPolygonMarkerLayer();
 				group.addLayer(this.psLayer);
@@ -1624,6 +1712,7 @@
 		mapClickNode: function () {
 			var self = this;
 			this.fmap.on('mapClickNode',function(event) {
+				if (!self.isNaviCtrlPanelShowing()) { return; }
 				if (self.isNavigating) { return; }
 
 				if (event.nodeType == fengmap.FMNodeType.MODEL) {
@@ -1638,24 +1727,13 @@
 							y: event.mapCoord.y,
 							groupID: event.groupID
 						};
-						//console.log('no label', coord);
 					} else {
 						coord = {
 							x: modelLabel.mapCoord.x,
 							y: modelLabel.mapCoord.y,
 							groupID: event.groupID
 						};
-
-						//console.log('has label', coord);
 					}
-/*
-					coord = {
-						x: event.mapCoord.x,
-						y: event.mapCoord.y,
-						groupID: event.groupID
-					};
-					console.log('navi', coord);
-					*/
 
 					var naviCoord = [];
 					var people = self.getSelectPeople();
@@ -1711,6 +1789,7 @@
 
 				// 导航路径结束事件
 				this.navi.on('complete',function() {
+					hzTip('已到目的地，导航结束。');
 				});
 			}
 			this.navi.clearAll();
@@ -1736,7 +1815,65 @@
 
 			// 画出导航线
 			this.navi.drawNaviLine();
+		},
+
+		setLineStyle: function () {
+			// 配置线型、线宽、透明度等
+			var lineStyle = {
+				// 设置线的宽度
+				lineWidth: 4,
+				// 设置线的透明度
+				alpha: 0.8,
+				// offsetHeight 默认的高度为 1, (离楼板1米的高度)
+				offsetHeight: 1,
+				// 设置线的类型为导航线
+				lineType: fengmap.FMLineType.FMARROW,
+				godColor: '#FF0000',
+				// 设置线动画,false为动画
+				noAnimate: false
+			};
+
+			// 配置线型、颜色、线宽、透明度等
+			var lineStyle2 = {
+				// 设置线的颜色
+				color: 'BlueViolet',
+				// 设置线的宽度
+				lineWidth: 4,
+				// 设置线的透明度
+				alpha: 0.8,
+				// offsetHeight 默认的高度为 1, (离楼板1米的高度)
+				offsetHeight: 1,
+				// 设置线的类型
+				lineType: fengmap.FMLineType.DOUBLE_DOT_DASH, // CENTER  DASH  DOT_DASH  DOTTED DOUBLE_DOT_DASH  FMARROW  FULL TRI_DOT_DASH
+				dash: {
+					// 设置线的大小
+					size: 5,
+					// 0为实线，大于0为虚线
+					gap: 0
+				}
+			};
+
+			this.lineStyle = [lineStyle, lineStyle2];
+		},
+
+		// 绘制线图层
+		drawLines : function (results, lineStyle) {
+			lineStyle = lineStyle || this.lineStyle[0];
+			// 绘制部分
+			var line = new fengmap.FMLineMarker();
+			for (var i = 0; i < results.length; i++) {
+				var result = results[i];
+				var gid = result.groupId;
+				var points = result.points;
+				var seg = new fengmap.FMSegment();
+				seg.groupId = gid;
+				seg.points = points;
+				line.addSegment(seg);
+				var lineObject = this.fmap.drawLineMark(line, lineStyle);
+				this.hisLocLines.push(lineObject);
+			}
 		}
+
 		// --------------------------------------------------------------------
 		// 3d map(fmap) 功能代码 end
 		// --------------------------------------------------------------------
@@ -1809,15 +1946,13 @@
 		},
 
 		addMarker: function () {
-			// 获取焦点层
 			var fmap = this.map.fmap;
-			var currentGid = fmap.focusGroupID;
-			var group = fmap.getFMGroup(currentGid);
+			var group = fmap.getFMGroup(fmap.groupIDs[0]);
 
-			if(!group) return null;
-
-			// 返回当前层中第一个imageMarkerLayer,如果没有，则自动创建
-			var layer = group.getOrCreateLayer('imageMarker');
+			if(!this.map.userLayer) {
+				this.map.userLayer = new fengmap.FMImageMarkerLayer();
+				group.addLayer(this.map.userLayer);
+			}
 
 			// 图标标注对象，默认位置为该楼层中心点
 			var im = new fengmap.FMImageMarker({
@@ -1837,7 +1972,7 @@
 
 			if(this.map.tools.selectUserId == this.id) { im.url = _SELECT_IMG; }
 
-			layer.addMarker(im);
+			this.map.userLayer.addMarker(im);
 			return im;
 		},
 

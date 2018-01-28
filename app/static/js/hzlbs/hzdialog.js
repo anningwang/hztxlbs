@@ -75,4 +75,8 @@ function hzInfo(content, title, icon, options) {
 	$.jBox.info(content, title, icon, options);
 }
 
+function hzTip(content, icon, options) {
+	icon = icon || 'success';
+	$.jBox.tip(content, icon, options);
+}
 

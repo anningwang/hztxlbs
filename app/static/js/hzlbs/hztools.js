@@ -163,6 +163,19 @@
     //-----------------------------------------------------------------------------
     // Init对象功能 end
     //-----------------------------------------------------------------------------
+
+    hzlbs.Util.getDate = function (date) {
+        date = date || new Date();
+        var y = date.getFullYear();
+        var m = date.getMonth()+1;
+        var d = date.getDate();
+
+        var H = date.getHours();
+        var M = date.getMinutes();
+        var S = date.getSeconds();
+        return y+'-'+(m<10?('0'+m):m)+'-'+(d<10?('0'+d):d)+' '+
+            (H<10?('0'+H):H)+':'+(M<10?('0'+M):M)+':'+(S<10?('0'+S):S);
+    };
     
 })(window);
 

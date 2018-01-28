@@ -177,7 +177,7 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 		this.mapW = 3477;           // 地图图片宽度 px
 		this.mapH = 1769;           // 地图图片高度 px
 		
-		this.pathData = undefined;  // 导航路径信息（为地图缩放使用）
+		this.pathData = undefined;      // 导航路径信息（为地图缩放使用）
 		this.hisLocData = undefined;    // 历史轨迹（为地图缩放使用）
 		this.psZoneData = undefined;    // 盘点区域数据 （为地图缩放使用）
 		this.erData = undefined;        // 电子围栏 （为地图缩放使用）
@@ -770,6 +770,14 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 				autoclose: true
 			});
 
+			var oStartTime = $('#hz_startTime');
+			var oEndTime = $('#hz_endTime');
+			var curDate = new Date();
+			var startDate = new Date(curDate.getTime() - 60 * 60 * 1000);
+			
+			oStartTime.val(hzlbs.Util.getDate(startDate));
+			oEndTime.val(hzlbs.Util.getDate(curDate));
+
 			var map = this;
 			// 查询历史轨迹
 			$('#hz_btnQueryHisLoc').click(function () {
@@ -779,13 +787,13 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 				}
 				var userId = map.getSelectPeople().getId();
 
-				var startTime = $('#hz_startTime').val();
+				var startTime = oStartTime.val();
 				if(startTime == ''){
 					hzInfo('请选择查询起始时间');
 					return;
 				}
 
-				var endTime = $('#hz_endTime').val();
+				var endTime = oEndTime.val();
 				if(endTime == ''){
 					hzInfo('请选择查询截止时间');
 					return;
