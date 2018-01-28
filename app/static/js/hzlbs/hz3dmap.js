@@ -1706,6 +1706,18 @@
 						}
 					}
 				});
+
+
+				// 电子围栏信息
+				self.socket.on('hz_electronic_tail', function (msg) {
+					//console.log('电子围栏：', msg);
+					for (var i=0; i< msg.length; i++){
+						var state = (msg[i].status == 1) ? '进入': '离开';
+						gritter_alert('电子围栏警报', '用户ID【' + msg[i].userId + '】 '+
+							msg[i].datetime +' 【'+ state + '】了电子围栏【' + msg[i].name + '】');
+					}
+				});
+
 			});
 		},
 
