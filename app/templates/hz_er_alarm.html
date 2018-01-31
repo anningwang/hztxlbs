@@ -105,80 +105,40 @@
                 </div>
 
                 <div class="row">
-                    <div class="row">
-                        <div class="col-sm-12" >
-                            <!--按钮区-->
-                            <div class="col-xs-2">
-                                <div class="col-xs-4">
-                                    <label for="electronic-fence-alert-user" class="control-label no-padding-right pull-right">用户：</label>
-                                </div>
-                                <div class="col-sm-8">
-                                    <select id="electronic-fence-alert-user" >
-                                        <option value="all">所有用户</option>
-                                        <option value="1918E00103AA">1918E00103AA</option>
-                                        <option value="1918E00103A9">1918E00103A9</option>
-                                    </select>
-                                </div>
-                            </div>
+                    <div class="col-xs-12" >
+                        <!--按钮区-->
+                        用户：
+                        <select id="electronic-fence-alert-user" title="user" >
+                            <option value="all">所有用户</option>
+                            <option value="1918E00103AA">1918E00103AA</option>
+                            <option value="1918E00103A9">1918E00103A9</option>
+                        </select>
+                        时间：
+                        <input type="text" id="electronic-fence-alert-start-time" class="date-timepicker"  placeholder="查询起始时间" style="width:170px;"/>
+                        <input type="text" id="electronic-fence-alert-end-time" class="date-timepicker" placeholder="查询截止时间" style="width:170px;"/>
+                        第
+                        <input type="text"  id="electronic-fence-page"  placeholder="页码" value="1" style="width:40px;"/>
+                        页
 
-                            <div class="col-xs-4">
-                                <div class="col-xs-2">
-                                    <label class="control-label no-padding-right pull-right">时间:</label>
-                                </div>
+                        每页记录：
+                        <input type="text"  id="electronic-fence-remember-number" placeholder="记录数" value="100" style="width:60px;"/>
 
-                                <div class="col-xs-10">
-                                    <span class="input-icon">
-                                        <input type="text" id="electronic-fence-alert-start-time" class="date-timepicker"  placeholder="查询起始时间" style="width:178px;"/>
-                                    </span>
+                        排序:
+                        <select id="electronic-fence-alert-field" title="order">
+                            <option value="datetime" selected="selected">时间</option>
+                            <option value="userId">id</option>
+                        </select>
 
-                                    <span class="input-icon input-icon-right">
-                                        <input type="text" id="electronic-fence-alert-end-time" class="date-timepicker" placeholder="查询截止时间" style="width:178px;"/>
-                                    </span>
-                                </div>
+                        <select id="electronic-fence-alert-oper" title="ascOrDesc">
+                            <option value="asc">升序</option>
+                            <option value="desc" selected="selected">降序</option>
+                        </select>
 
-                            </div>
-                            <div class="col-xs-2">
-                                <div class="col-xs-12">
-                                    <span class="input-icon col-xs-6">
-                                        <input type="text"  id="electronic-fence-page"  placeholder="查询页码" value="1" style="width:78px;"/>
-                                    </span>
-
-                                    <span class="input-icon input-icon-right col-xs-6">
-                                        <input type="text"  id="electronic-fence-remember-number" placeholder="查询记录数" value="100" style="width:78px;"/>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="col-xs-2">
-                                <div class="col-xs-4">
-                                    <label for="electronic-fence-alert-field" class="control-label no-padding-right pull-right">排序:</label>
-                                </div>
-                                <div class="col-sm-4">
-                                    <select id="electronic-fence-alert-field" >
-                                        <option value="datetime" selected="selected">时间</option>
-                                        <option value="userId">id</option>
-                                    </select>
-                                </div>
-                                <div class="col-xs-4">
-                                    <label for="electronic-fence-alert-oper" class="control-label no-padding-right pull-right" style="display: none">与</label>
-                                </div>
-                                <div class="col-sm-4">
-                                    <select id="electronic-fence-alert-oper" >
-                                        <option value="asc">升序</option>
-                                        <option value="desc" selected="selected">降序</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-xs-2">
-                                <button class="btn btn-info btn-sm" id="electronic-fence-alert-query-button">查询</button>
-                            </div>
-                        </div>
+                        <button class="btn btn-info btn-sm" id="electronic-fence-alert-query-button">查询</button>
                     </div>
                     <div class="hr hr-10"></div>
                 </div>
-
                 <div class="row" style="min-height:600px;" id="electronicFenceContent"></div>
-
             </div> <!-- /.page-content -->
         </div>
     </div> <!-- /.main-content -->

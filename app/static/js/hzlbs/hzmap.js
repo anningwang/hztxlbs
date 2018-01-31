@@ -2,7 +2,7 @@
  * hztx map：v0.4
  *
  * 和仲通讯 版权所有 2016-2018
- * Created by WXG on 2018/1/11.
+ * Created by WXG on 2017/9/11.
  *
  * Requires: jQuery 1.2.2+
  *           jquery.validate.js
