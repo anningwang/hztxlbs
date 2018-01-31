@@ -106,70 +106,32 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-sm-12" >
+                    <div class="col-xs-12" >
                         <!--按钮区-->
-                        <div class="row">
-                            <div class="row">
 
-                                <div class="col-xs-4">
-                                    <div class="col-xs-2">
-                                        <label class="control-label no-padding-right pull-right">时间:</label>
-                                    </div>
+                        时间:
+                        <input type="text" id="dateFrom" class="date-timepicker"  placeholder="查询起始时间" style="width:178px;"/>
+                        <input type="text" id="dateTo" class="date-timepicker" placeholder="查询截止时间" style="width:178px;"/>
+                        第
+                        <input type="text"  id="page"  placeholder="查询页码" value="1" style="width:78px;"/>
+                        页 每页记录：
+                        <input type="text"  id="rows" placeholder="查询记录数" value="30" style="width:78px;"/>
+                        排序:
+                        <select id="psOrderField" title="排序方式">
+                            <option value="datetime" selected="selected">时间</option>
+                            <option value="roomName">区域名称</option>
+                        </select>
+                        与
+                        <select id="psOrderOp" title="升降">
+                            <option value="asc">升序</option>
+                            <option value="desc" selected="selected">降序</option>
+                        </select>
 
-                                    <div class="col-xs-10">
-                                        <span class="input-icon">
-                                            <input type="text" id="dateFrom" class="date-timepicker"  placeholder="查询起始时间" style="width:178px;"/>
-                                        </span>
+                        <button class="btn btn-info btn-sm" id="btnPsQuery">查询</button>
 
-                                        <span class="input-icon input-icon-right">
-                                            <input type="text" id="dateTo" class="date-timepicker" placeholder="查询截止时间" style="width:178px;"/>
-                                        </span>
-                                    </div>
-
-                                </div>
-                                <div class="col-xs-2">
-                                    <div class="col-xs-12">
-                                        <span class="input-icon col-xs-6">
-                                            <input type="text"  id="page"  placeholder="查询页码" value="1" style="width:78px;"/>
-                                        </span>
-
-                                        <span class="input-icon input-icon-right col-xs-6">
-                                            <input type="text"  id="rows" placeholder="查询记录数" value="30" style="width:78px;"/>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="col-xs-3">
-                                    <div class="col-xs-4">
-                                        <label for="psOrderField" class="control-label no-padding-right pull-right">排序:</label>
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <select id="psOrderField" >
-                                            <option value="datetime" selected="selected">时间</option>
-                                            <option value="roomName">区域名称</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-xs-4">
-                                        <label for="psOrderOp" class="control-label no-padding-right pull-right" style="display: none">与</label>
-                                    </div>
-                                    <div class="col-sm-4">
-                                        <select id="psOrderOp" >
-                                            <option value="asc">升序</option>
-                                            <option value="desc" selected="selected">降序</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-
-                                <div class="col-xs-2">
-                                    <button class="btn btn-info btn-sm" id="btnPsQuery">查询</button>
-                                </div>
-
-                            </div>
-                            <div class="hr hr-10"></div>
-                        </div>
+                        <div class="hr hr-10"></div>
 
                         <div class="row" style="min-height:600px;" id="psResult"></div>
-
                     </div>
 
                 </div>
