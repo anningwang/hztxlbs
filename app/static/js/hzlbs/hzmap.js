@@ -869,9 +869,13 @@ document.write('<script src="/static/ace/components/jquery-validation/dist/jquer
 					hzInfo('请在地图上选择要导航的用户。');
 					return;
 				}
+				var userId = map.tools.navUserId;
+				if (selectPeople) {
+					userId = selectPeople.getId();
+				}
 				map.startNavigation({
 					location: $('#hz_nav_dest').val(),
-					userId: selectPeople.getId() || map.tools.navUserId
+					userId: userId
 				});
 			});
 
