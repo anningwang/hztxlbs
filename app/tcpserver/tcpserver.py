@@ -29,7 +29,7 @@ def worker(num):
     time.sleep(1)
     print("Thread %d" % num)
 
-    host, port = "localhost", 9999
+    host, port = "0.0.0.0", 9999  # localhost
 
     print "tcp server start! (ip=%s, port=%d)" % (host, port)
     # Create the server, binding to localhost on port 9999
