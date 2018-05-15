@@ -1,12 +1,12 @@
 #!flask/bin/python
 # -*- coding:utf-8 -*-
 from app import app, socketio
-from app.utils.getip import get_ip
+from app.utils.wmmtools import WmmTools
 from app.tcpserver import tcpserver
 
 
 if __name__ == '__main__':
-    ip = get_ip()
+    ip = WmmTools.get_ip()
     print("ip=%s" % ip)
 
     tcpserver.t.start()
