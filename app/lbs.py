@@ -269,7 +269,7 @@ def hz_connect():
     global thread
     with thread_lock:
         if thread is None:
-            thread = socketio.start_background_task(target=background_thread)
+            thread = socketio.start_background_task(target=background_thread, name='socketio background thread')
 
 
 @socketio.on('hz_get_position', namespace=HZ_NAMESPACE)

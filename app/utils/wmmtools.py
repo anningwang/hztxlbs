@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 __author__ = 'WangXiuGuo'
+__version__ = '0.1'
 
 from ctypes import *
 import struct
@@ -40,3 +41,25 @@ class WmmTools(object):
     @staticmethod
     def is_windows_os():
         return 'Windows' in platform.system()
+
+    # 将16进制数据转换为字节流 data: A5 05 00 94 01 00 01 00 64 FF A5 or A50500940100010064FFA5
+    @staticmethod
+    def data_switch(data):
+        ret = ''
+        data = data.strip()
+        while data:
+            tmp = data[0:2]
+            s = int(tmp, 16)
+            ret += struct.pack('B', s)
+            data = data[2:].strip()
+        return ret
+
+    @staticmethod
+    def format_data(data):
+        ret = ''
+        data = data.strip()
+        while data:
+            tmp = data[0:2]
+            ret += tmp + ' '
+            data = data[2:].strip()
+        return ret
