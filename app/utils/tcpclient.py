@@ -10,6 +10,8 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 try:
     # Connect to server and send data
     sock.connect((HOST, PORT))
+    if data == '':
+        data = 'hello python!'
     sock.sendall(data + "\n")
 
     # Receive data from the server and shut down
