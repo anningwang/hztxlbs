@@ -28,14 +28,6 @@ class WmmTCPServer(SocketServer.ThreadingTCPServer):
     clients = []            # clients ( socket ) list
     device_client = {}      # map device id to client ( King Pigeon protocol )
 
-    """
-    def close_request(self, request):
-        # Called to clean up an individual request.
-        print request, 'will be close!'
-        self.del_client(request)
-        request.close()
-"""
-
     def add_client(self, client):
         self.clients.append(client)
 
@@ -86,34 +78,24 @@ class WmmTCPHandler(SocketServer.BaseRequestHandler):
                 if not d:   # 远端断开连接
                     end_handle = True
                     break
-
                 if cnt == 0:
                     start, = struct.unpack("B", d[0:1])
                     if start != START_CHAR:     # not king pigeon protocol
                         break
-
                 end, = struct.unpack("B", d[-1])
                 if end == END_CHAR:
                     break
-
                 cnt += 1
-
             if end_handle:
                 break
 
-            self.protocol.data_received(data)
-
-            # print "{} wrote:".format(self.client_address[0])
-            # print data
+            flag_quit = self.protocol.data_received(data)
+            if flag_quit:
+                break
 
             cur_thread = threading.current_thread()
-            print 'thread:{} receive data from {}, {}'.format(cur_thread.name, self.client_address[0],
-                                                              self.client_address[1])
-            # response = "{}: {}".format(cur_thread.name, self.protocol.hex_rx)
-
-            # just send back the same data, but upper-cased
-            # self.request.sendall(response)
-
+            name = cur_thread.name
+            print 'thread:{} receive data from {}, {}'.format(name, self.client_address[0], self.client_address[1])
             time.sleep(0.1)
 
     def finish(self):
@@ -130,10 +112,8 @@ class PigeonProtocol(object):
     """
     def __init__(self, handle):
         self.handle = handle
-
         self.host = handle.client_address[0]
         self.port = handle.client_address[1]
-
         self.start = 0xA5
         self.length = 5
         self.cmd = None
@@ -143,30 +123,27 @@ class PigeonProtocol(object):
         self.data = None
         self.sum = None
         self.end = self.start
-
         self.ori_rx = None
         self.hex_rx = None
         self.ori_tx = None
         self.hex_tx = None
-
         self.timer = None
-        self.time_out_val = 60
+        self.time_out_val = 180
         self.time_out_cnt = 0
         self.time_out_tick = 0
         self.tick = 0
-
         self.random = None
-
         self.dispatch = {
+            0x70: self.process_alarm,
+            0x71: self.upload_data,
             0x80: self.ack_random_number,
             0x94: self.ack_inquiry_device_id,
-            0x97: self.ack_inquiry_device_id,
+            0x97: self.ack_inquiry_current_data,
             0x99: self.ack_control_relay
         }
-
         self.timer_func = [
-            # --- cnt, period, function ---
-            [59, 60, self.ontimer_keep_alive]
+            # --- counter, period, function ---
+            [30, 60, self.ontimer_keep_alive]
         ]
 
     def __del__(self):
@@ -178,25 +155,25 @@ class PigeonProtocol(object):
     def data_received(self, data):
         self.ori_rx = data
         self.hex_rx = data.encode('hex').upper()
-
-        self.handle.request.sendall(self.hex_rx)
         self.time_out_tick = 0
         self.time_out_cnt = 0
 
         try:
-            start, l, cmd, tp, cp = struct.unpack("<BhBhh", data[0:DEVICE_BEGIN])
+            start, = struct.unpack("B", data[0:1])
+            if start != self.start:
+                print 'error: Receive data is not king pigeon protocol. data =', data
+                self.send_msg(self.ori_rx.upper())
+                return
+            l, cmd, tp, cp = struct.unpack("<hBhh", data[1:DEVICE_BEGIN])
             self.length = l
             self.cmd = cmd
             self.tp = tp
             self.cp = cp
-            if start != self.start:
-                print data
-                print 'error: Receive data is not king pigeon protocol.'
-                return
+            print 'receive data from', self.host, self.port
             print WmmTools.format_data(self.hex_rx)
             print 'cmd=0x{:X}'.format(cmd)
             if cmd in self.dispatch:
-                apply(self.dispatch[cmd])
+                return apply(self.dispatch[cmd])
             else:
                 print 'Unknown cmd: 0x{:X}'.format(cmd)
         except struct.error, e:
@@ -246,10 +223,12 @@ class PigeonProtocol(object):
         data += struct.pack('<I', tm)
 
         self.ori_tx = data
-        self.hex_tx = data.encode('hex').upper()
-        self.calc_sum()
-        print 'tx=', self.hex_tx
-        self.handle.request.sendall(self.ori_tx)
+        sum_tx = self.calc_sum(data)
+        self.ori_tx += struct.pack('<hB', sum_tx, self.end)
+        self.hex_tx = self.ori_tx.encode('hex').upper()
+
+        print 'tx =', self.hex_tx
+        self.send_msg(self.ori_tx)
         return
 
     def time_out(self):
@@ -257,9 +236,13 @@ class PigeonProtocol(object):
         self.time_out_tick = 0
         print 'time out {}, {}, cnt={}'.format(self.host, self.port, self.time_out_cnt)
         if self.time_out_cnt >= 3:
-            self.handle.server.shutdown_request(self.handle.request)
+            self.shutdown_request()
             return True
         return False
+
+    def shutdown_request(self):
+        self.close_timer()
+        self.handle.server.shutdown_request(self.handle.request)
 
     def inquiry_device_id(self):
         pass
@@ -284,15 +267,28 @@ class PigeonProtocol(object):
         self.parse_device_id()
         calc, model, vice_model, version = struct.unpack("<I10s2s6s", self.ori_rx[DATA_BEGIN:DATA_BEGIN+22])
         print calc, model, vice_model, version
-
-        # self.random = [0x12, 0x34, 0x56, 0x78]
-        print self.verify_random(calc)
-        return
+        verify = self.verify_random(calc)
+        print 'verify=', verify
+        return not verify
 
     def ack_control_relay(self):
         self.parse_device_id()
         success, = struct.unpack("b", self.ori_rx[DATA_BEGIN:DATA_BEGIN+1])
         print 'success=', success
+
+    def process_alarm(self):
+        self.parse_device_id()
+        alm_type, addr, alm = struct.unpack("<BBB", self.ori_rx[DATA_BEGIN:DATA_BEGIN+3])
+        print 'type={}, addr={}, alm={}'.format(alm_type, addr, alm)
+        tx = self.generate_send_msg(cmd=0x70)
+        self.send_msg(tx)
+        return
+
+    def upload_data(self):
+        self.parse_device_id()
+        tx = self.generate_send_msg(cmd=0x71)
+        self.send_msg(tx)
+        return
 
     def parse_device_id(self):
         dev_id, = struct.unpack("<15s", self.ori_rx[DEVICE_BEGIN:DATA_BEGIN])
@@ -324,18 +320,28 @@ class PigeonProtocol(object):
             return False
         return True
 
-    def calc_sum(self):
+    @staticmethod
+    def calc_sum(data, b=1, e=-1):
         # 2B (LSB First, Sum Negation，from “Length” to “SUM”)
         # Tips: Sum is the origin Sum, not after Escape String.
-        data = self.ori_tx
         s = 0
-        for i in range(1, len(data)):
+        for i in range(b, len(data[:e])):
             c, = struct.unpack("B", data[i:i+1])
             s += c
-        self.sum = ~s
-        self.ori_tx += struct.pack('<hB', self.sum, self.end)
-        self.hex_tx = self.ori_tx.encode('hex').upper()
-        return
+        sum_tx = ~s
+        return sum_tx
+
+    def generate_send_msg(self, cmd=None, length=5, tp=1, cp=1, device_id=None, data=None):
+        cmd = self.cmd if cmd is None else cmd
+        if cmd is None:
+            return None
+        data = struct.pack('<BHBHH', self.start, length, cmd, tp, cp)
+        sum_tx = self.calc_sum(data)
+        data += struct.pack('<hB', sum_tx, self.end)
+        return data
+
+    def send_msg(self, data):
+        self.handle.request.sendall(data)
 
 
 class WmmServer(object):

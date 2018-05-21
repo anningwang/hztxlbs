@@ -152,7 +152,12 @@ def job_get_location():
         headers = {'Content-Type': 'application/json;charset=UTF-8',
                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'}
         req = urllib2.Request(url=url, data=json.dumps(data), headers=headers)
-        res_data = urllib2.urlopen(req)
+        try:
+            res_data = urllib2.urlopen(req)
+        except IOError, e:    # URLError
+            print 'lbs exception =', e
+            return
+
         res = res_data.read()
         obj = json.loads(res)
         if obj["errorCode"] == 0:
