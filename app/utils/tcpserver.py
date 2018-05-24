@@ -325,7 +325,8 @@ class PigeonProtocol(object):
         # 2B (LSB First, Sum Negation，from “Length” to “SUM”)
         # Tips: Sum is the origin Sum, not after Escape String.
         s = 0
-        for i in range(b, len(data[:e])):
+        data_len = len(data) if e == -1 else len(data[:e])
+        for i in range(b, data_len):
             c, = struct.unpack("B", data[i:i+1])
             s += c
         sum_tx = ~s
