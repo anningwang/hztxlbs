@@ -10,6 +10,7 @@ import threading
 import time
 import struct
 import random
+import sys
 
 from wmmtools import WmmTools
 
@@ -227,7 +228,7 @@ class PigeonProtocol(object):
         self.ori_tx += struct.pack('<hB', sum_tx, self.end)
         self.hex_tx = self.ori_tx.encode('hex').upper()
 
-        print 'tx =', self.hex_tx
+        print 'tx =', WmmTools.format_data(self.hex_tx)
         self.send_msg(self.ori_tx)
         return
 
@@ -321,11 +322,11 @@ class PigeonProtocol(object):
         return True
 
     @staticmethod
-    def calc_sum(data, b=1, e=-1):
+    def calc_sum(data, b=1, e=None):
         # 2B (LSB First, Sum Negation，from “Length” to “SUM”)
         # Tips: Sum is the origin Sum, not after Escape String.
         s = 0
-        data_len = len(data) if e == -1 else len(data[:e])
+        data_len = len(data) if e is None else len(data[:e])
         for i in range(b, data_len):
             c, = struct.unpack("B", data[i:i+1])
             s += c
@@ -365,3 +366,16 @@ class WmmServer(object):
         server_thread.daemon = True
         server_thread.start()
         print "Server loop running in thread:", server_thread.name
+
+
+if __name__ == "__main__":
+    try:
+        p = sys.argv[1]
+        if p is None:
+            p = 2345
+    except IndexError:
+        p = 2345
+    server = WmmServer(p)
+    server.run()
+    while True:
+        time.sleep(0.1)
