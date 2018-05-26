@@ -370,11 +370,11 @@ class WmmServer(object):
 
 if __name__ == "__main__":
     try:
-        p = sys.argv[1]
+        p = int(sys.argv[1])
         if p is None:
-            p = 2345
+            p = 3456
     except IndexError:
-        p = 2345
+        p = 3456
     server = WmmServer(p)
     server.run()
     while True:
