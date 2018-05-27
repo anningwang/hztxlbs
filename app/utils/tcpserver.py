@@ -154,24 +154,25 @@ class PigeonProtocol(object):
         return self.device_id
 
     def data_received(self, data):
-        self.ori_rx = data
-        self.hex_rx = data.encode('hex').upper()
+        d = self.escape_string_receive(data)
+        self.ori_rx = d
+        self.hex_rx = d.encode('hex').upper()
         self.time_out_tick = 0
         self.time_out_cnt = 0
 
         try:
-            start, = struct.unpack("B", data[0:1])
+            start, = struct.unpack("B", d[0:1])
             if start != self.start:
                 print 'error: Receive data is not king pigeon protocol. data =', data
                 self.send_msg(self.ori_rx.upper())
                 return
-            l, cmd, tp, cp = struct.unpack("<hBhh", data[1:DEVICE_BEGIN])
+            l, cmd, tp, cp = struct.unpack("<hBhh", d[1:DEVICE_BEGIN])
             self.length = l
             self.cmd = cmd
             self.tp = tp
             self.cp = cp
             print 'receive data from', self.host, self.port
-            print WmmTools.format_data(self.hex_rx)
+            self.show(self.hex_rx)
             print 'cmd=0x{:X}'.format(cmd)
             if cmd in self.dispatch:
                 return apply(self.dispatch[cmd])
@@ -182,6 +183,47 @@ class PigeonProtocol(object):
             import traceback
             traceback.print_exc()
             print '...error: Receive data is not king pigeon protocol.'
+
+    @staticmethod
+    def escape_string_receive(data):
+        # 0xAA 0x05 --> 0xA5, 0xAA 0x0A --> 0xAA
+        ret = data
+        i = 1
+        while i < len(ret):
+            c, = struct.unpack("B", ret[i:i + 1])
+            if c == 0xAA:
+                i += 1
+                m, = struct.unpack("B", ret[i:i + 1])
+                if m == 0x05:
+                    ret = ret[:i-1] + struct.pack('B', 0xA5) + ret[i+1:]
+                elif m == 0x0A:
+                    ret = ret[:i-1] + struct.pack('B', 0xAA) + ret[i+1:]
+            i += 1
+        # str_hex = ret.encode('hex').upper()
+        # PigeonProtocol.show(str_hex)
+        return ret
+
+    @staticmethod
+    def escape_string_send(data):
+        # 0xA5 --> 0xAA 0x05, 0xAA --> 0xAA 0x0A
+        ret = data
+        i = 1
+        while i < len(ret) - 1:
+            c, = struct.unpack("B", ret[i:i + 1])
+            if c == 0xA5:
+                ret = ret[:i] + struct.pack('<BB', 0xAA, 0x05) + ret[i+1:]
+                i += 1
+            elif c == 0xAA:
+                ret = ret[:i] + struct.pack('<BB', 0xAA, 0x0A) + ret[i+1:]
+                i += 1
+            i += 1
+        # str_hex = ret.encode('hex').upper()
+        # PigeonProtocol.show(str_hex)
+        return ret
+
+    @staticmethod
+    def show(data):
+        print WmmTools.format_data(data)
 
     def close_timer(self):
         if self.timer is not None:
@@ -218,7 +260,7 @@ class PigeonProtocol(object):
         self.generate_random()
         self.cmd = 0x80
         self.length = 13
-        data = struct.pack('<BHBHH', self.start, self.length, self.cmd, self.tp, self.cp)
+        data = struct.pack('<BHBHH', START_CHAR, self.length, self.cmd, 1, 1)
         for i in range(4):
             data += struct.pack('<B', self.random[i])
         data += struct.pack('<I', tm)
@@ -226,9 +268,6 @@ class PigeonProtocol(object):
         self.ori_tx = data
         sum_tx = self.calc_sum(data)
         self.ori_tx += struct.pack('<hB', sum_tx, self.end)
-        self.hex_tx = self.ori_tx.encode('hex').upper()
-
-        print 'tx =', WmmTools.format_data(self.hex_tx)
         self.send_msg(self.ori_tx)
         return
 
@@ -333,7 +372,7 @@ class PigeonProtocol(object):
         sum_tx = ~s
         return sum_tx
 
-    def generate_send_msg(self, cmd=None, length=5, tp=1, cp=1, device_id=None, data=None):
+    def generate_send_msg(self, cmd=None, length=5, tp=1, cp=1):
         cmd = self.cmd if cmd is None else cmd
         if cmd is None:
             return None
@@ -343,7 +382,10 @@ class PigeonProtocol(object):
         return data
 
     def send_msg(self, data):
-        self.handle.request.sendall(data)
+        d = self.escape_string_send(data)
+        self.handle.request.sendall(d)
+        self.hex_tx = d.encode('hex').upper()
+        self.show(self.hex_tx)
 
 
 class WmmServer(object):
@@ -369,13 +411,15 @@ class WmmServer(object):
 
 
 if __name__ == "__main__":
-    try:
-        p = int(sys.argv[1])
-        if p is None:
-            p = 3456
-    except IndexError:
+    if len(sys.argv) > 1:
+        try:
+            p = int(sys.argv[1])
+        except ValueError:
+            print 'please input port number.'
+            sys.exit(1)
+    else:
         p = 3456
-    server = WmmServer(p)
-    server.run()
+    kp_server = WmmServer(p)
+    kp_server.run()
     while True:
         time.sleep(0.1)
