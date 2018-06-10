@@ -11,6 +11,7 @@ import time
 import struct
 import random
 import sys
+import copy
 
 from wmmtools import WmmTools
 
@@ -24,7 +25,7 @@ MSG_HEAD_LENGTH = 5     # 报文头长度，从cmd到cp  cmd(1) tp(2) cp(2)
 
 TIMER_INTERVAL = 1
 
-RELAY_CTRL_MODE_VIA_INTER_LOCK_LINK = 0     # 0为报警与联动事件控制方式
+RELAY_CTRL_MODE_VIA_INTER_LOCK = 0          # 0 为 报警与联动事件控制方式
 RELAY_CTRL_MODE_VIA_APP = 1                 # 1 为 app 控制方式
 
 
@@ -111,6 +112,11 @@ class WmmTCPHandler(SocketServer.BaseRequestHandler):
         return
 
 
+# 返回元素比较key
+def take_no(elem):
+    return elem['no']
+
+
 class PigeonProtocol(object):
     """
     King Pigeon Protocol implementation
@@ -144,16 +150,21 @@ class PigeonProtocol(object):
             0x71: self.upload_data,
             0x80: self.ack_random_number,
             0x81: self.ack_set_ip_address,
-            0x82: self.ack_inquiry_ip_address,
+            0x82: self.ack_get_ip_address,
             0x83: self.ack_set_phone_number,
-            0x84: self.ack_inquiry_phone_number,
-            0x85: self.ack_program_relay,
-            0x86: self.ack_inquiry_relay_cfg,
-            0x87: self.ack_program_ain,
-            0x88: self.ack_inquiry_ain_param,
+            0x84: self.ack_get_phone_number,
+            0x85: self.ack_set_relay,
+            0x86: self.ack_get_relay,
+            0x87: self.ack_set_ain,
+            0x88: self.ack_get_ain,
+            0x89: self.ack_set_din,
+            0x8A: self.ack_get_din,
+            0x8B: self.ack_set_inter_lock,
+            0x8C: self.ack_get_inter_lock,
+            0x8D: self.ack_set_timed_task,
             0x8F: self.ack_arm_disarm,
             0x94: self.ack_inquiry_device_id,
-            0x97: self.ack_inquiry_current_data,
+            0x97: self.ack_get_current_data,
             0x99: self.ack_control_relay
         }
         self.timer_func = [
@@ -180,15 +191,22 @@ class PigeonProtocol(object):
         # self.set_ip_address([{'index': 1, 'ip': '113.232.197.13', 'port': 9016}])
         # self.set_ip_address([{'index': 2, 'ip': ''}])
         # self.set_phone_number([{'index': 7, 'phone': '18642304486', 'call': 1, 'sms': 0}])
-        # self.inquiry_current_data()
-        # self.program_relay(mode=0, control_info=[{'index': 0, 'closeTime': 5, 'openTime': 2, 'freq': 0},
-        #                                         {'index': 1, 'closeTime': 3, 'openTime': 1, 'freq': 0}])
-        # self.inquiry_relay_cfg(RELAY_CTRL_MODE_VIA_INTER_LOCK_LINK)
-        # self.program_ain(mode=0, param=[{'index': 0, 'type': 3, 'maxVal': 100, 'minVal': 0, 'hLimit': 35, 'lLimit': 0,
-        #                                 'confirmTime': 4, 'hour24': 1},
-        #                                {'index': 1, 'type': 3, 'maxVal': 200, 'minVal': 20, 'hLimit': 40,
-        #                                 'lLimit': 10, 'confirmTime': 2, 'hour24': 0}])
-        self.inquiry_ain_param(0)
+        # self.get_current_data()
+        # self.set_relay(mode=0, control_info=[{'index': 0, 'closeTime': 5, 'openTime': 2, 'freq': 0},
+        #                                     {'index': 1, 'closeTime': 3, 'openTime': 1, 'freq': 0}])
+        # self.get_relay(RELAY_CTRL_MODE_VIA_INTER_LOCK)
+        # self.set_ain(mode=0, param=[{'index': 0, 'type': 3, 'maxVal': 100, 'minVal': 0, 'hLimit': 35, 'lLimit': 0,
+        #                             'confirmTime': 4, 'hour24': 1},
+        #                            {'index': 1, 'type': 3, 'maxVal': 200, 'minVal': 20, 'hLimit': 40,
+        #                             'lLimit': 10, 'confirmTime': 2, 'hour24': 0}])
+        # self.get_ain(0)
+        # self.set_din([{'index': 0, 'type': 5, 'confirmTime': 2, 'hour24': 1, 'startVal': 0, 'interval': 5,
+        #               'total': 10}, {'index': 1, 'type': 3, 'confirmTime': 5, 'hour24': 0}])
+        # self.get_din()
+        # self.set_inter_lock([{'event': 21, 'action': 7}, {'event': 37, 'action': 9}])
+        # self.get_inter_lock()
+        self.set_timed_task([{'no': 10, 'valid': 1, 'week': 2, 'hour': 10, 'minute': 30, 'event': 6},
+                             {'no': 1, 'valid': 1, 'week': 7, 'hour': 8, 'minute': 5, 'event': 1}])
 
         try:
             start, = struct.unpack("B", d[0:1])
@@ -324,7 +342,7 @@ class PigeonProtocol(object):
         self.parse_device_id()
         print '...ack inquiry device id: {}'.format(self.device_id)
 
-    def inquiry_current_data(self):
+    def get_current_data(self):
         """
         Inquiry the Current Data “0x97” （Downstream ）
         Downstream Structure: A5 L1 L2 97 TP1 TP2 CP1 CP2 SUM1 SUM2 A5
@@ -334,7 +352,7 @@ class PigeonProtocol(object):
         self.send_msg(msg)
         return
 
-    def ack_inquiry_current_data(self):
+    def ack_get_current_data(self):
         """
         Inquiry the Current Data “0x97” （Downstream ） --- RTU 返回的应答报文
         Upstream Structure: A5 L1 L2 97 TP1 TP2 CP1 CP2 ID1~15 DATA1~X SUM1 SUM2 A5
@@ -402,7 +420,7 @@ class PigeonProtocol(object):
         Character   Bytes   Description
         ---------   ------  ---------------------------------------------------------------------------------
         Cnt         1B      Total quantity relays need to be Control
-        Index       1B      Index is the Relay Channel Number，Index=0～3
+        Index       1B      Index is the Relay Channel Number，Index=0~3
         operation   1B      Operation=0~1
                             0=Open
                             1=Close (The close time is setting by the “0x85” Command, mode=1)
@@ -506,7 +524,7 @@ class PigeonProtocol(object):
         Character           Bytes   Description
         ---------           ------  ---------------------------------------------------------------------------------
         Device ID           15      ASCII
-        code                1   `   1 = success, 0 = error
+        code                1       1 = success, 0 = error
         :return:
         """
         self.parse_device_id()
@@ -514,7 +532,7 @@ class PigeonProtocol(object):
         print 'ack set ip address: success ={}'.format(success)
         return
 
-    def inquiry_ip_address(self):
+    def get_ip_address(self):
         """
         Inquiry the IP Address “0x82” (Downstream )
         Downstream Structure: A5 L1 L2 82 TP1 TP2 CP1 CP2 SUM1 SUM2 A5
@@ -525,7 +543,7 @@ class PigeonProtocol(object):
         self.send_msg(msg)
         return
 
-    def ack_inquiry_ip_address(self):
+    def ack_get_ip_address(self):
         """
         Inquiry the IP Address “0x82”  -- 服务器收到设备应答
         Upstream Structure: A5 L1 L2 82 TP1 TP2 CP1 CP2 ID1~15 Cnt Index ip port index ip port SUM1 SUM2 A5
@@ -562,7 +580,7 @@ class PigeonProtocol(object):
             ips.append({'index': index, 'ip': ip_addr, 'port': port})
         return ips
 
-    def program_relay(self, mode, control_info):
+    def set_relay(self, mode, control_info):
         """
         Program the Relay Command “ 0x85” （Downstream ）--- （发起方：服务器）设置继电器命令
         Downstream Structure: A5 L1 L2 85 TP1 TP2 CP1 CP2 mode Cnt Index CloseTime OpenTime freq index CloseTime
@@ -572,7 +590,7 @@ class PigeonProtocol(object):
         mode        1B      Control Method,0=Inter-Lock Link,1=Control via APP
                                 0 为报警与联动事件控制方式,  1 为 app 控制方式
         Cnt         1B      Totally how many relays need to be Program
-        Index       1B      Index is the Relay Channel Number，Index=0～3
+        Index       1B      Index is the Relay Channel Number，Index=0~3
         CloseTime   2B      Close Time=0~10000, 0= Always Close; Unit: Second
         OpenTime    2B      Open Time=0~10000; 0= Always Close; Unit: Second
         freq        2B      Frequency, freq=0~1000, 0=No Action, 1000=1000 Times; Unit: Times
@@ -598,7 +616,7 @@ class PigeonProtocol(object):
         self.send_msg(msg)
         return
 
-    def ack_program_relay(self):
+    def ack_set_relay(self):
         """
         Program the Relay Command “ 0x85” --- RTU 应答 设置继电器命令
         Upstream Structure: A5 L1 L2 85 TP1 TP2 CP1 CP2 ID1~15 mode bool SUM1 SUM2 A5
@@ -606,7 +624,7 @@ class PigeonProtocol(object):
         ---------   ------  ---------------------------------------------------------------------------------
         device ID   15      ASCII
         mode        1       Control Method,0=Inter-Lock Link,1=Control via APP
-        code        1   `   1 = success, 0 = error
+        code        1       1 = success, 0 = error
         :return:
         """
         self.parse_device_id()
@@ -614,7 +632,7 @@ class PigeonProtocol(object):
         print 'ack program relay: mode = {}, success = {}'.format(mode, success)
         return
 
-    def inquiry_relay_cfg(self, mode):
+    def get_relay(self, mode):
         """
         Inquiry the Relay Configuration “0x86” （ Downstream ） 发起方：服务器，查询继电器命令
         Downstream Structure: A5 L1 L2 86 TP1 TP2 CP1 CP2 mode SUM1 SUM2 A5
@@ -637,7 +655,7 @@ class PigeonProtocol(object):
         self.send_msg(msg)
         return
 
-    def ack_inquiry_relay_cfg(self):
+    def ack_get_relay(self):
         """
         Inquiry the Relay Configuration “0x86”  --- RTU 应答 查询继电器命令
         Upstream Structure: A5 L1 L2 86 TP1 TP2 CP1 CP2 ID1~15 mode Cnt Index CloseTime OpenTime freq index
@@ -648,7 +666,7 @@ class PigeonProtocol(object):
         mode        1B      Control Method,0=Inter-Lock Link,1=Control via APP
                                 0 为报警与联动事件控制方式,  1 为 app 控制方式
         Cnt         1B      Totally how many relays need to be Program
-        Index       1B      Index is the Relay Channel Number，Index=0～3
+        Index       1B      Index is the Relay Channel Number，Index=0~3
         CloseTime   2B      Close Time=0~10000, 0= Always Close; Unit: Second
         OpenTime    2B      Open Time=0~10000; 0= Always Close; Unit: Second
         freq        2B      Frequency, freq=0~1000, 0=No Action, 1000=1000 Times; Unit: Times
@@ -767,7 +785,7 @@ class PigeonProtocol(object):
         print 'ack set phone number: success ={}'.format(success)
         return
 
-    def inquiry_phone_number(self):
+    def get_phone_number(self):
         """
         Inquiry the Phone Number Command “0x84” （Downstream ）
         Downstream Structure: A5 L1 L2 84 TP1 TP2 CP1 CP2 SUM1 SUM2 A5
@@ -777,7 +795,7 @@ class PigeonProtocol(object):
         self.send_msg(msg)
         return
 
-    def ack_inquiry_phone_number(self):
+    def ack_get_phone_number(self):
         """
         Inquiry the Phone Number Command “0x84” （Downstream ） --- RTU 应答 查询电话号码命令
         Upstream Structure: A5 L1 L2 84 TP1 TP2 CP1 CP2 ID1~15 Cnt Index phone fun1 fun2 index phone fun1 fun2 SUM1
@@ -816,7 +834,7 @@ class PigeonProtocol(object):
         # print phone_numbers
         return phone_numbers
 
-    def program_ain(self, mode, param):
+    def set_ain(self, mode, param):
         """
         Program the AIN Parameter Command “0x87” （Downstream ）
         Downstream Structure: A5 L1 L2 85 TP1 TP2 CP1 CP2 mode Cnt Index Type maxvalue minvalue HLimit LLimit
@@ -830,7 +848,7 @@ class PigeonProtocol(object):
         Type        1B      When the “Mode”=0,then Type=0~3;
                                 0= Disable
                                 1=Sensor Type 0~5V
-                                2=Sensor Type 0～20mA
+                                2=Sensor Type 0~20mA
                                 3=Sensor Type 4~20mA
                             When the “Mode”=1, then Type=0~1;
                                 0= Disable
@@ -867,7 +885,7 @@ class PigeonProtocol(object):
         self.send_msg(msg)
         return
 
-    def ack_program_ain(self):
+    def ack_set_ain(self):
         """
         Program the AIN Parameter Command “0x87” --- RTU 应答 设置AIN 参数命令
         Upstream Structure: A5 L1 L2 85 TP1 TP2 CP1 CP2 ID1~15 mode bool SUM1 SUM2 A5
@@ -883,7 +901,7 @@ class PigeonProtocol(object):
         print 'ack program ain: mode = {}, success = {}'.format(mode, success)
         return
 
-    def inquiry_ain_param(self, mode):
+    def get_ain(self, mode):
         """
         Inquiry the AIN Parameter Command “0x88” （Downstream ）
         Downstream Structure: A5 L1 L2 88 TP1 TP2 CP1 CP2 mode SUM1 SUM2 A5
@@ -898,7 +916,7 @@ class PigeonProtocol(object):
         self.send_msg(msg)
         return
 
-    def ack_inquiry_ain_param(self):
+    def ack_get_ain(self):
         """
         Inquiry the AIN Parameter Command “0x88” （Downstream ） --- RTU 应答 查询 Ain 参数命令
         Upstream Structure: A5 L1 L2 88 TP1 TP2 CP1 CP2 ID1~15 mode Cnt Index Type maxvalue minvalue HLimit LLimit
@@ -913,7 +931,7 @@ class PigeonProtocol(object):
         Type        1B      When the “Mode”=0,then Type=0~3;
                                 0= Disable
                                 1=Sensor Type 0~5V
-                                2=Sensor Type 0～20mA
+                                2=Sensor Type 0~20mA
                                 3=Sensor Type 4~20mA
                             When the “Mode”=1, then Type=0~1;
                                 0= Disable
@@ -950,6 +968,320 @@ class PigeonProtocol(object):
                               'hLimit': h, 'lLimit': l, 'confirmTime': confirm, 'hour24': hr24})
         return mode, ain_param
 
+    def set_din(self, param):
+        """
+        Program the DIN Parameter Command “0x89” （Downstream ）
+        Downstream Structure: A5 L1 L2 89 TP1 TP2 CP1 CP2 Cnt Index Type confirmTime 24hr startValue interval total
+        Index Type confirmTime 24hr SUM1 SUM2 A5
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        Cnt         1B      Total quantity group of the Data (Each Group=Index~24hr)
+        Index       1B      Index is Channel Number of the DIN, Index=0~8
+        Type        1B      0 =Disable; 1=NO; 2=NC; 3=Change; 4=Disarm/arm; 5=Counter
+        confirmTime 2B      Alarm Verify Time (Integer),Max: 9999
+        24hr        1B      24*7hours arm, cannot be disarm,Enable=1;Disable=0
+        startValue  4B      Start Value(Integer),Max: 999999 ,If “Type” ≠5,then this value is invalid
+                            当 type 为 5 时传输此值，否则不传（下同）
+        interval    4B      Step Alarm Value (Integer),Max:999999, If “Type” ≠5,then this value is invalid.
+        total       4B      Total Alarm Value(Integer)，Max:999999, If “Type” ≠5,then this value is invalid.
+        =====================================================================================================
+        For Example： ： (Program the DIN0 as Counter, Alarm verify time is 2 Seconds, Enable 24 hours mode, Start
+        Value=0, Step Alarm Value=5, Total Alarm value=10;Program the DIN1 as Change, Alarm Verify Time is 5 Seconds,
+        Disable 24 hours mode)
+        Server Downstream:
+        A5 1C 00 89 01 00 01 00 02 00 05 02 00 01 00 00 00 00 05 00 00 00 0A 00 00 00 01 03 05 00 00 36 FF A5
+        [{'index': 0, 'type': 5, 'confirmTime': 2, 'hour24': 1, 'startVal': 0, 'interval': 5, 'total': 10},
+         {'index': 1, 'type': 3, 'confirmTime': 5, 'hour24': 0}]
+        :param param: list of din parameter
+            [{'index': int, 'type': int, 'confirmTime': int, 'hour24': int, 'startVal': int, 'interval': int,
+            'total': int}]
+        :return:
+        """
+        cnt = len(param)
+        data = struct.pack('<B', cnt)
+        for o in param:
+            data += struct.pack('<BBHb', o['index'], o['type'], o['confirmTime'], o['hour24'])
+            if o['type'] == 5:
+                data += struct.pack('<III', o['startVal'], o['interval'], o['total'])
+        msg = self.generate_send_msg(cmd=0x89, data=data)
+        self.send_msg(msg)
+        return
+
+    def ack_set_din(self):
+        """
+        Program the DIN Parameter Command “0x89” --- RTU 应答 设置 DIN 参数命令
+        Upstream Structure: A5 L1 L2 89 TP1 TP2 CP1 CP2 ID1~15 bool SUM1 SUM2 A5
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        device ID   15      ASCII
+        code        1       1 = success, 0 = error
+        :return:
+        """
+        self.parse_device_id()
+        success, = struct.unpack("<b", self.ori_rx[DATA_BEGIN:DATA_BEGIN + 1])
+        print 'ack set din: success = {}'.format(success)
+        return
+
+    def get_din(self):
+        """
+        Inquiry the DIN Parameter Command “0x8A” （Downstream ）
+        Downstream Structure: A5 L1 L2 8A TP1 TP2 CP1 CP2 SUM1 SUM2 A5
+        :return:
+        """
+        msg = self.generate_send_msg(cmd=0x8A)
+        self.send_msg(msg)
+        return
+
+    def ack_get_din(self):
+        """
+        Inquiry the DIN Parameter Command “0x8A” --- RTU 应答 查询 DIN 参数命令
+        Upstream Structure: A5 L1 L2 8A TP1 TP2 CP1 CP2 ID1~15 Cnt Index Type confirmTime 24hr startValue interval total
+            Index Type confirmTime 24hr SUM1 SUM2 A5
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        device ID   15      ASCII
+        Cnt         1B      Total quantity group of the Data (Each Group=Index~24hr)
+        Index       1B      Index is Channel Number of the DIN, Index=0~8
+        Type        1B      0 =Disable; 1=NO; 2=NC; 3=Change; 4=Disarm/arm; 5=Counter
+        confirmTime 2B      Alarm Verify Time (Integer),Max: 9999
+        24hr        1B      24*7hours arm, cannot be disarm,Enable=1;Disable=0
+        startValue  4B      Start Value(Integer),Max: 999999 ,If “Type” ≠5,then this value is invalid
+                            当 type 为 5 时传输此值，否则不传（下同）
+        interval    4B      Step Alarm Value (Integer),Max:999999, If “Type” ≠5,then this value is invalid.
+        total       4B      Total Alarm Value(Integer)，Max:999999, If “Type” ≠5,then this value is invalid.
+        :return: list of din parameter
+            [{'index': int, 'type': int, 'confirmTime': int, 'hour24': int, 'startVal': int, 'interval': int,
+            'total': int}]
+        """
+        self.parse_device_id()
+        din_param = []
+        p = DATA_BEGIN
+        cnt, = struct.unpack("<B", self.ori_rx[p:p + 1])
+        p += 1
+        for i in xrange(cnt):
+            index, din_type, confirm, hr24, = struct.unpack("<BBHb", self.ori_rx[p:p + 5])
+            p += 5
+            start_val, interval, total = None, None, None
+            if din_type == 5:
+                start_val, interval, total = struct.unpack("<III", self.ori_rx[p:p + 12])
+                p += 12
+            din_param.append({'index': index, 'type': din_type, 'confirmTime': confirm, 'hour24': hr24,
+                              'startVal': start_val, 'interval': interval, 'total': total})
+        return din_param
+
+    def set_inter_lock(self, param):
+        """
+        Program the Inter-Lock Command 0x8B （Downstream ） 发起方：服务器，设置触发事件命令
+        Tips: When to program the Inter-Lock of the 27X, need to send 40 Events in the same data package, “0” means
+        the event is invalid, when inquiry the Inter-Lock Command, will Upstream all of the Events.
+        27X 系列 RTU 设备最多存储四十个触发事件配置，而且在调用本命令进行配置时，须将所有 40 组事件同时
+        送给设备，未设置的使用 0 填充；
+        若要针对设备已有事件进行修改，服务器须先调用 0x8C 先读取设备上的四十个事件配置，再进行设置。
+        Downstream Structure:A5 L1 L2 8B TP1 TP2 CP1 CP2 Cnt Event Active Event Active Event Active … SUM1 SUM2
+            A5
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        Cnt         1B      Total quantity group of the Data (Each Group=Event ~ Active)
+        Event       1B      Event=0~54 (Refer to the “ Inter-Lock Code Table ” )
+        Active      1B      Active=0~18 (Refer to the “ Inter-Lock Code Table ” )
+
+        =================== Inter-Lock Code Table ===================
+        Event Code          Description
+        ---------------     ------------------------------------------------------------
+        0                   None
+        1                   Arm
+        2                   Disarm
+        4~11                DIN1 ~ DIN8 Alarm   DIN1~DIN8 报警
+        13~20               DIN1 ~ DIN8 Recovery    DIN1~DIN8 恢复
+        21                  Step Alarm Value    间隔报警
+        22                  Total Value Alarm   总值报警
+        24~29               AIN1~AIN6 Alarm
+        31~36               AIN1~AIN6 Recovery
+        37                  Temperature Alarm
+        38                  Humidity Alarm
+        39                  Temperature Recovery
+        40                  Humidity Recovery
+        41                  All the Relay Close 所有继电器闭合
+        42~45               Relay 1~ Relay 4 Close
+        46                  All the Relay Open  所有继电器断开
+        47~50               Relay 1~ Relay 4 Open
+        51                  RS232 Device Alarm
+        52                  RS485 Device Alarm
+        53                  GSM Signal Low
+        54                  GPRS Connection Failure
+
+        Action Code         Description
+        ---------------     ------------------------------------------------------------
+        0                   None
+        1                   Reset
+        2                   All the Relay Close
+        3                   All the Relay Open
+        4                   Relay 0 Open
+        5                   Relay 0 Close
+        6                   Relay 1 Open
+        7                   Relay 1 Close
+        8                   Relay 2 Open
+        9                   Relay 2 Close
+        10                  Relay 3 Open
+        11                  Relay 3 Close
+        12                  Arm 布防
+        13                  Disarm  撤防
+        14                  GPRS Online
+        15                  Open the Door   开门
+        16                  Siren   警号
+        17                  Video-Interlock
+        18                  Switch ON/OFF   开关
+
+        :param param:
+        :return: list of inter-lock parameter
+            [{'event': int, 'action': int}]
+        """
+        cnt = 40
+        data = struct.pack('<B', cnt)
+        n = 0
+        for o in param:
+            data += struct.pack('<BB', o['event'], o['action'])
+            n += 1
+
+        while n < 40:
+            data += struct.pack('<BB', 0, 0)
+            n += 1
+
+        msg = self.generate_send_msg(cmd=0x8B, data=data)
+        self.send_msg(msg)
+        return
+
+    def ack_set_inter_lock(self):
+        """
+        设置触发事件命令  0x8B （上行）
+        Upstream Structure:A5 L1 L2 8B TP1 TP2 CP1 CP2 ID1~15 bool SUM1 SUM2 A5
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        device ID   15      ASCII
+        code        1       1 = success, 0 = error. 响应码
+        :return:
+        """
+        self.parse_device_id()
+        success, = struct.unpack("<b", self.ori_rx[DATA_BEGIN:DATA_BEGIN + 1])
+        print 'ack set inter lock: success = {}'.format(success)
+        return
+
+    def get_inter_lock(self):
+        """
+        Inquiry the Inter-Lock Command “0x8C” （Downstream ）
+        Downstream Structure: A5 L1 L2 8C TP1 TP2 CP1 CP2 SUM1 SUM2 A5
+        :return:
+        """
+        msg = self.generate_send_msg(cmd=0x8C)
+        self.send_msg(msg)
+        return
+
+    def ack_get_inter_lock(self):
+        """
+        Inquiry the Inter-Lock Command “0x8C” （Upstream ） --- RTU 应答 查询 关联事件命令
+        Upstream Structure: A5 L1 L2 8C TP1 TP2 CP1 CP2 ID1~15 Cnt Event Active Event Active Event Active … SUM1 SUM2
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        device ID   15      ASCII
+        Cnt         1B      Total quantity group of the Data (Each Group=Event ~ Active)
+        Event       1B      Event=0~54 (Refer to the “ Inter-Lock Code Table ” )
+        Active      1B      Active=0~18 (Refer to the “ Inter-Lock Code Table ” )
+        :return:  list of inter-lock configuration
+            [{'event': int, 'action': int}]
+        """
+        self.parse_device_id()
+        inter_lock = []
+        p = DATA_BEGIN
+        cnt, = struct.unpack("<B", self.ori_rx[p:p + 1])
+        p += 1
+        for i in xrange(cnt):
+            event, action = struct.unpack("<BB", self.ori_rx[p:p + 2])
+            p += 2
+            inter_lock.append({'event': event, 'action': action})
+        return inter_lock
+
+    def set_timed_task(self, param):
+        """
+        Program the Timer Inter-Lock Command “0x8D” （Downstream ）
+        Tips: When to program the Inter-Lock of the 27X, need to send 10 Timer Inter-Lock Events in the same data
+        package, “0” means the event is invalid, when inquiry the Inter-Lock Command, will Upstream all of the Events.
+        27X 系列 RTU 设备最多存储十个定时任务配置，而且在调用本命令进行配置时，须将所有 10 组定时任务同
+        时送给设备，未设置的使用 0 填充；
+        若要针对设备已有定时任务进行修改，服务器须先调用 0x8E 先读取设备上的十组定时任务配置，再进行设置。
+        Downstream Structure: A5 L1 L2 8D TP1 TP2 CP1 CP2 Cnt week hour min Event week hour min Event … SUM1 SUM2 A5
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        Cnt         1B      Cnt =10, Total quantity group of the Data (Each Group= Week ~ Event)
+        week        1B      When “Bit7” =1 is enable this Timer Inter-Lock, When “Bit7” =0 is disable
+                            this Timer Inter-Lock. Bit0~Bit6 is Week: 0~6=Sunday~ Saturday; 7=Everyday
+        hour        1B      Hour=0~24
+        Min         1B      Min=0~60
+        Event       1B      Event=0~18 (Refer to the “Timer Inter-Lock Code Table”)
+
+        =================== Timer Inter-Lock Code Table ===================
+        Event Code  Description
+        ----------  -----------------------------------------------------------
+        0           Reboot
+        1           GPRS Upload Data
+        2           Pulse Counter Reset to Zero
+        3           Auto Report By SMS
+        4           GPRS Online
+        5           Collect the Data By RS232/485
+        6           Save the Historical Data
+        7           All the Relay Close
+        8           All the Relay Open
+        9~12        Relay 1~4 Close
+        13~16       Relay 1~4 Open
+        17          Arm
+        18          Disarm
+        ================================================================================
+        For Example ：
+        Example 1: (Program to enable the 1st Timer ,GPRS upload the data in Everyday 08:05; enable the 10th Timer,
+        Save the Historical Data in Every Tuesday 10:30)
+        Server Downstream:
+        A5 2E 00 8D 01 00 01 00 0A 87 08 05 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+        00 00 00 00 00 00 00 00 82 0A 1E 06 F3 FD A5
+        [{'no': 1, 'valid': 1, 'week': 7, 'hour': 8, 'minute': 5, 'event': 1},
+         {'no': 10, 'valid': 1, 'week': 2, 'hour': 10, 'minute': 30, 'event': 6}]
+        :param param: list of timed task parameter
+            [{'valid': int, 'week': int, 'hour':int, 'minute': int, 'event': int}]
+        :return:
+        """
+        cnt = 10
+        data = struct.pack('<B', cnt)
+        pm = copy.deepcopy(param)
+        pm.sort(key=take_no)
+        p = 0
+        for i in xrange(cnt):
+            o = pm[p]
+            if i == o['no'] - 1:
+                if o['valid'] == 0:
+                    data += struct.pack('<BBbb', 0, 0, 0, 0)
+                else:
+                    week = (o['valid'] << 7) | o['week']
+                    data += struct.pack('<BBbb', week, o['hour'], o['minute'], o['event'])
+                p += 1
+            else:
+                data += struct.pack('<BBbb', 0, 0, 0, 0)
+        msg = self.generate_send_msg(cmd=0x8D, data=data)
+        self.send_msg(msg)
+        return
+
+    def ack_set_timed_task(self):
+        """
+        Program the Timer Inter-Lock Command “0x8D” （Upstream ） --- RTU 应答 设置定时任务命令
+        Upstream Structure: A5 L1 L2 8D TP1 TP2 CP1 CP2 ID1~15 bool SUM1 SUM2 A5
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        device ID   15      ASCII
+        code        1       1 = success, 0 = error. 响应码
+        :return:
+        """
+        self.parse_device_id()
+        success, = struct.unpack("<b", self.ori_rx[DATA_BEGIN:DATA_BEGIN + 1])
+        print 'ack set timed task: success = {}'.format(success)
+        return
+
     def parse_device_id(self):
         dev_id, = struct.unpack("<15s", self.ori_rx[DEVICE_BEGIN:DATA_BEGIN])
         if self.device_id is None:
@@ -958,7 +1290,7 @@ class PigeonProtocol(object):
             self.handle.server.del_device_client(self.device_id)
             self.device_id = dev_id
         self.handle.server.add_device_client(dev_id, self)
-        print 'device id =', dev_id
+        print 'device id = {}'.format(dev_id)
         return
 
     def del_device_protocol(self):
@@ -1079,9 +1411,9 @@ class PigeonProtocol(object):
                     0x04  DIN4
                     0x05  DIN5
                     Tips: In the Data, "bit27~bit0" is the specific value;
-                    "bit28～31" is the Type,1=NC, 2=NO, 3=Change, 5=Counter
-                    When the "bit28～31" =1,2,3; then Data =1=Open; Data =0= Close;
-                    When the "bit28～31" =5, then it will use as a Counter, the data is the specific value;
+                    "bit28~31" is the Type,1=NC, 2=NO, 3=Change, 5=Counter
+                    When the "bit28~31" =1,2,3; then Data =1=Open; Data =0= Close;
+                    When the "bit28~31" =5, then it will use as a Counter, the data is the specific value;
                 If the "Type"=0x04 (Temperature & Humidity), the "Address" Interpretation:
                     0x00  Temperature 1 (Temperature is Even)
                     0x01  Humidity 1 (Humidity is Odd)
