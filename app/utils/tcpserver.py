@@ -24,6 +24,9 @@ MSG_HEAD_LENGTH = 5     # 报文头长度，从cmd到cp  cmd(1) tp(2) cp(2)
 
 TIMER_INTERVAL = 1
 
+RELAY_CTRL_MODE_VIA_INTER_LOCK_LINK = 0     # 0为报警与联动事件控制方式
+RELAY_CTRL_MODE_VIA_APP = 1                 # 1 为 app 控制方式
+
 
 class WmmTCPServer(SocketServer.ThreadingTCPServer):
 
@@ -144,6 +147,10 @@ class PigeonProtocol(object):
             0x82: self.ack_inquiry_ip_address,
             0x83: self.ack_set_phone_number,
             0x84: self.ack_inquiry_phone_number,
+            0x85: self.ack_program_relay,
+            0x86: self.ack_inquiry_relay_cfg,
+            0x87: self.ack_program_ain,
+            0x88: self.ack_inquiry_ain_param,
             0x8F: self.ack_arm_disarm,
             0x94: self.ack_inquiry_device_id,
             0x97: self.ack_inquiry_current_data,
@@ -173,7 +180,15 @@ class PigeonProtocol(object):
         # self.set_ip_address([{'index': 1, 'ip': '113.232.197.13', 'port': 9016}])
         # self.set_ip_address([{'index': 2, 'ip': ''}])
         # self.set_phone_number([{'index': 7, 'phone': '18642304486', 'call': 1, 'sms': 0}])
-        self.inquiry_current_data()
+        # self.inquiry_current_data()
+        # self.program_relay(mode=0, control_info=[{'index': 0, 'closeTime': 5, 'openTime': 2, 'freq': 0},
+        #                                         {'index': 1, 'closeTime': 3, 'openTime': 1, 'freq': 0}])
+        # self.inquiry_relay_cfg(RELAY_CTRL_MODE_VIA_INTER_LOCK_LINK)
+        # self.program_ain(mode=0, param=[{'index': 0, 'type': 3, 'maxVal': 100, 'minVal': 0, 'hLimit': 35, 'lLimit': 0,
+        #                                 'confirmTime': 4, 'hour24': 1},
+        #                                {'index': 1, 'type': 3, 'maxVal': 200, 'minVal': 20, 'hLimit': 40,
+        #                                 'lLimit': 10, 'confirmTime': 2, 'hour24': 0}])
+        self.inquiry_ain_param(0)
 
         try:
             start, = struct.unpack("B", d[0:1])
@@ -293,7 +308,7 @@ class PigeonProtocol(object):
         Downstream Structure: A5 L1 L2 94 TP1 TP2 CP1 CP2 SUM1 SUM2 A5 
         :return: 
         """
-        msg = self.generate_send_msg(cmd=0x94, length=MSG_HEAD_LENGTH, tp=1, cp=1, data=None)
+        msg = self.generate_send_msg(cmd=0x94, length=MSG_HEAD_LENGTH, tp=1, cp=1)
         self.send_msg(msg)
         return
 
@@ -315,7 +330,7 @@ class PigeonProtocol(object):
         Downstream Structure: A5 L1 L2 97 TP1 TP2 CP1 CP2 SUM1 SUM2 A5
         :return:
         """
-        msg = self.generate_send_msg(cmd=0x97, length=MSG_HEAD_LENGTH, tp=1, cp=1, data=None)
+        msg = self.generate_send_msg(cmd=0x97, length=MSG_HEAD_LENGTH, tp=1, cp=1)
         self.send_msg(msg)
         return
 
@@ -416,7 +431,7 @@ class PigeonProtocol(object):
         """
         self.parse_device_id()
         success, = struct.unpack("b", self.ori_rx[DATA_BEGIN:DATA_BEGIN+1])
-        print 'success =', success
+        print 'ack control relay success = {}'.format(success)
 
     def arm_disarm(self, flag):
         """
@@ -496,7 +511,7 @@ class PigeonProtocol(object):
         """
         self.parse_device_id()
         success, = struct.unpack("b", self.ori_rx[DATA_BEGIN:DATA_BEGIN + 1])
-        print 'success =', success
+        print 'ack set ip address: success ={}'.format(success)
         return
 
     def inquiry_ip_address(self):
@@ -506,7 +521,7 @@ class PigeonProtocol(object):
         :return:
         """
         length = MSG_HEAD_LENGTH
-        msg = self.generate_send_msg(cmd=0x82, length=length, tp=1, cp=1, data=None)
+        msg = self.generate_send_msg(cmd=0x82, length=length, tp=1, cp=1)
         self.send_msg(msg)
         return
 
@@ -547,6 +562,110 @@ class PigeonProtocol(object):
             ips.append({'index': index, 'ip': ip_addr, 'port': port})
         return ips
 
+    def program_relay(self, mode, control_info):
+        """
+        Program the Relay Command “ 0x85” （Downstream ）--- （发起方：服务器）设置继电器命令
+        Downstream Structure: A5 L1 L2 85 TP1 TP2 CP1 CP2 mode Cnt Index CloseTime OpenTime freq index CloseTime
+                              OpenTime freq SUM1 SUM2 A5
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        mode        1B      Control Method,0=Inter-Lock Link,1=Control via APP
+                                0 为报警与联动事件控制方式,  1 为 app 控制方式
+        Cnt         1B      Totally how many relays need to be Program
+        Index       1B      Index is the Relay Channel Number，Index=0～3
+        CloseTime   2B      Close Time=0~10000, 0= Always Close; Unit: Second
+        OpenTime    2B      Open Time=0~10000; 0= Always Close; Unit: Second
+        freq        2B      Frequency, freq=0~1000, 0=No Action, 1000=1000 Times; Unit: Times
+        :param mode:  Control Method,0=Inter-Lock Link,1=Control via APP
+        :param control_info:  list of relay control information
+            [{'index': int, 'closeTime': int, 'openTime': int, 'freq': int}]
+        =======================================================================================================
+        For Example ：
+        Example 1 ：(Program the relay control via Inter-lock, totally need to program 2 relays, relay 0 needs to close
+        5 seconds, open 2 seconds, frequency is 0; relay 1 close 3 seconds, open 1 second, frequency is 0)
+        Server Program the Relay Downstream:
+        A5 15 00 85 01 00 01 00 00 02 00 05 00 02 00 00 00 01 03 00 01 00 00 00 55 FF A5
+        mode=0, control_info=[{'index': 0, 'closeTime': 5, 'openTime': 2, 'freq': 0},
+            {'index': 1, 'closeTime': 3, 'openTime': 1, 'freq': 0}]
+        :return:
+        """
+        cnt = len(control_info)
+        length = MSG_HEAD_LENGTH + 2 + cnt * 7
+        data = struct.pack('<BB', mode, cnt)
+        for o in control_info:
+            data += struct.pack('<bHHH', o['index'], o['closeTime'], o['openTime'], o['freq'])
+        msg = self.generate_send_msg(cmd=0x85, length=length, tp=1, cp=1, data=data)
+        self.send_msg(msg)
+        return
+
+    def ack_program_relay(self):
+        """
+        Program the Relay Command “ 0x85” --- RTU 应答 设置继电器命令
+        Upstream Structure: A5 L1 L2 85 TP1 TP2 CP1 CP2 ID1~15 mode bool SUM1 SUM2 A5
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        device ID   15      ASCII
+        mode        1       Control Method,0=Inter-Lock Link,1=Control via APP
+        code        1   `   1 = success, 0 = error
+        :return:
+        """
+        self.parse_device_id()
+        mode, success = struct.unpack("<bb", self.ori_rx[DATA_BEGIN:DATA_BEGIN + 2])
+        print 'ack program relay: mode = {}, success = {}'.format(mode, success)
+        return
+
+    def inquiry_relay_cfg(self, mode):
+        """
+        Inquiry the Relay Configuration “0x86” （ Downstream ） 发起方：服务器，查询继电器命令
+        Downstream Structure: A5 L1 L2 86 TP1 TP2 CP1 CP2 mode SUM1 SUM2 A5
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        mode        1       Control Method,0=Inter-Lock Link,1=Control via APP
+        =====================================================================================================
+        For Example ：
+            Server Downstream: (Inquiry the Inter-lock Relay configuration )
+            A5 06 00 86 01 00 01 00 00 71 FF A5
+
+            Server Downstream: (Inquiry the APP Relay configuration )
+            A5 06 00 86 01 00 01 00 01 70 FF A5
+        :param mode: Control Method,0=Inter-Lock Link,1=Control via APP
+        :return:
+        """
+        length = MSG_HEAD_LENGTH + 1
+        data = struct.pack('<B', mode)
+        msg = self.generate_send_msg(cmd=0x86, length=length, tp=1, cp=1, data=data)
+        self.send_msg(msg)
+        return
+
+    def ack_inquiry_relay_cfg(self):
+        """
+        Inquiry the Relay Configuration “0x86”  --- RTU 应答 查询继电器命令
+        Upstream Structure: A5 L1 L2 86 TP1 TP2 CP1 CP2 ID1~15 mode Cnt Index CloseTime OpenTime freq index
+                            CloseTime OpenTime freq SUM1 SUM2 A5
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        device ID   15      ASCII
+        mode        1B      Control Method,0=Inter-Lock Link,1=Control via APP
+                                0 为报警与联动事件控制方式,  1 为 app 控制方式
+        Cnt         1B      Totally how many relays need to be Program
+        Index       1B      Index is the Relay Channel Number，Index=0～3
+        CloseTime   2B      Close Time=0~10000, 0= Always Close; Unit: Second
+        OpenTime    2B      Open Time=0~10000; 0= Always Close; Unit: Second
+        freq        2B      Frequency, freq=0~1000, 0=No Action, 1000=1000 Times; Unit: Times
+        :return: tuple of relay configuration
+            ( mode, [{'index': int, 'closeTime': int, 'openTime': int, 'freq': int}] )
+        """
+        self.parse_device_id()
+        relay_cfg = []
+        p = DATA_BEGIN
+        mode, cnt, = struct.unpack("<BB", self.ori_rx[p:p+2])
+        p += 2
+        for i in xrange(cnt):
+            index, close_time, open_time, freq = struct.unpack("<bHHH", self.ori_rx[p:p+7])
+            p += 7
+            relay_cfg.append({'index': index, 'closeTime': close_time, 'openTime': open_time})
+        return mode, relay_cfg
+
     def process_alarm(self):
         """
         Alarm “0x70” (Upstream)
@@ -578,7 +697,6 @@ class PigeonProtocol(object):
         alm_type, addr, alm = struct.unpack("<BBB", self.ori_rx[DATA_BEGIN:DATA_BEGIN+3])
         print 'type={}, addr={}, alm={}'.format(alm_type, addr, alm)
         self.parse_upload_data(self.ori_rx[DATA_BEGIN+3:], self.length-MSG_HEAD_LENGTH-15-3)
-
         msg = self.generate_send_msg(cmd=0x70)
         self.send_msg(msg)
         return
@@ -646,7 +764,7 @@ class PigeonProtocol(object):
         """
         self.parse_device_id()
         success, = struct.unpack("b", self.ori_rx[DATA_BEGIN:DATA_BEGIN + 1])
-        print 'success =', success
+        print 'ack set phone number: success ={}'.format(success)
         return
 
     def inquiry_phone_number(self):
@@ -655,7 +773,7 @@ class PigeonProtocol(object):
         Downstream Structure: A5 L1 L2 84 TP1 TP2 CP1 CP2 SUM1 SUM2 A5
         :return:
         """
-        msg = self.generate_send_msg(cmd=0x84, length=MSG_HEAD_LENGTH, tp=1, cp=1, data=None)
+        msg = self.generate_send_msg(cmd=0x84, length=MSG_HEAD_LENGTH, tp=1, cp=1)
         self.send_msg(msg)
         return
 
@@ -697,6 +815,140 @@ class PigeonProtocol(object):
             phone_numbers.append({'index': index, 'phone': phone, 'call': call, 'sms': sms})
         # print phone_numbers
         return phone_numbers
+
+    def program_ain(self, mode, param):
+        """
+        Program the AIN Parameter Command “0x87” （Downstream ）
+        Downstream Structure: A5 L1 L2 85 TP1 TP2 CP1 CP2 mode Cnt Index Type maxvalue minvalue HLimit LLimit
+            confirmTime 24hr Index Type maxvalue minvalue HLimit LLimit confirmTime 24hr SUM1 SUM2 A5
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        mode        1B      AIN=0; Temperature&Humidity=1
+        Cnt         1B      Total quantity group of the Data (Each Group=Index~24hr)
+        Index       1B      When the “Mode”=0, then Index=0~6, Analog Channel Number
+                            When the “Mode”=1, Then Index=0~1, 0=Temperature,1=Humidity
+        Type        1B      When the “Mode”=0,then Type=0~3;
+                                0= Disable
+                                1=Sensor Type 0~5V
+                                2=Sensor Type 0～20mA
+                                3=Sensor Type 4~20mA
+                            When the “Mode”=1, then Type=0~1;
+                                0= Disable
+                                1= Enable
+        maxvalue    4B      Max(Floating Number), “-9999.99~9999.99”,when “Mode”=1,then this value is invalid.
+        minvalue    4B      Min(Floating Number) , “-9999.99~9999.99”,when “Mode”=1,then this value is invalid.
+        HLimit      4B      Threshold High(Floating Number) , “-9999.99~9999.99”
+        LLimit      4B      Threshold Low(Floating Number) , “-9999.99~9999.99”
+        confirmTime 2B      Alarm Verify Time (Integer),Max: 9999. 单位为秒
+        24hr        1B      24*7hours arm, cannot be disarm, Enable=1;Disable=0. 是否 24 小时监控
+        =====================================================================================================
+        For Example ：
+            Example 1: (Program the AIN0=4~20mA,Measuring Range:0~100, Threshold High=35, Threshold Low=0, Alarm verify
+                time=4 Seconds, Enable 24hours mode; Program the AIN1=4~20mA,Measuring Range:20~200, Threshold High=40,
+                Threshold Low=10, Alarm verify time=2 Seconds, Disable 24hours mode)
+                Server Downstream:
+                A5 31 00 87 01 00 01 00 00 02 00 03 00 00 C8 42 00 00 00 00 00 00 0C 42 00 00 00 00 04 00 01 01 03 00
+                00 48 43 00 00 A0 41 00 00 20 42 00 00 20 41 02 00 00 AE FB A5
+                mode=0, param=[{'index': 0, 'type': 3, 'maxVal': 100, 'minVal': 0, 'hLimit': 35, 'lLimit': 0,
+                'confirmTime': 4, 'hour24': 1}, {'index': 1, 'type': 3, 'maxVal': 200, 'minVal': 20, 'hLimit': 40,
+                'lLimit': 10, 'confirmTime': 2, 'hour24': 0}]
+        :param mode:    AIN=0; Temperature&Humidity=1
+        :param param: list of parameter
+            [ { 'index': int, 'type': int, 'maxVal': float, 'minVal':float, 'hLimit': float, 'lLimit': float,
+                'confirmTime': int, 'hour24': int} ]
+        :return:
+        """
+        cnt = len(param)
+        data = struct.pack('<BB', mode, cnt)
+        for o in param:
+            data += struct.pack('<BBffffHB', o['index'], o['type'], o['maxVal'], o['minVal'], o['hLimit'], o['lLimit'],
+                                o['confirmTime'], o['hour24'])
+        msg = self.generate_send_msg(cmd=0x87, data=data)
+        self.send_msg(msg)
+        return
+
+    def ack_program_ain(self):
+        """
+        Program the AIN Parameter Command “0x87” --- RTU 应答 设置AIN 参数命令
+        Upstream Structure: A5 L1 L2 85 TP1 TP2 CP1 CP2 ID1~15 mode bool SUM1 SUM2 A5
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        device ID   15      ASCII
+        mode        1       AIN=0; Temperature&Humidity=1
+        code        1       1 = success, 0 = error
+        :return:
+        """
+        self.parse_device_id()
+        mode, success = struct.unpack("<bb", self.ori_rx[DATA_BEGIN:DATA_BEGIN + 2])
+        print 'ack program ain: mode = {}, success = {}'.format(mode, success)
+        return
+
+    def inquiry_ain_param(self, mode):
+        """
+        Inquiry the AIN Parameter Command “0x88” （Downstream ）
+        Downstream Structure: A5 L1 L2 88 TP1 TP2 CP1 CP2 mode SUM1 SUM2 A5
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        mode        1B      AIN=0; Temperature & Humidity=1
+        :param mode:    AIN=0; Temperature & Humidity=1
+        :return:
+        """
+        data = struct.pack('<B', mode)
+        msg = self.generate_send_msg(cmd=0x88, data=data)
+        self.send_msg(msg)
+        return
+
+    def ack_inquiry_ain_param(self):
+        """
+        Inquiry the AIN Parameter Command “0x88” （Downstream ） --- RTU 应答 查询 Ain 参数命令
+        Upstream Structure: A5 L1 L2 88 TP1 TP2 CP1 CP2 ID1~15 mode Cnt Index Type maxvalue minvalue HLimit LLimit
+            confirmTime 24hr Index Type maxvalue minvalue HLimit LLimit confirmTime 24hr SUM1 SUM2
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        device ID   15      ASCII
+        mode        1B      AIN=0; Temperature&Humidity=1
+        Cnt         1B      Total quantity group of the Data (Each Group=Index~24hr)
+        Index       1B      When the “Mode”=0, then Index=0~6, Analog Channel Number
+                            When the “Mode”=1, Then Index=0~1, 0=Temperature,1=Humidity
+        Type        1B      When the “Mode”=0,then Type=0~3;
+                                0= Disable
+                                1=Sensor Type 0~5V
+                                2=Sensor Type 0～20mA
+                                3=Sensor Type 4~20mA
+                            When the “Mode”=1, then Type=0~1;
+                                0= Disable
+                                1= Enable
+        maxvalue    4B      Max(Floating Number), “-9999.99~9999.99”,when “Mode”=1,then this value is invalid.
+        minvalue    4B      Min(Floating Number) , “-9999.99~9999.99”,when “Mode”=1,then this value is invalid.
+        HLimit      4B      Threshold High(Floating Number) , “-9999.99~9999.99”
+        LLimit      4B      Threshold Low(Floating Number) , “-9999.99~9999.99”
+        confirmTime 2B      Alarm Verify Time (Integer),Max: 9999. 单位为秒
+        24hr        1B      24*7hours arm, cannot be disarm, Enable=1;Disable=0. 是否 24 小时监控
+        =====================================================================================================
+        For Example ：
+            Example 1:
+            Server Downstream:
+            A5 06 00 88 01 00 01 00 00 6F FF A5
+            Device Answer:
+            A5 6A 00 88 01 00 01 00 38 36 33 38 33 35 30 32 34 37 34 32 37 35 36 00 04 00 03 00 00 C8 42 00 00 00 00 00
+            00 0C 42 00 00 00 00 04 00 01 01 03 00 00 48 43 00 00 A0 41 00 00 20 42 00 00 20 41 02 00 00 02 00 00 00 00
+            00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+            00 57 F8 A5
+        :return: tuple of parameter
+            mode, [{'index': int, 'type': int, 'maxVal': float, 'minVal':float, 'hLimit': float, 'lLimit': float,
+                'confirmTime': int, 'hour24': int}]
+        """
+        self.parse_device_id()
+        ain_param = []
+        p = DATA_BEGIN
+        mode, cnt, = struct.unpack("<BB", self.ori_rx[p:p + 2])
+        p += 2
+        for i in xrange(cnt):
+            index, ain_type, max_val, min_val, h, l, confirm, hr24 = struct.unpack("<BBffffHb", self.ori_rx[p:p + 21])
+            p += 21
+            ain_param.append({'index': index, 'type': ain_type, 'maxVal': max_val, 'minVal': min_val,
+                              'hLimit': h, 'lLimit': l, 'confirmTime': confirm, 'hour24': hr24})
+        return mode, ain_param
 
     def parse_device_id(self):
         dev_id, = struct.unpack("<15s", self.ori_rx[DEVICE_BEGIN:DATA_BEGIN])
@@ -747,7 +999,7 @@ class PigeonProtocol(object):
         sum_tx = ~s
         return sum_tx
 
-    def generate_send_msg(self, cmd=None, length=5, tp=1, cp=1, data=None):
+    def generate_send_msg(self, cmd=None, length=None, tp=1, cp=1, data=None):
         """
         构造命令报文
         :param cmd:         命令码
@@ -760,6 +1012,7 @@ class PigeonProtocol(object):
         cmd = self.cmd if cmd is None else cmd
         if cmd is None:
             return None
+        length = MSG_HEAD_LENGTH + (0 if data is None else len(data)) if length is None else length
         msg = struct.pack('<BHBHH', self.start, length, cmd, tp, cp)
         if data is not None:
             msg += data
