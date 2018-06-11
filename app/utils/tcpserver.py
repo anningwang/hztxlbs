@@ -162,6 +162,7 @@ class PigeonProtocol(object):
             0x8B: self.ack_set_inter_lock,
             0x8C: self.ack_get_inter_lock,
             0x8D: self.ack_set_timed_task,
+            0x8E: self.ack_get_timed_task,
             0x8F: self.ack_arm_disarm,
             0x94: self.ack_inquiry_device_id,
             0x97: self.ack_get_current_data,
@@ -205,8 +206,9 @@ class PigeonProtocol(object):
         # self.get_din()
         # self.set_inter_lock([{'event': 21, 'action': 7}, {'event': 37, 'action': 9}])
         # self.get_inter_lock()
-        self.set_timed_task([{'no': 10, 'valid': 1, 'week': 2, 'hour': 10, 'minute': 30, 'event': 6},
-                             {'no': 1, 'valid': 1, 'week': 7, 'hour': 8, 'minute': 5, 'event': 1}])
+        # self.set_timed_task([{'no': 10, 'valid': 1, 'week': 2, 'hour': 10, 'minute': 30, 'event': 6},
+        #                     {'no': 1, 'valid': 1, 'week': 7, 'hour': 8, 'minute': 5, 'event': 1}])
+        self.get_timed_task()
 
         try:
             start, = struct.unpack("B", d[0:1])
@@ -1244,7 +1246,7 @@ class PigeonProtocol(object):
         [{'no': 1, 'valid': 1, 'week': 7, 'hour': 8, 'minute': 5, 'event': 1},
          {'no': 10, 'valid': 1, 'week': 2, 'hour': 10, 'minute': 30, 'event': 6}]
         :param param: list of timed task parameter
-            [{'valid': int, 'week': int, 'hour':int, 'minute': int, 'event': int}]
+            [{'no': int, 'valid': int, 'week': int, 'hour':int, 'minute': int, 'event': int}]
         :return:
         """
         cnt = 10
@@ -1281,6 +1283,47 @@ class PigeonProtocol(object):
         success, = struct.unpack("<b", self.ori_rx[DATA_BEGIN:DATA_BEGIN + 1])
         print 'ack set timed task: success = {}'.format(success)
         return
+
+    def get_timed_task(self):
+        """
+        Inquiry the Timer Inter-Lock Command “0x8E” （Downstream ）
+        Downstream Structure:A5 L1 L2 8E TP1 TP2 CP1 CP2 SUM1 SUM2 A5
+        :return:
+        """
+        msg = self.generate_send_msg(cmd=0x8E)
+        self.send_msg(msg)
+        return
+
+    def ack_get_timed_task(self):
+        """
+        Inquiry the Timer Inter-Lock Command “0x8E”  -- RTU 返回 查询定时任务命令的结果
+        Upstream Structure: A5 L1 L2 8D TP1 TP2 CP1 CP2 ID1~15 Cnt week hour min Event week hour min Event …
+            SUM1 SUM2 A5
+        Character   Bytes   Description
+        ---------   ------  ---------------------------------------------------------------------------------
+        Device ID   15      ASCII
+        Cnt         1B      Cnt =10, Total quantity group of the Data (Each Group= Week ~ Event)
+        week        1B      When “Bit7” =1 is enable this Timer Inter-Lock, When “Bit7” =0 is disable
+                            this Timer Inter-Lock. Bit0~Bit6 is Week: 0~6=Sunday~ Saturday; 7=Everyday
+        hour        1B      Hour=0~24
+        Min         1B      Min=0~60
+        Event       1B      Event=0~18 (Refer to the “Timer Inter-Lock Code Table”)
+        :return: list of timed task parameter
+            [{'no': int, 'valid': int, 'week': int, 'hour':int, 'minute': int, 'event': int}]
+        """
+        self.parse_device_id()
+        timed_task = []
+        p = DATA_BEGIN
+        cnt, = struct.unpack("<B", self.ori_rx[p:p + 1])
+        p += 1
+        for i in xrange(cnt):
+            week, hour, minute, event = struct.unpack("<BBbb", self.ori_rx[p:p + 4])
+            p += 4
+            valid = (week & 0x80) >> 7
+            w = week & 0x7F
+            timed_task.append({'no': i+1, 'valid': valid,
+                               'week': w, 'hour': hour, 'minute': minute, 'event': event})
+        return timed_task
 
     def parse_device_id(self):
         dev_id, = struct.unpack("<15s", self.ori_rx[DEVICE_BEGIN:DATA_BEGIN])
