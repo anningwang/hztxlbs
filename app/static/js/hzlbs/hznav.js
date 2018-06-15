@@ -24,7 +24,6 @@ $(function(){
 		'<li class=""><a href="/hz_ps_result"><i class="menu-icon fa fa-caret-right"></i>盘点结果</a><b class="arrow"></b></li>' +
 		'<li class=""><a href="/hz_people_stat_task"><i class="menu-icon fa fa-caret-right"></i>定时盘点</a><b class="arrow"></b></li>' +
 		'</ul></li>' +
-
 		'</ul></li>' +
 
 		'<li class=""><a href="/hz_2d_map"><i class="menu-icon fa fa-map-o"></i><span class="menu-text"> 2D地图 </span></a><b class="arrow"></b></li>' +
@@ -36,6 +35,19 @@ $(function(){
 			'</a>' +
 			'<b class="arrow"></b>'
 		+'</li>' +
+
+		'<li class=""><a href="#" class="dropdown-toggle"><i class="menu-icon fa fa-fire"></i><span class="menu-text">智慧消防</span><b class="arrow fa fa-angle-down"></b></a><b class="arrow"></b>' +
+		'<ul class="submenu">' +
+		'<li class=""><a href="/#" class="dropdown-toggle"><i class="menu-icon fa fa-caret-right"></i><span class="menu-text">设备管理</span><b class="arrow fa fa-angle-down"></b></a><b class="arrow"></b>' +
+		'<ul class="submenu">' +
+		'<li class=""><a href="#" class="dropdown-toggle"><i class="menu-icon fa fa-caret-right"></i><span class="menu-text">RTU 管理</span><b class="arrow fa fa-angle-down"></b></a><b class="arrow"></b>' +
+		'<ul class="submenu">' +
+		'<li class=""><a href="/hz_rtu_main"><i class="menu-icon fa fa-caret-right"></i>RTU主页</a><b class="arrow"></b></li>' +
+		'<li class=""><a href="/hz_rtu_inter_lock"><i class="menu-icon fa fa-caret-right"></i>关联事件</a><b class="arrow"></b></li>' +
+		'<li class=""><a href="/hz_rtu_timed_task"><i class="menu-icon fa fa-caret-right"></i>定时任务</a><b class="arrow"></b></li>' +
+		'</ul></li>' +
+		'</ul></li>' +
+		'</ul></li>' +
 
 		'<li class=""><a href="#" class="dropdown-toggle"><i class="menu-icon fa fa-tags"></i><span class="menu-text">测试专用页</span><b class="arrow fa fa-angle-down"></b></a><b class="arrow"></b>' +
 		'<ul class="submenu">' +

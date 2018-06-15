@@ -5,7 +5,8 @@ from flask_sqlalchemy import get_debug_queries
 from flask_babel import gettext
 from app import app, db, lm, oid, babel
 from forms import LoginForm, EditForm, PostForm, SearchForm
-from models import User, ROLE_USER, Post, HzToken, HzLocation, HzElecTail, HzElecTailCfg, HzEtPoints
+from models import User, ROLE_USER, Post, HzToken, HzLocation, HzElecTail, HzElecTailCfg, HzEtPoints,\
+    Device, Relay, Din
 from emails import follower_notification
 from guess_language import guessLanguage
 from translate import microsoft_translate
@@ -392,6 +393,24 @@ def hz_page_map():
     return render_template('hz_map.html')
 
 
+@app.route('/hz_rtu_main', methods=['POST', 'GET'])
+def hz_page_rtu_main():
+    """ ace 框架 RTU 管理 首页 """
+    return render_template('rtu_main.html')
+
+
+@app.route('/hz_rtu_inter_lock', methods=['POST', 'GET'])
+def hz_page_rtu_inter_lock():
+    """ ace 框架 RTU 关联时间 """
+    return render_template('rtu_inter_lock.html')
+
+
+@app.route('/hz_rtu_timed_task', methods=['POST', 'GET'])
+def hz_page_rtu_timed_task():
+    """ ace 框架 RTU 定时任务 """
+    return render_template('rtu_timed_task.html')
+
+
 @app.route('/lbs/get_history_location', methods=['POST'])
 def get_history_location():
     """
@@ -771,3 +790,146 @@ def api_hz_lbs_locate_results():
                      'time': datetime.datetime.strftime(lo.timestamp, '%Y-%m-%d %H:%M:%S')})
 
     return jsonify({'errorCode': 0, 'errorMsg': [], 'data': data, 'valid': True})
+
+
+@app.route('/rtu/device_get', methods=['POST', 'GET'])
+def rtu_device_get():
+    """
+    查询 RTU 设备列表
+    输入参数:
+    {
+        page:           查询的页码。 当记录很多时，需要分页查询。可选参数，默认为第1页
+        rows:           当前页记录条数。可选参数。默认50条
+    }
+    :return:
+        errorCode       msg
+        ------------    -----------------------------
+        0               '查询成功.'
+
+        total: 符合条件的记录总数
+        rows:[{      盘点信息
+            id                  记录ID
+            deviceId            设备id，字符串
+            uuid                uuid
+            isOnline            在线状态 1 online; 0 offline
+            isArm               布防状态 0 disarm; 2 arm
+            companyId           设备所属公司id
+            name                设备名称
+            no                  序号
+        }]
+    """
+
+    obj = request.json if request.json is not None else request.form
+    page = 1 if 'page' not in obj else int(obj['page'])
+    rows = 50 if 'rows' not in obj else int(obj['rows'])
+
+    device = []
+    hzq = Device.query
+
+    total = hzq.count()
+    if page < 1:
+        page = 1
+    offset = (page - 1) * rows
+    records = hzq.limit(rows).offset(offset).all()
+    i = offset + 1
+
+    for r in records:
+        device.append({'id': r.id, 'deviceId': r.device_id, 'uuid': r.uuid, 'isOnline': r.is_online,
+                       'isArm': r.is_arm, 'companyId': r.company_id, 'name': r.name,
+                       'no': i})
+    return jsonify({'errorCode': 0, 'msg': u'查询成功.', 'total': total, 'rows': device})
+
+
+@app.route('/rtu/inter_lock_get', methods=['POST', 'GET'])
+def rtu_inter_lock_get():
+    """
+    查询 RTU 关联事件列表
+    输入参数:
+    {
+        page:           查询的页码。 当记录很多时，需要分页查询。可选参数，默认为第1页
+        rows:           当前页记录条数。可选参数。默认50条
+    }
+    :return:
+        errorCode       msg
+        ------------    -----------------------------
+        0               '查询成功.'
+
+        total: 符合条件的记录总数
+        rows:[{      盘点信息
+            id                  记录ID
+            dId                 设备记录id
+            index               relay index 从 0 开始
+            op                  relay状态 op: 0=Open(断开), 1=Close（闭合）
+            name                relay 名称
+            no                  序号
+        }]
+    """
+
+    obj = request.json if request.json is not None else request.form
+    page = 1 if 'page' not in obj else int(obj['page'])
+    rows = 50 if 'rows' not in obj else int(obj['rows'])
+
+    device = []
+    hzq = Relay.query
+
+    total = hzq.count()
+    if page < 1:
+        page = 1
+    offset = (page - 1) * rows
+    records = hzq.limit(rows).offset(offset).all()
+    i = offset + 1
+
+    for r in records:
+        device.append({'id': r.id, 'dId': r.d_id, 'index': r.index, 'op': r.op, 'name': r.name, 'no': i})
+    return jsonify({'errorCode': 0, 'msg': u'查询成功.', total: total, 'rows': device})
+
+
+@app.route('/rtu/din_get', methods=['POST', 'GET'])
+def rtu_din_get():
+    """
+    查询 RTU Digit IN 配置列表
+    输入参数:
+    {
+        page:           查询的页码。 当记录很多时，需要分页查询。可选参数，默认为第1页
+        rows:           当前页记录条数。可选参数。默认50条
+    }
+    :return:
+        errorCode       msg
+        ------------    -----------------------------
+        0               '查询成功.'
+
+        total: 符合条件的记录总数
+        rows:[{      盘点信息
+            id                  记录ID
+            dId                 设备记录id
+            index               din index 从 0 开始
+            type                din 类型：type: din 类型：0=Disable; 1=NO; 2=NC; 3=Change; 4=Disarm/arm; 5=Counter
+            name                din 名称
+            no                  序号
+            confirmTime         确认时间
+            hr24                是否开启24小时监控
+            startVal            起始值， type=5 有效
+            interval            间隔报警值，type=5 有效
+            total               总报警值，type=5 有效
+        }]
+    """
+
+    obj = request.json if request.json is not None else request.form
+    page = 1 if 'page' not in obj else int(obj['page'])
+    rows = 50 if 'rows' not in obj else int(obj['rows'])
+
+    device = []
+    hzq = Din.query
+
+    total = hzq.count()
+    if page < 1:
+        page = 1
+    offset = (page - 1) * rows
+    records = hzq.limit(rows).offset(offset).all()
+    i = offset + 1
+
+    for r in records:
+        device.append({'id': r.id, 'dId': r.d_id, 'index': r.index, 'type': r.type, 'name': r.name, 'no': i,
+                       'confirmTime': r.confirm_time, 'hr24': r.hr24, 'startVal': r.start_value,
+                       'interval': r.interval, 'total': r.total})
+    return jsonify({'errorCode': 0, 'msg': u'查询成功.', total: total, 'rows': device})

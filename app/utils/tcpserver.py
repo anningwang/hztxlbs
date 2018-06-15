@@ -13,6 +13,9 @@ import random
 import sys
 import copy
 
+from app.models import Device
+from app import db, app
+
 from wmmtools import WmmTools
 
 BUF_SIZE = 4096         # 从socket每次读取的数据长度
@@ -49,6 +52,12 @@ class WmmTCPServer(SocketServer.ThreadingTCPServer):
     def del_device_client(self, device_id):
         if device_id in self.device_client:
             del self.device_client[device_id]
+
+    def arm(self, device_id, state):
+        if device_id in self.device_client:
+            self.device_client[device_id].arm_disarm(state)
+        else:
+            print 'device id ({}) not exist.'.format(device_id)
 
 
 class WmmTCPHandler(SocketServer.BaseRequestHandler):
@@ -1326,15 +1335,25 @@ class PigeonProtocol(object):
         return timed_task
 
     def parse_device_id(self):
-        dev_id, = struct.unpack("<15s", self.ori_rx[DEVICE_BEGIN:DATA_BEGIN])
-        if self.device_id is None:
-            self.device_id = dev_id
-        if self.device_id != dev_id:
-            self.handle.server.del_device_client(self.device_id)
-            self.device_id = dev_id
-        self.handle.server.add_device_client(dev_id, self)
-        print 'device id = {}'.format(dev_id)
-        return
+        with app.app_context():
+            dev_id, = struct.unpack("<15s", self.ori_rx[DEVICE_BEGIN:DATA_BEGIN])
+            if self.device_id is None:
+                self.device_id = dev_id
+                dev = Device.query.filter_by(device_id=self.device_id).first()
+                if dev is None:
+                    dev = Device({'deviceId': dev_id, 'isOnline': 1, 'name': 'RTU'})
+                    db.session.add(dev)
+                    db.session.commit()
+            if self.device_id != dev_id:
+                self.handle.server.del_device_client(self.device_id)
+                dev = Device.query.filter_by(device_id=self.device_id).first()
+                if dev is not None:
+                    dev.update({'deviceId': dev_id})
+                    db.session.commit()
+                self.device_id = dev_id
+            self.handle.server.add_device_client(dev_id, self)
+            print 'device id = {}'.format(dev_id)
+            return
 
     def del_device_protocol(self):
         self.handle.server.del_device_client(self.device_id)
@@ -1542,6 +1561,8 @@ class WmmServer(object):
         server_thread.start()
         print "Server loop running in thread:", server_thread.name
 
+
+kp_server = WmmServer(9999)       # king pigeon server
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

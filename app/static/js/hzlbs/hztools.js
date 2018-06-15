@@ -83,13 +83,17 @@
     };
     
     var HZ_SOCKET_NAMESPACE = '/HeZhong';
+    var HZ_NAMESPACE_DEVICE_RTU = '/HeZhongDeviceRTU';
     hzlbs.CONST = {
         HZ_NAMESPACE: HZ_SOCKET_NAMESPACE,
         
         // Connect to the Socket.IO server.
         // The connection URL has the following format:
         //     http[s]://<domain>:<port>[/<namespace>]
-        HZ_CONN_STR:  location.protocol + '//' + document.domain + ':' + location.port + HZ_SOCKET_NAMESPACE
+        HZ_CONN_STR:  location.protocol + '//' + document.domain + ':' + location.port + HZ_SOCKET_NAMESPACE,
+
+        HZ_NAMESPACE_RTU : HZ_NAMESPACE_DEVICE_RTU,
+        HZ_RTU_CONN_STR: location.protocol + '//' + document.domain + ':' + location.port + HZ_NAMESPACE_DEVICE_RTU
     };
 
     hzlbs.HzTools = new HzTools();
@@ -176,6 +180,50 @@
         return y+'-'+(m<10?('0'+m):m)+'-'+(d<10?('0'+d):d)+' '+
             (H<10?('0'+H):H)+':'+(M<10?('0'+M):M)+':'+(S<10?('0'+S):S);
     };
+    
+    //-----------------------------------------------------------------------------
+    // King Pigeon RTU --- BEGINS
+    //-----------------------------------------------------------------------------
+    function KpRtu() {
+        this.socket = io.connect(hzlbs.CONST.HZ_RTU_CONN_STR);
+
+        var self = this;
+    
+        this.socket.on('connect', function() {
+            console.log('web socket connect');
+            self.socket.emit('rtu_event', {data: 'I\'m connected!'});
+        });
+    
+        this.socket.on('hz_response', function (msg) {
+            console.log('hz_response', msg);
+        });
+    
+        this.socket.on('hz_rtu', function (msg) {
+            console.log('hz_rtu', msg);
+        });
+
+        this.socket.on('hz_rtu_arm', function (msg) {
+            console.log('hz_rtu_arm', msg);
+        });
+    }
+    
+    KpRtu.prototype = {
+        constructor: KpRtu,
+
+	    /**
+         * 设置 RTU 布防 / 撤防
+         * @param deviceId:     设备id
+         * @param state:        0 disarm; 2 arm
+         */
+        arm: function (deviceId, state) {
+            this.socket.emit('hz_rtu_arm', {'deviceId': parseInt(deviceId), 'data': state});
+        }
+    };
+    
+    hzlbs.KpRtu = KpRtu;
+    //-----------------------------------------------------------------------------
+    // King Pigeon RTU --- ENDS
+    //-----------------------------------------------------------------------------
     
 })(window);
 

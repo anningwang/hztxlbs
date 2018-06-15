@@ -34,7 +34,7 @@ class User(db.Model):
 
     @staticmethod
     def make_valid_nickname(nickname):
-        return re.sub('[^a-zA-Z0-9_\.]', '', nickname)
+        return re.sub('[^a-zA-Z0-9_.]', '', nickname)
 
     @staticmethod
     def make_unique_nickname(nickname):
@@ -280,3 +280,80 @@ class Jobs(db.Model):
 
 
 whooshalchemy.whoosh_index(app, Post)
+
+
+class Device(db.Model):
+    """
+    设备表
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    device_id = db.Column(db.String(40))
+    uuid = db.Column(db.String(40))
+    is_online = db.Column(db.Integer)
+    is_arm = db.Column(db.Integer)
+    company_id = db.Column(db.Integer)
+    name = db.Column(db.String(20))
+
+    def __init__(self, param):
+        if 'name' in param:
+            self.name = param['name']
+        if 'deviceId' in param:
+            self.device_id = param['deviceId']
+        if 'isOnline' in param:
+            self.is_online = param['isOnline']
+        if 'isArm' in param:
+            self.is_arm = param['isArm']
+        if 'uuid' in param:
+            self.uuid = param['uuid']
+        if 'companyId' in param:
+            self.company_id = param['companyId']
+
+    def update(self, param):
+        if 'name' in param:
+            self.name = param['name']
+        if 'deviceId' in param:
+            self.device_id = param['deviceId']
+        if 'isOnline' in param:
+            self.is_online = param['isOnline']
+        if 'isArm' in param:
+            self.is_arm = param['isArm']
+        if 'uuid' in param:
+            self.uuid = param['uuid']
+        if 'companyId' in param:
+            self.company_id = param['companyId']
+
+
+class Relay(db.Model):
+    """
+    继电器输出 Digit OUT
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    d_id = db.Column(db.Integer)
+    index = db.Column(db.Integer)
+    op = db.Column(db.Integer)
+    name = db.Column(db.String(20))
+
+
+class Din(db.Model):
+    """
+    数字量输入 Digit IN
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    d_id = db.Column(db.Integer)
+    index = db.Column(db.Integer)
+    type = db.Column(db.Integer)
+    confirm_time = db.Column(db.Integer)
+    hr24 = db.Column(db.Integer)
+    start_value = db.Column(db.Integer)
+    interval = db.Column(db.Integer)
+    total = db.Column(db.Integer)
+    name = db.Column(db.String(20))
+
+
+class Company(db.Model):
+    """
+    设备所属公司表
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(40))
+    tel = db.Column(db.String(20))
