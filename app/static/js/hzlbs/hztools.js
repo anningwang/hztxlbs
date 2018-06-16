@@ -191,7 +191,7 @@
     
         this.socket.on('connect', function() {
             console.log('web socket connect');
-            self.socket.emit('rtu_event', {data: 'I\'m connected!'});
+            self.socket.emit('rtu_event', {data: ' I\'m connected! ...KpRtu'});
         });
     
         this.socket.on('hz_response', function (msg) {

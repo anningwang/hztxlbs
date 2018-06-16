@@ -38,6 +38,15 @@ def hz_rtu_event(msg):
 
 @socketio.on('hz_rtu_arm', namespace=HZ_NAMESPACE_RTU)
 def hz_rtu_event(msg):
+    """
+    设备布防/撤防
+    :param msg:
+    {
+        'deviceId': 设备id,
+        'data':     0 disarm; 2 arm
+    }
+    :return:
+    """
     print 'hz_rtu_arm', msg
     dev = Device.query.get(msg['deviceId'])
     if dev is not None:

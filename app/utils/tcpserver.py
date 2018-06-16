@@ -54,6 +54,12 @@ class WmmTCPServer(SocketServer.ThreadingTCPServer):
             del self.device_client[device_id]
 
     def arm(self, device_id, state):
+        """
+        设备布防/撤防
+        :param device_id:   设备 id, string
+        :param state:       0 disarm; 2 arm
+        :return:
+        """
         if device_id in self.device_client:
             self.device_client[device_id].arm_disarm(state)
         else:
