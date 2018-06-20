@@ -191,7 +191,7 @@
     
         this.socket.on('connect', function() {
             console.log('web socket connect');
-            self.socket.emit('rtu_event', {data: ' I\'m connected! ...KpRtu'});
+            self.socket.emit('hz_rtu_event', {data: ' I\'m connected! ...KpRtu'});
         });
     
         this.socket.on('hz_response', function (msg) {
@@ -217,6 +217,16 @@
          */
         arm: function (deviceId, state) {
             this.socket.emit('hz_rtu_arm', {'deviceId': parseInt(deviceId), 'data': state});
+        },
+
+	    /**
+         * 控制继电器命令
+         * @param deviceId:     设备id
+         * @param relay  继电器控制参数
+         *  [{index: int, op: int}]  -- Index=0~3; op=0~1, 0= Open; 1=Close
+         */
+        controlRelay: function (deviceId, relay) {
+            this.socket.emit('hz_rtu_control_relay', {'deviceId': parseInt(deviceId), 'data': relay});
         }
     };
     

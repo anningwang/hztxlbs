@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-from app import db, socketio, app
+from app import socketio
 from flask import request
 from flask_socketio import emit, join_room, close_room
 from app.models import Device
@@ -31,13 +31,13 @@ def hz_rtu_error_handler(e):
     print('An error has occurred: ' + str(e))
 
 
-@socketio.on('rtu_event', namespace=HZ_NAMESPACE_RTU)
+@socketio.on('hz_rtu_event', namespace=HZ_NAMESPACE_RTU)
 def hz_rtu_event(msg):
     print msg
 
 
 @socketio.on('hz_rtu_arm', namespace=HZ_NAMESPACE_RTU)
-def hz_rtu_event(msg):
+def hz_rtu_arm(msg):
     """
     设备布防/撤防
     :param msg:
@@ -52,6 +52,23 @@ def hz_rtu_event(msg):
     if dev is not None:
         device_id = dev.device_id
         kp_server.server.arm(device_id, msg['data'])
+
+
+@socketio.on('hz_rtu_control_relay', namespace=HZ_NAMESPACE_RTU)
+def hz_rtu_control_relay(msg):
+    """
+    控制继电器命令（开、关继电器）
+    :param msg:
+    {
+        'deviceId': 设备id,
+        'data':     [{index: int, op: int}]  -- Index=0~3; op=0~1, 0= Open; 1=Close
+    }
+    :return:
+    """
+    dev = Device.query.get(msg['deviceId'])
+    if dev is not None:
+        device_id = dev.device_id
+        kp_server.server.control_relay(device_id, msg['data'])
 
 
 def rtu_background_thread():

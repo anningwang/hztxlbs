@@ -419,10 +419,10 @@
                 },
                 {name:'id',index:'id', width:30, sorttype:"int",editable:true},
                 {name:'name',index:'name',width:140,editable:true},
-                {name:'deviceId',index:'deviceId', width:70,editable: true},
+                {name:'deviceId',index:'deviceId', width:80,editable: true},
                 {name:'uuid',index:'uuid', width:70,editable: true},
-                {name:'isOnline',index:'isOnline', width:70,editable: true},
-                {name:'isArm',index:'isArm', width:70, editable: true,sorttype : "int"},
+                {name:'isOnline',index:'isOnline', width:40,editable: true},
+                {name:'isArm',index:'isArm', width:40, editable: true,sorttype : "int"},
                 {name:'companyId',index:'companyId', width:90}
             ],
 
@@ -748,6 +748,19 @@
                 return;
             }
             rtu.arm(deviceId, (status ? 2: 0));
+        });
+
+
+        $('#rtuBtnDOUT0').on('click', function () {
+            var status = $(this).is(':checked');
+            console.log('do0', status);
+            if (!deviceId) {
+                $(this).prop('checked', !status);
+                hzInfo('请选择RTU设备，再执该操作。');
+                return;
+            }
+
+            rtu.controlRelay(deviceId, [{'index': 0, 'op': status?1:0}]);
         });
 
         function addDOUT(num) {

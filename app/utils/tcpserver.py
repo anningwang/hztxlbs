@@ -65,6 +65,18 @@ class WmmTCPServer(SocketServer.ThreadingTCPServer):
         else:
             print 'device id ({}) not exist.'.format(device_id)
 
+    def control_relay(self, device_id, relay):
+        """
+        控制继电器命令
+        :param device_id:   设备 id, string
+        :param relay:       [{index: int, op: int}]  -- Index=0~3; op=0~1, 0= Open; 1=Close
+        :return:
+        """
+        if device_id in self.device_client:
+            self.device_client[device_id].control_relay(relay)
+        else:
+            print 'device id ({}) not exist.'.format(device_id)
+
 
 class WmmTCPHandler(SocketServer.BaseRequestHandler):
     """
