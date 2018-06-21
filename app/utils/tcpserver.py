@@ -171,7 +171,7 @@ class PigeonProtocol(object):
         self.time_out_tick = 0
         self.tick = 0
         self.random = None
-        self.upload_data = None
+        self.data_upload = None
         self.dispatch = {
             0x70: self.process_alarm,
             0x71: self.upload_data,
@@ -1554,7 +1554,7 @@ class PigeonProtocol(object):
                 sensor_data, = struct.unpack('<I', data[p + 2:p + 6])
             p += 6
             print 'type={}, address={}, data={}'.format(sensor_type, addr, sensor_data)
-        self.upload_data = None
+        self.data_upload = None
         return
 
 
