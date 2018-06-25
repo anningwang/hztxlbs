@@ -64,7 +64,9 @@ class WmmTCPServer(SocketServer.ThreadingTCPServer):
         if device_id in self.device_client:
             self.device_client[device_id].arm_disarm(state)
         else:
-            print 'device id ({}) not exist.'.format(device_id)
+            msg = '设备({})不在线.'.format(device_id)
+            print msg
+            return {'errorCode': 100, 'msg': msg}
 
     def control_relay(self, device_id, relay):
         """
@@ -76,7 +78,9 @@ class WmmTCPServer(SocketServer.ThreadingTCPServer):
         if device_id in self.device_client:
             self.device_client[device_id].control_relay(relay)
         else:
-            print 'device id ({}) not exist.'.format(device_id)
+            msg = '设备({})不在线.'.format(device_id)
+            print msg
+            return {'errorCode': 100, 'msg': msg}
 
 
 class WmmTCPHandler(SocketServer.BaseRequestHandler):
@@ -172,7 +176,6 @@ class PigeonProtocol(object):
         self.time_out_tick = 0
         self.tick = 0
         self.random = None
-        self.data_upload = None
         self.dispatch = {
             0x70: self.process_alarm,
             0x71: self.upload_data,
@@ -1356,29 +1359,22 @@ class PigeonProtocol(object):
     def parse_device_id(self):
         with app.app_context():
             dev_id, = struct.unpack("<15s", self.ori_rx[DEVICE_BEGIN:DATA_BEGIN])
-            if self.device_id is None:
+            if self.device_id != dev_id:
+                if self.device_id is not None:
+                    self.handle.server.del_device_client(self.device_id)
                 self.device_id = dev_id
                 dev = Device.query.filter_by(device_id=self.device_id).first()
                 if dev is None:
                     dev = Device({'deviceId': dev_id, 'isOnline': 1, 'name': 'RTU'})
                     db.session.add(dev)     # 新增 设备信息
                     db.session.commit()
-
                     dev = Device.query.filter_by(device_id=self.device_id).first()
                     self.report(dev.id, is_online=1)
-
                 elif dev.is_online != 1:
                     dev.update({'isOnline': 1})     # 更新状态为 "在线"
                     db.session.commit()
                     self.report(dev.id, is_online=1)
-            elif self.device_id != dev_id:
-                self.handle.server.del_device_client(self.device_id)
-                dev = Device.query.filter_by(device_id=self.device_id).first()
-                if dev is not None:
-                    dev.update({'deviceId': dev_id})    # 修改 设备 Device ID
-                    db.session.commit()
-                self.device_id = dev_id
-            self.handle.server.add_device_client(dev_id, self)
+                self.handle.server.add_device_client(dev_id, self)
             print 'device id = {}'.format(dev_id)
             return
 
@@ -1534,6 +1530,8 @@ class PigeonProtocol(object):
         :param length:      length of upload data
         :return:
         """
+        dout = []
+        din = []
         s1, s2 = struct.unpack("<BB", data[0:2])
         p = 2
         if s1 != 0x7f or s2 != 0x7f:
@@ -1546,11 +1544,13 @@ class PigeonProtocol(object):
             sensor_type, addr = struct.unpack('<BB', data[p:p + 2])
             if sensor_type == 0x05:
                 sensor_data, = struct.unpack('<I', data[p + 2:p + 6])
+                dout.append({'index': addr, 'state': sensor_data})
             elif sensor_type == 0x3:
                 tmp, = struct.unpack('<I', data[p + 2:p + 6])
                 sensor_data = tmp & 0x0FFFFFFF
                 din_type = tmp >> 28
                 print 'din type={}'.format(din_type)
+                din.append({'index': addr, 'state': sensor_data, 'type': din_type})
             elif sensor_type == 0x11:
                 sensor_data, = struct.unpack('<I', data[p + 2:p + 6])
             elif sensor_type == 0x1 or sensor_type == 0x2:
@@ -1570,15 +1570,49 @@ class PigeonProtocol(object):
                 sensor_data, = struct.unpack('<I', data[p + 2:p + 6])
             p += 6
             print 'type={}, address={}, data={}'.format(sensor_type, addr, sensor_data)
-        self.data_upload = None
+        self.report(din=din, dout=dout)
         return
 
-    def report(self, did, device_id=None, is_online=None, is_arm=None):
+    def report(self, did=None, device_id=None, is_online=None, is_arm=None, din=None, dout=None):
+        """
+        主动上报设备状态
+        :param did:
+        :param device_id:
+        :param is_online:
+        :param is_arm:
+        :param din:
+        :param dout:
+        :return: msg 结构如下 {
+            'did':          int         必填  设备DB id
+            'deviceId':     string      必填  设备ID
+            'isOnline':     int         可选  是否在线 1 online; 0 offline
+            'isArm':        int         可选  是否布防 0 disarm; 2 arm
+            'din':  [{      list        可选
+                'index':    int         索引 从 0 开始
+                'type':     int         类型 1=NC, 2=NO, 3=Change, 5=Counter
+                'state':    int         状态 type=1,2,3; then Data 1=Open; state 0=Close;
+                                             type=5, then it will use as a Counter, the state is the specific value;
+                }]
+            'dout': [{      list        可选
+                'index':    int         索引 从 0 开始
+                'state':    int         状态 0=Open(断开),1=Close(闭合)
+                }]
+         }
+        """
+        if did is None:
+            with app.app_context():
+                dev = Device.query.filter_by(device_id=self.device_id).first()
+                if dev is not None:
+                    did = dev.id
         msg = {'did': did, 'deviceId': self.device_id if device_id is None else device_id}
         if is_online is not None:
             msg['isOnline'] = is_online
         if is_arm is not None:
             msg['isArm'] = is_arm
+        if din is not None:
+            msg['din'] = din
+        if dout is not None:
+            msg['dout'] = dout
         print '>>> report', msg
         hz_rtu_ws_mutex.acquire()
         hz_rtu_ws_msg.append(msg)

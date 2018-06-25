@@ -210,10 +210,20 @@
 	    /**
          * RTU 主动上报 设备状态信息
          * msg 结构如下 {
-         *       'did':         int         必填  设备DB id
-         *       'deviceId':    string      必填  设备ID
-         *       'isOnline':    int         可选  是否在线 1 online; 0 offline
-         *       'isArm':       int         可选  是否布防 0 disarm; 2 arm
+         *      'did':          int         必填  设备DB id
+         *      'deviceId':     string      必填  设备ID
+         *      'isOnline':     int         可选  是否在线 1 online; 0 offline
+         *      'isArm':        int         可选  是否布防 0 disarm; 2 arm
+         *      'din':  [{      list        可选
+         *          'index':    int         索引 从 0 开始
+         *          'type':     int         类型 1=NC, 2=NO, 3=Change, 5=Counter
+         *          'state':    int         状态 type=1,2,3; then Data 1=Open; state 0=Close;
+         *                                       type=5, then it will use as a Counter, the state is the specific value;
+         *          }]
+         *      'dout': [{      list        可选
+         *          'index':    int         索引 从 0 开始
+         *          'state':    int         状态 0=Open(断开),1=Close(闭合)
+         *          }]
          *  }
          */
         this.socket.on('hz_rtu_report', function (msg) {
@@ -222,6 +232,13 @@
                 self.func_report(msg);
             }
         });
+
+	    /**
+         * RTU 操作返回的错误信息
+         */
+        this.socket.on('hz_rtu_error_msg', function (msg) {
+            hzInfo(msg['msg']);
+        })
     }
     
     KpRtu.prototype = {

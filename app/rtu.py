@@ -50,7 +50,9 @@ def hz_rtu_arm(msg):
     dev = Device.query.get(msg['deviceId'])
     if dev is not None:
         device_id = dev.device_id
-        kp_server.server.arm(device_id, msg['data'])
+        ret = kp_server.server.arm(device_id, msg['data'])
+        if ret is not None and 'errorCode' in ret and ret['errorCode'] != 0:
+            emit('hz_rtu_error_msg', ret)
 
 
 @socketio.on('hz_rtu_control_relay', namespace=HZ_NAMESPACE_RTU)
@@ -67,14 +69,16 @@ def hz_rtu_control_relay(msg):
     dev = Device.query.get(msg['deviceId'])
     if dev is not None:
         device_id = dev.device_id
-        kp_server.server.control_relay(device_id, msg['data'])
+        ret = kp_server.server.control_relay(device_id, msg['data'])
+        if ret is not None and 'errorCode' in ret and ret['errorCode'] != 0:
+            emit('hz_rtu_error_msg', ret)
 
 
 def hz_rtu_send_report(msg):
     socketio.emit('hz_rtu_report', msg, namespace=HZ_NAMESPACE_RTU)
 
 
-def rtu_background_thread():
+def hz_rtu_background_thread():
     """Example of how to send server generated events to clients."""
     count = 0
     while True:
@@ -84,6 +88,7 @@ def rtu_background_thread():
         for client in list(hz_rtu_client_id.keys()):
             socketio.emit('hz_rtu', 'rtu test', namespace=HZ_NAMESPACE_RTU, room=client)
 
+        ''' 主动上报给web端的设备状态 使用 web socket '''
         hz_rtu_ws_mutex.acquire()
         for msg in hz_rtu_ws_msg:
             hz_rtu_send_report(msg)
@@ -91,4 +96,4 @@ def rtu_background_thread():
         hz_rtu_ws_mutex.release()
 
 
-rtu_thread = socketio.start_background_task(target=rtu_background_thread)
+hz_rtu_thread = socketio.start_background_task(target=hz_rtu_background_thread)
