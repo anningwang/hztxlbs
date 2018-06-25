@@ -15,6 +15,7 @@ import copy
 
 from app.models import Device
 from app import db, app
+from app.hzlbs.hzglobal import hz_rtu_ws_msg, hz_rtu_ws_mutex
 
 from wmmtools import WmmTools
 
@@ -1360,13 +1361,21 @@ class PigeonProtocol(object):
                 dev = Device.query.filter_by(device_id=self.device_id).first()
                 if dev is None:
                     dev = Device({'deviceId': dev_id, 'isOnline': 1, 'name': 'RTU'})
-                    db.session.add(dev)
+                    db.session.add(dev)     # 新增 设备信息
                     db.session.commit()
-            if self.device_id != dev_id:
+
+                    dev = Device.query.filter_by(device_id=self.device_id).first()
+                    self.report(dev.id, is_online=1)
+
+                elif dev.is_online != 1:
+                    dev.update({'isOnline': 1})     # 更新状态为 "在线"
+                    db.session.commit()
+                    self.report(dev.id, is_online=1)
+            elif self.device_id != dev_id:
                 self.handle.server.del_device_client(self.device_id)
                 dev = Device.query.filter_by(device_id=self.device_id).first()
                 if dev is not None:
-                    dev.update({'deviceId': dev_id})
+                    dev.update({'deviceId': dev_id})    # 修改 设备 Device ID
                     db.session.commit()
                 self.device_id = dev_id
             self.handle.server.add_device_client(dev_id, self)
@@ -1374,7 +1383,14 @@ class PigeonProtocol(object):
             return
 
     def del_device_protocol(self):
+        with app.app_context():
+            dev = Device.query.filter_by(device_id=self.device_id).first()
+            if dev is not None:
+                dev.update({'isOnline': 0})  # 更新状态为 "离线"
+                db.session.commit()
+                self.report(dev.id, is_online=0)
         self.handle.server.del_device_client(self.device_id)
+        return
 
     def generate_random(self):
         self.random = random.sample(range(10, 240), 4)
@@ -1556,6 +1572,18 @@ class PigeonProtocol(object):
             print 'type={}, address={}, data={}'.format(sensor_type, addr, sensor_data)
         self.data_upload = None
         return
+
+    def report(self, did, device_id=None, is_online=None, is_arm=None):
+        msg = {'did': did, 'deviceId': self.device_id if device_id is None else device_id}
+        if is_online is not None:
+            msg['isOnline'] = is_online
+        if is_arm is not None:
+            msg['isArm'] = is_arm
+        print '>>> report', msg
+        hz_rtu_ws_mutex.acquire()
+        hz_rtu_ws_msg.append(msg)
+        hz_rtu_ws_mutex.release()
+        return msg
 
 
 class WmmServer(object):

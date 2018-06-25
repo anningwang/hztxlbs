@@ -186,6 +186,7 @@
     //-----------------------------------------------------------------------------
     function KpRtu() {
         this.socket = io.connect(hzlbs.CONST.HZ_RTU_CONN_STR);
+        this.func_report = null;
 
         var self = this;
     
@@ -204,6 +205,22 @@
 
         this.socket.on('hz_rtu_arm', function (msg) {
             console.log('hz_rtu_arm', msg);
+        });
+
+	    /**
+         * RTU 主动上报 设备状态信息
+         * msg 结构如下 {
+         *       'did':         int         必填  设备DB id
+         *       'deviceId':    string      必填  设备ID
+         *       'isOnline':    int         可选  是否在线 1 online; 0 offline
+         *       'isArm':       int         可选  是否布防 0 disarm; 2 arm
+         *  }
+         */
+        this.socket.on('hz_rtu_report', function (msg) {
+            console.log('hz_rtu_report', msg);
+            if (self.func_report) {
+                self.func_report(msg);
+            }
         });
     }
     
@@ -227,6 +244,10 @@
          */
         controlRelay: function (deviceId, relay) {
             this.socket.emit('hz_rtu_control_relay', {'deviceId': parseInt(deviceId), 'data': relay});
+        },
+
+        reportCallback: function (callback) {
+            this.func_report = callback;
         }
     };
     

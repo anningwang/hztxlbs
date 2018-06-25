@@ -1,6 +1,7 @@
 
 # coding=utf-8
 import datetime
+from threading import Lock
 
 GEO_SCALE = 0.0891                  # 像素坐标(px) * 10 / 物理坐标(mm) = 89.1%
 HZ_BUILDING_ID = "100159"           # 建筑ID
@@ -10,6 +11,11 @@ TEST_UID_2 = "1918E00103A9"         # 测试用标签UID
 HZ_UID = [TEST_UID, TEST_UID_2]     # 用户标签id 表
 
 HZ_ACCESS_TOKEN = 'you_never_guess@!#$~%'
+
+HZ_NAMESPACE_RTU = '/HeZhongDeviceRTU'
+
+hz_rtu_ws_msg = []          # 竞争资源
+hz_rtu_ws_mutex = Lock()    # 创建一个互斥锁, web socket
 
 
 def px2geo(pt):

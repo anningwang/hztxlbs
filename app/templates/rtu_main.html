@@ -421,7 +421,7 @@
                 {name:'name',index:'name',width:140,editable:true},
                 {name:'deviceId',index:'deviceId', width:80,editable: true},
                 {name:'uuid',index:'uuid', width:70,editable: true},
-                {name:'isOnline',index:'isOnline', width:40,editable: true},
+                {name:'isOnline',index:'isOnline', width:40,formatter: formatIsOnline},
                 {name:'isArm',index:'isArm', width:40, editable: true,sorttype : "int"},
                 {name:'companyId',index:'companyId', width:90}
             ],
@@ -512,9 +512,13 @@
             return newVal;
         }
 
+        function formatIsOnline(cellvalue, options, cell) {
+            console.log('formatIsOnline', cellvalue,options,cell);
+            return (cellvalue == 1 ? '在线': '离线');
+        }
+
         function unformatDayOfWeek(cellvalue, options, cell) {
             console.log('unformatDayOfWeek', cellvalue,options,cell);
-
         }
 
 
@@ -763,15 +767,20 @@
             rtu.controlRelay(deviceId, [{'index': 0, 'op': status?1:0}]);
         });
 
-        function addDOUT(num) {
-            var tab = $('#rtuMain');
-
-            for (var i=0; i< num; i++) {
-
+        rtu.reportCallback(function (msg) {
+            var rows = $(grid_selector).jqGrid('getRowData');   // 获取当前显示的记录
+            console.log('report rows=', rows, 'msg=', msg);
+            for (var i=0; i< rows.length; i++) {
+                if (rows[i]['id'] == msg['did']) {
+                    if ('isOnline' in msg) {
+                        var isOnline = msg['isOnline'];
+                        $(grid_selector).jqGrid('setCell',msg['did'],"isOnline",isOnline);
+                    }
+                    break;
+                }
             }
-        }
+        });
 
-        addDOUT(4);
 
     }); // jQuery(function($) --- ENDS
 

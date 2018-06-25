@@ -4,11 +4,10 @@ from flask import request
 from flask_socketio import emit, join_room, close_room
 from app.models import Device
 from utils.tcpserver import kp_server
+from hzlbs.hzglobal import HZ_NAMESPACE_RTU, hz_rtu_ws_msg, hz_rtu_ws_mutex
 
 
 hz_rtu_client_id = {}                       # 在线客户表
-
-HZ_NAMESPACE_RTU = '/HeZhongDeviceRTU'
 
 
 @socketio.on('connect', namespace=HZ_NAMESPACE_RTU)
@@ -71,6 +70,10 @@ def hz_rtu_control_relay(msg):
         kp_server.server.control_relay(device_id, msg['data'])
 
 
+def hz_rtu_send_report(msg):
+    socketio.emit('hz_rtu_report', msg, namespace=HZ_NAMESPACE_RTU)
+
+
 def rtu_background_thread():
     """Example of how to send server generated events to clients."""
     count = 0
@@ -78,8 +81,14 @@ def rtu_background_thread():
         socketio.sleep(1)
         count += 1
 
-        for client in hz_rtu_client_id:
+        for client in list(hz_rtu_client_id.keys()):
             socketio.emit('hz_rtu', 'rtu test', namespace=HZ_NAMESPACE_RTU, room=client)
+
+        hz_rtu_ws_mutex.acquire()
+        for msg in hz_rtu_ws_msg:
+            hz_rtu_send_report(msg)
+        del hz_rtu_ws_msg[:]
+        hz_rtu_ws_mutex.release()
 
 
 rtu_thread = socketio.start_background_task(target=rtu_background_thread)

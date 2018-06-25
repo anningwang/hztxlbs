@@ -12,7 +12,7 @@ flipflop
 coverage
 
 apscheduler == 3.3.1
-flask_socketio == 2.9.2
+flask-socketio
 eventlet == 0.21.0
 futures
 twisted

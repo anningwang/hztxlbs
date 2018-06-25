@@ -289,8 +289,8 @@ class Device(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     device_id = db.Column(db.String(40))
     uuid = db.Column(db.String(40))
-    is_online = db.Column(db.Integer)
-    is_arm = db.Column(db.Integer)
+    is_online = db.Column(db.Integer)       # 1 online; 0 offline
+    is_arm = db.Column(db.Integer)          # 0 disarm; 2 arm
     company_id = db.Column(db.Integer)
     name = db.Column(db.String(20))
 
