@@ -1,18 +1,18 @@
-flask
-flask-login
-flask-openid
-flask-mail
-flask-sqlalchemy
-sqlalchemy-migrate
-flask-whooshalchemy
-flask-wtf
-flask-babel
+Flask
+Flask-Login
+Flask-Openid
+Flask-Mail
+Flask-SQLAlchemy
+SQLAlchemy-Migrate
+Flask-whooshAlchemy
+Flask-wtf
+Flask-babel
 guess_language
 flipflop
 coverage
 
-apscheduler == 3.3.1
-flask-socketio
+APScheduler == 3.3.1
+Flask-SocketIO
 eventlet == 0.21.0
 futures
-twisted
+Twisted
