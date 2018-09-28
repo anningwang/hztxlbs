@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-from apscheduler.schedulers.background import BackgroundScheduler     # Apscheduler ver 3.3.1
+from apscheduler.schedulers.background import BackgroundScheduler     # APScheduler ver 3.3.1
 import datetime
 import urllib2
 import json
